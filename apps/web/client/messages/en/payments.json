@@ -1,0 +1,39 @@
+{
+  "title": "Payments",
+  "wallet": "Wallet",
+  "balance": "Current Balance",
+  "transactions": "Transactions",
+  "escrow": "Escrow (Held)",
+  "released": "Released",
+  "commission": "Commission",
+  "vat": "VAT",
+  "netAmount": "Net Amount",
+  "totalRevenue": "Total Revenue",
+  "totalSpent": "Total Spent",
+  "invoice": "Invoice",
+  "invoices": "Invoices",
+  "exportPDF": "Export PDF",
+  "exportExcel": "Export Excel",
+  "statementOfAccount": "Statement of Account",
+  "transactionType": {
+    "credit": "Credit",
+    "debit": "Debit",
+    "commission": "Commission",
+    "payout": "Payout",
+    "refund": "Refund",
+    "escrowHold": "Escrow Hold",
+    "escrowRelease": "Escrow Release"
+  },
+  "invoiceStatus": {
+    "issued": "Issued",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled"
+  },
+  "paymentStatus": {
+    "held": "Held",
+    "released": "Released",
+    "refunded": "Refunded",
+    "disputed": "Disputed"
+  }
+}

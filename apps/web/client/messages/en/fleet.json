@@ -1,0 +1,61 @@
+{
+  "title": "Fleet",
+  "trucks": "Trucks",
+  "drivers": "Drivers",
+  "addTruck": "Add Truck",
+  "addDriver": "Add Driver",
+  "plateNumber": "Plate Number",
+  "registrationType": {
+    "label": "Registration Type",
+    "light": "Light Transport",
+    "public": "Public Transport"
+  },
+  "truckType": {
+    "label": "Truck Type",
+    "smallVan": "Small Van",
+    "smallFlatbed": "Small Flatbed",
+    "mediumFlatbed": "Medium Flatbed",
+    "largeFlatbed": "Large Flatbed",
+    "refrigerated": "Refrigerated",
+    "container20": "20ft Container",
+    "container40": "40ft Container",
+    "containerTrailer": "Container Trailer",
+    "tanker": "Tanker",
+    "boxTruck": "Box Truck",
+    "lowbed": "Lowbed"
+  },
+  "truckStatus": {
+    "available": "Available",
+    "onTrip": "On Trip",
+    "maintenance": "Maintenance",
+    "offDuty": "Off Duty"
+  },
+  "driverStatus": {
+    "available": "Available",
+    "onTrip": "On Trip",
+    "offDuty": "Off Duty"
+  },
+  "capacity": "Capacity",
+  "tons": "tons",
+  "kg": "kg",
+  "make": "Brand",
+  "model": "Model",
+  "year": "Year",
+  "hasGPS": "GPS Equipped",
+  "hasRefrigeration": "Refrigeration Equipped",
+  "specifications": "Specifications",
+  "documents": "Documents",
+  "tripsHistory": "Trip History",
+  "totalTrips": "Total Trips",
+  "totalDistance": "Total Distance",
+  "currentDriver": "Current Driver",
+  "noDriverAssigned": "No driver assigned",
+  "driver": {
+    "fullName": "Full Name",
+    "nationalId": "National ID",
+    "licenseClass": "License Class",
+    "licenseExpiry": "License Expiry",
+    "phone": "Phone",
+    "totalTrips": "Completed Trips"
+  }
+}

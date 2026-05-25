@@ -1,0 +1,68 @@
+{
+  "buttons": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "export": "تصدير",
+    "search": "بحث",
+    "filter": "فلتر",
+    "back": "رجوع",
+    "next": "التالي",
+    "submit": "إرسال",
+    "add": "إضافة",
+    "view": "عرض",
+    "close": "إغلاق",
+    "yes": "نعم",
+    "no": "لا",
+    "all": "الكل",
+    "reset": "استرجاع",
+    "retry": "إعادة المحاولة",
+    "more": "المزيد",
+    "less": "أقل"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "pending": "معلق",
+    "approved": "معتمد",
+    "rejected": "مرفوض",
+    "completed": "مكتمل",
+    "expired": "منتهي"
+  },
+  "currency": "ر.س",
+  "comingSoon": "قريباً",
+  "loading": "جاري التحميل...",
+  "noData": "لا توجد بيانات",
+  "error": "حدث خطأ",
+  "success": "تمت العملية بنجاح",
+  "confirm_dialog": "هل أنت متأكد؟",
+  "cannot_undo": "لا يمكن التراجع عن هذا الإجراء",
+  "language": "اللغة",
+  "languages": {
+    "ar": "العربية",
+    "en": "الإنجليزية"
+  },
+  "appearance": {
+    "title": "تفضيلات العرض",
+    "theme": "الوضع",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "حسب النظام"
+  },
+  "pagination": {
+    "page": "صفحة",
+    "of": "من",
+    "showing": "عرض",
+    "to": "إلى",
+    "results": "نتيجة"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "البريد الإلكتروني غير صالح",
+    "invalidPhone": "رقم الجوال غير صالح",
+    "passwordTooShort": "كلمة المرور قصيرة جداً",
+    "passwordsDontMatch": "كلمتا المرور غير متطابقتين"
+  }
+}

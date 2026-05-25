@@ -1,0 +1,43 @@
+# Dependencies — installed fresh inside Docker
+node_modules
+**/node_modules
+
+# Next.js / NestJS build artifacts — rebuilt inside Docker
+**/.next
+**/dist
+**/.turbo
+
+# Prisma generated client — regenerated inside Docker with Linux engine
+apps/api/src/generated
+
+# Git
+.git
+.gitignore
+
+# Env files — injected at runtime via Coolify / docker-compose
+.env
+.env.*
+!.env.*.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+**/*.swp
+
+# Test / coverage
+coverage
+**/.nyc_output
+
+# Docker data volumes
+docker-data
+
+# Misc
+tmp
+temp
+*.tsbuildinfo

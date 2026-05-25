@@ -1,0 +1,68 @@
+{
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "export": "Export",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "add": "Add",
+    "view": "View",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "reset": "Reset",
+    "retry": "Retry",
+    "more": "More",
+    "less": "Less"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "completed": "Completed",
+    "expired": "Expired"
+  },
+  "currency": "SAR",
+  "comingSoon": "Coming soon",
+  "loading": "Loading...",
+  "noData": "No data available",
+  "error": "An error occurred",
+  "success": "Operation completed successfully",
+  "confirm_dialog": "Are you sure?",
+  "cannot_undo": "This action cannot be undone",
+  "language": "Language",
+  "languages": {
+    "ar": "Arabic",
+    "en": "English"
+  },
+  "appearance": {
+    "title": "Display Preferences",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "results": "results"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "invalidPhone": "Invalid phone number",
+    "passwordTooShort": "Password is too short",
+    "passwordsDontMatch": "Passwords don't match"
+  }
+}

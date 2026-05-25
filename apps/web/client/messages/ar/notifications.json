@@ -1,0 +1,33 @@
+{
+  "title": "الإشعارات",
+  "all": "الكل",
+  "unread": "غير مقروءة",
+  "markAllRead": "تعليم الكل كمقروء",
+  "markRead": "تعليم كمقروء",
+  "noNotifications": "لا توجد إشعارات",
+  "channels": {
+    "email": "بريد إلكتروني",
+    "sms": "رسائل نصية",
+    "inApp": "داخل التطبيق",
+    "whatsapp": "واتساب",
+    "push": "تطبيق الجوال"
+  },
+  "categories": {
+    "otp": "تحقّق OTP",
+    "transactional": "معاملات",
+    "notification": "إشعار",
+    "alert": "تنبيه"
+  },
+  "events": {
+    "newBid": "عرض جديد",
+    "bidAccepted": "قبول عرض",
+    "orderConfirmed": "تأكيد طلب",
+    "orderPickedUp": "تم استلام الشحنة",
+    "orderDelivered": "تم تسليم الشحنة",
+    "paymentReleased": "إفراج عن الدفع",
+    "newOpportunity": "فرصة جديدة",
+    "kycPending": "KYC بانتظار المراجعة",
+    "newDispute": "نزاع جديد",
+    "invoiceOverdue": "فاتورة متأخرة"
+  }
+}

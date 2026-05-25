@@ -1,0 +1,101 @@
+{
+  "title": "Company Settings",
+  "subtitle": "Company info, team, preferences, and documents",
+  "tabs": {
+    "company": "Company Info",
+    "team": "Team",
+    "settings": "Settings",
+    "kyc": "Documents"
+  },
+  "company": {
+    "info": "Basic Information",
+    "verifiedAccount": "Verified Account",
+    "awaitingVerification": "Awaiting Verification",
+    "nameAr": "Name (Arabic)",
+    "nameEn": "Name (English)",
+    "crNumber": "Commercial Registration",
+    "vatNumber": "VAT Number",
+    "city": "City",
+    "region": "Region",
+    "email": "Email",
+    "phone": "Phone",
+    "joinDate": "Joined",
+    "updateBtn": "Update Info",
+    "activitySummary": "Activity Summary",
+    "monthlyVolume": "Monthly Shipping Volume",
+    "kycStatus": "KYC Status"
+  },
+  "team": {
+    "title": "Team Members",
+    "subtitle": "Manage who can access your company account on the platform",
+    "addMember": "Add Member",
+    "addMemberTitle": "Add New Team Member",
+    "addMemberSubtitle": "An SMS will be sent to notify them they've been added",
+    "noMembers": "No team members yet. Add the first one.",
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "phoneRequired": "Required — used to send the invitation SMS",
+    "email": "Email (Optional)",
+    "selectRole": "Select Member Role",
+    "memberRole": "Role",
+    "memberStatus": "Status",
+    "addedAt": "Added On",
+    "active": "Active",
+    "suspended": "Suspended",
+    "pendingActivation": "Pending Activation",
+    "owner": "Owner",
+    "ownerProtected": "The owner cannot be removed nor have their role changed",
+    "actions": {
+      "editRole": "Edit Role",
+      "suspend": "Suspend Member",
+      "activate": "Activate",
+      "remove": "Remove from Team",
+      "confirmRemove": "Remove from team?",
+      "confirmRemoveBody": "The member will lose access to the company account immediately. This cannot be undone.",
+      "confirmSuspend": "Suspend member?",
+      "confirmSuspendBody": "You can reactivate them later with the same permissions."
+    },
+    "roles": {
+      "OWNER": {
+        "label": "Owner",
+        "icon": "👑",
+        "description": "Account owner — unrestricted access"
+      },
+      "ADMIN": {
+        "label": "Admin",
+        "icon": "👑"
+      },
+      "STAFF": {
+        "label": "Operations Staff",
+        "icon": "📦"
+      },
+      "DISPATCH": {
+        "label": "Fleet Dispatcher",
+        "icon": "🚚"
+      },
+      "FINANCE": {
+        "label": "Finance",
+        "icon": "💰"
+      }
+    },
+    "permissions": "Permissions",
+    "canDo": "Can",
+    "cannotDo": "Cannot",
+    "smsNotice": "The member will receive an SMS on their phone with an invitation link to join the company.",
+    "noPermissionTitle": "Permission Denied",
+    "noPermissionBody": "This page is available only to the Owner or Admin role."
+  },
+  "preferences": {
+    "title": "Display Preferences",
+    "language": "Language",
+    "languageHint": "Applies to your personal dashboard only"
+  },
+  "kyc": {
+    "title": "KYC Documents",
+    "subtitle": "Under compliance team review",
+    "uploadDoc": "Upload Document",
+    "approved": "Approved",
+    "notUploaded": "Not Uploaded",
+    "viewDoc": "View"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "appName": "نقلة لوجيستك",
+  "appSubtitle": "منصة الناقل",
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "opportunities": "فرص النقل",
+    "orders": "طلباتي",
+    "bids": "سجل العروض",
+    "trucks": "الشاحنات",
+    "drivers": "السائقون",
+    "earnings": "الأرباح",
+    "finance": "الشؤون المالية",
+    "reports": "التقارير",
+    "documents": "الوثائق",
+    "disputes": "النزاعات",
+    "support": "الدعم الفني",
+    "notifications": "الإشعارات",
+    "company": "بيانات الشركة",
+    "settings": "إعدادات الشركة"
+  },
+  "groups": {
+    "carrier": "الناقل",
+    "fleet": "الأسطول",
+    "finance": "المالية",
+    "complianceSupport": "الامتثال والدعم",
+    "settings": "الإعدادات"
+  },
+  "dashboard": {
+    "welcome": "مرحباً بك",
+    "activeTrips": "رحلات نشطة",
+    "earnings": "الأرباح",
+    "fleetSize": "حجم الأسطول",
+    "rating": "التقييم",
+    "openOpportunities": "فرص متاحة",
+    "viewAll": "الكل"
+  },
+  "opportunities": {
+    "title": "سوق الفرص",
+    "subtitle": "جميع طلبات النقل المتاحة",
+    "openMarket": "سوق مفتوح",
+    "direct": "موجّه لشركتي",
+    "submitBid": "قدّم عرضاً",
+    "competitivePrice": "قدّم سعرك التنافسي"
+  },
+  "bids": {
+    "title": "سجل العروض",
+    "total": "إجمالي العروض",
+    "accepted": "مقبولة",
+    "pending": "بانتظار الرد",
+    "winRate": "نسبة الفوز"
+  },
+  "documents": {
+    "title": "الوثائق والامتثال",
+    "validUntil": "صالحة حتى",
+    "expired": "منتهية",
+    "expiringSoon": "تنتهي قريباً",
+    "missing": "غير مرفقة",
+    "uploadNow": "رفع الآن",
+    "replace": "استبدال"
+  }
+}

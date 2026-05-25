@@ -1,0 +1,61 @@
+{
+  "appName": "Naqla Logistics",
+  "appSubtitle": "Carrier Portal",
+  "nav": {
+    "dashboard": "Dashboard",
+    "opportunities": "Opportunities",
+    "orders": "My Orders",
+    "bids": "Bid History",
+    "trucks": "Trucks",
+    "drivers": "Drivers",
+    "earnings": "Earnings",
+    "finance": "Finance",
+    "reports": "Reports",
+    "documents": "Documents",
+    "disputes": "Disputes",
+    "support": "Support",
+    "notifications": "Notifications",
+    "company": "Company Info",
+    "settings": "Company Settings"
+  },
+  "groups": {
+    "carrier": "Carrier",
+    "fleet": "Fleet",
+    "finance": "Finance",
+    "complianceSupport": "Compliance & Support",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "activeTrips": "Active Trips",
+    "earnings": "Earnings",
+    "fleetSize": "Fleet Size",
+    "rating": "Rating",
+    "openOpportunities": "Open Opportunities",
+    "viewAll": "View All"
+  },
+  "opportunities": {
+    "title": "Opportunities Market",
+    "subtitle": "All available transport requests",
+    "openMarket": "Open Market",
+    "direct": "Direct to me",
+    "submitBid": "Submit Bid",
+    "competitivePrice": "Submit your competitive price"
+  },
+  "bids": {
+    "title": "Bid History",
+    "total": "Total Bids",
+    "accepted": "Accepted",
+    "pending": "Pending",
+    "winRate": "Win Rate"
+  },
+  "documents": {
+    "title": "Documents & Compliance",
+    "validUntil": "Valid Until",
+    "expired": "Expired",
+    "expiringSoon": "Expiring Soon",
+    "missing": "Missing",
+    "uploadNow": "Upload Now",
+    "replace": "Replace"
+  }
+}

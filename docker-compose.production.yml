@@ -1,0 +1,106 @@
+# ─── Naqla Platform — Production Compose ───────────────────────
+# Designed for Coolify deployment on Ubuntu VPS.
+# Database is expected to come from Supabase; Redis & MinIO live here.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: naqla-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - redis
+    ports:
+      - "4000:4000"
+    networks:
+      - naqla-network
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/web/admin/Dockerfile
+    container_name: naqla-admin
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3001:3001"
+    networks:
+      - naqla-network
+
+  client:
+    build:
+      context: .
+      dockerfile: apps/web/client/Dockerfile
+    container_name: naqla-client
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3002:3002"
+    networks:
+      - naqla-network
+
+  carrier:
+    build:
+      context: .
+      dockerfile: apps/web/carrier/Dockerfile
+    container_name: naqla-carrier
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3003:3003"
+    networks:
+      - naqla-network
+
+  landing:
+    build:
+      context: .
+      dockerfile: apps/web/landing/Dockerfile
+    container_name: naqla-landing
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    networks:
+      - naqla-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: naqla-redis-prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - naqla-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: naqla-minio-prod
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    networks:
+      - naqla-network
+
+volumes:
+  redis_data:
+  minio_data:
+
+networks:
+  naqla-network:
+    driver: bridge

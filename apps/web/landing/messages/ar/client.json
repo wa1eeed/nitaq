@@ -1,0 +1,55 @@
+{
+  "appName": "نقلة لوجيستك",
+  "appSubtitle": "منصة العميل",
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "orders": "طلباتي",
+    "tracking": "التتبع المباشر",
+    "addresses": "العناوين",
+    "finance": "الشؤون المالية",
+    "invoices": "الفواتير",
+    "disputes": "النزاعات",
+    "support": "الدعم الفني",
+    "notifications": "الإشعارات",
+    "company": "بيانات الشركة",
+    "settings": "إعدادات الشركة"
+  },
+  "groups": {
+    "platform": "منصة العميل",
+    "finance": "المالية",
+    "support": "الدعم",
+    "settings": "الإعدادات"
+  },
+  "dashboard": {
+    "welcome": "مرحباً بعودتك",
+    "activeOrders": "طلبات نشطة",
+    "completed": "مكتملة",
+    "totalSpent": "إجمالي الإنفاق",
+    "totalOrders": "إجمالي الطلبات",
+    "recentOrders": "آخر طلباتي",
+    "viewAll": "الكل",
+    "pendingTasks": "مهام تستحق الانتباه"
+  },
+  "addresses": {
+    "title": "العناوين المحفوظة",
+    "subtitle": "مواقع الاستلام والتسليم المتكررة",
+    "addNew": "إضافة عنوان",
+    "label": "الاسم المختصر",
+    "city": "المدينة",
+    "kind": "النوع",
+    "kindPickup": "استلام",
+    "kindDestination": "تسليم",
+    "kindBoth": "الاثنين",
+    "default": "افتراضي",
+    "makeDefault": "اجعله افتراضياً"
+  },
+  "tracking": {
+    "title": "التتبع المباشر",
+    "active": "الشحنات النشطة",
+    "live": "مباشر",
+    "currentLocation": "الموقع الحالي للشاحنة",
+    "remaining": "متبقّي",
+    "estimatedArrival": "الوصول المتوقّع",
+    "progress": "التقدّم"
+  }
+}

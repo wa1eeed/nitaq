@@ -1,0 +1,75 @@
+{
+  "title": "الطلبات",
+  "myOrders": "طلباتي",
+  "newOrder": "طلب جديد",
+  "orderNumber": "رقم الطلب",
+  "details": "تفاصيل الطلب",
+  "timeline": "سجل الأحداث",
+  "noOrders": "لا توجد طلبات",
+  "status": {
+    "draft": "مسودة",
+    "published": "منشور",
+    "bidding": "قيد العروض",
+    "assigned": "مُسند",
+    "confirmed": "مؤكد",
+    "inTransit": "في الطريق",
+    "delivered": "تم التسليم",
+    "completed": "مكتمل",
+    "cancelled": "ملغى",
+    "disputed": "نزاع"
+  },
+  "fields": {
+    "client": "العميل",
+    "carrier": "الناقل",
+    "route": "المسار",
+    "amount": "المبلغ",
+    "date": "التاريخ",
+    "pickupDate": "تاريخ الاستلام",
+    "deliveryDate": "تاريخ التسليم",
+    "cargoType": "نوع البضاعة",
+    "description": "وصف البضاعة",
+    "weight": "الوزن",
+    "from": "من",
+    "to": "إلى",
+    "specialInstructions": "تعليمات خاصة",
+    "insurance": "تأمين شامل",
+    "refrigeration": "تبريد"
+  },
+  "cargoTypes": {
+    "general": "بضائع عامة",
+    "food": "مواد غذائية",
+    "perishable": "قابلة للتلف",
+    "chemicals": "مواد كيميائية",
+    "electronics": "إلكترونيات",
+    "furniture": "أثاث",
+    "construction": "مواد بناء",
+    "automotive": "قطع سيارات",
+    "medical": "مستلزمات طبية",
+    "hazardous": "مواد خطرة",
+    "fragile": "هشة",
+    "livestock": "مواشي",
+    "oversized": "حمولة استثنائية"
+  },
+  "mode": {
+    "open": "سوق مفتوح",
+    "direct": "إرسال مباشر"
+  },
+  "actions": {
+    "publish": "نشر الطلب",
+    "cancel": "إلغاء الطلب",
+    "confirmDelivery": "تأكيد التسليم",
+    "openDispute": "فتح نزاع",
+    "acceptBid": "قبول العرض",
+    "rejectBid": "رفض العرض"
+  },
+  "bidding": {
+    "title": "العروض المستلمة",
+    "bidsCount": "{count} عرض",
+    "submitBid": "تقديم عرض",
+    "yourPrice": "سعرك المقترح",
+    "estimatedDays": "المدة المقدّرة",
+    "notes": "ملاحظات",
+    "noBids": "لا توجد عروض بعد",
+    "winRate": "نسبة الفوز"
+  }
+}

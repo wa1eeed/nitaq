@@ -1,0 +1,116 @@
+{
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "pricing": "Pricing",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Sign In",
+    "signUp": "Sign Up"
+  },
+  "hero": {
+    "badge": "Smart Logistics Platform",
+    "title": "Naqla Logistics",
+    "subtitle": "We connect businesses and individuals with Saudi Arabia's top transporters — competitive pricing, full transparency, and complete insurance on every shipment.",
+    "ctaClient": "Sign Up as Client",
+    "ctaCarrier": "Sign Up as Carrier",
+    "stats": {
+      "carriers": "Verified Carriers",
+      "cities": "Saudi Cities",
+      "successRate": "On-Time Delivery"
+    }
+  },
+  "features": {
+    "title": "Why Naqla Logistics?",
+    "subtitle": "Everything you need to manage your shipments safely and efficiently",
+    "marketplace": {
+      "title": "Open Bidding Marketplace",
+      "desc": "Publish your request and invite dozens of verified carriers to bid competitively in minutes."
+    },
+    "direct": {
+      "title": "Direct Carrier Request",
+      "desc": "Have a preferred carrier? Send them the request directly — they accept or propose a different price."
+    },
+    "tracking": {
+      "title": "Live Map Tracking",
+      "desc": "Track your shipment on the map from pickup to delivery."
+    },
+    "escrow": {
+      "title": "Secure Escrow Payments",
+      "desc": "Your money is held in escrow and only released to the carrier after delivery confirmation."
+    },
+    "verified": {
+      "title": "Verified Carriers Only",
+      "desc": "Every carrier undergoes KYC verification: commercial registration, insurance, and valid transport licenses."
+    },
+    "ratings": {
+      "title": "Transparent Rating System",
+      "desc": "Rate carriers after every trip, and view others' ratings before choosing your bid."
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Four simple steps from request to delivery",
+    "step1Title": "Create Your Request",
+    "step1Desc": "Describe your cargo and define your route in five simple steps.",
+    "step2Title": "Receive Bids",
+    "step2Desc": "Verified carriers submit their bids — compare price, rating, and duration.",
+    "step3Title": "Select & Pay",
+    "step3Desc": "Funds held in Escrow until delivery. No surprises, no hidden fees.",
+    "step4Title": "Track & Deliver",
+    "step4Desc": "Track the truck in real time. Once delivered, funds are released automatically."
+  },
+  "testimonials": {
+    "title": "What Our Customers Say"
+  },
+  "cta": {
+    "title": "Ready to start?",
+    "subtitle": "Join thousands of businesses using Naqla every day",
+    "client": "Sign Up as Client",
+    "carrier": "Sign Up as Carrier"
+  },
+  "footer": {
+    "tagline": "The smart logistics platform in Saudi Arabia — we connect businesses and individuals with Saudi Arabia's top transporters with full transparency.",
+    "platform": "Platform",
+    "company": "Company",
+    "legal": "Legal",
+    "links": {
+      "about": "About Naqla",
+      "contact": "Contact Us",
+      "privacy": "Privacy Policy",
+      "terms": "Terms & Conditions",
+      "transport": "Transport Terms"
+    },
+    "rights": "All rights reserved"
+  },
+  "about": {
+    "title": "About Naqla Logistics",
+    "subtitle": "Redefining the logistics transport sector in Saudi Arabia",
+    "missionTag": "Our Mission",
+    "missionTitle": "Digitizing the Saudi Transport Sector",
+    "missionBody": "We aim to unify the logistics transport market into one transparent platform, where clients find the best prices and services in minutes, and carriers find real, sustained demand to grow their business.",
+    "visionTag": "Our Vision",
+    "visionTitle": "The Leading Logistics Platform",
+    "visionBody": "To be the #1 transport and logistics platform in the Middle East, serving thousands of businesses daily through an expansive network of verified carriers.",
+    "values": "Our Values",
+    "trust": "Trust",
+    "innovation": "Innovation",
+    "partnership": "Partnership",
+    "quality": "Quality"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Our team is ready to answer your questions and help with anything related to the platform",
+    "phoneTitle": "Phone Call",
+    "emailTitle": "Email",
+    "chatTitle": "Live Chat",
+    "formTitle": "Send us a message",
+    "name": "Full Name",
+    "subject": "Subject (Optional)",
+    "topic": "Topic",
+    "message": "Message",
+    "send": "Send Message",
+    "sentTitle": "Message Received",
+    "sentBody": "We'll get back to you soon on your registered email."
+  }
+}

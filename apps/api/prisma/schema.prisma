@@ -1,0 +1,765 @@
+// ─────────────────────────────────────────────────────────────
+// Naqla Logistics — Prisma Schema
+// ─────────────────────────────────────────────────────────────
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  CLIENT_ADMIN
+  CLIENT_USER
+  CARRIER_ADMIN
+  CARRIER_USER
+  DRIVER
+}
+
+enum CompanyType {
+  CLIENT
+  CARRIER
+}
+
+/// Per-company role of a user inside their company account. Controls which
+/// company features they can access. Different from UserRole (which is the
+/// platform-wide kind: admin / client_admin / carrier_admin / driver).
+enum CompanyRole {
+  OWNER     // single per company; created at signup
+  ADMIN     // full access except cannot remove the owner
+  STAFF     // (client side) operations: create/track orders
+  DISPATCH  // (carrier side) accept orders, manage fleet
+  FINANCE   // read-only on invoices/payments + export
+}
+
+enum CompanyStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum KYCStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OrderStatus {
+  DRAFT
+  PUBLISHED
+  BIDDING
+  ASSIGNED
+  CONFIRMED
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum TruckType {
+  // The carrier add-truck UI uses the catalog in
+  // packages/shared-utils/src/mock-data.ts → DEFAULT_TRUCK_TYPES.
+  // Keep this enum a superset of those IDs so the form can submit any value
+  // the carrier selects without a manual mapping.
+  SMALL_VAN
+  SMALL_FLATBED
+  MEDIUM_FLATBED
+  LARGE_FLATBED
+  REFRIGERATED
+  CONTAINER_20
+  CONTAINER_40
+  CONTAINER_TRAILER
+  TANKER
+  CURTAINSIDER
+  BOX_TRUCK
+  LOWBED
+}
+
+enum CargoType {
+  GENERAL
+  FOOD
+  CHEMICALS
+  ELECTRONICS
+  FURNITURE
+  CONSTRUCTION
+  AUTOMOTIVE
+  MEDICAL
+  HAZARDOUS
+  FRAGILE
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+  FAILED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  BID_RECEIVED
+  BID_ACCEPTED
+  BID_REJECTED
+  ORDER_ASSIGNED
+  ORDER_CONFIRMED
+  SHIPMENT_STARTED
+  SHIPMENT_DELIVERED
+  PAYMENT_RECEIVED
+  PAYMENT_RELEASED
+  KYC_APPROVED
+  KYC_REJECTED
+  DISPUTE_OPENED
+  DISPUTE_RESOLVED
+  SYSTEM
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketCategory {
+  TECHNICAL
+  BILLING
+  ACCOUNT
+  ORDER
+  GENERAL
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_TRIP
+  OFF_DUTY
+}
+
+// ─── MODELS ───────────────────────────────────────────────────────
+
+model User {
+  id              String   @id @default(cuid())
+  email           String?  @unique
+  phone           String   @unique
+  passwordHash    String?
+  role            UserRole
+  firstName       String
+  lastName        String
+  avatar          String?
+  isActive        Boolean  @default(true)
+  isEmailVerified Boolean  @default(false)
+  isPhoneVerified Boolean  @default(false)
+  /// Preferred UI language — 'ar' or 'en'. Used to render every interface on sign-in.
+  preferredLanguage String  @default("ar")
+  nationalId        String?
+  /// Per-company role inside the user's company account.
+  /// Only meaningful for users that belong to a company (CLIENT/CARRIER).
+  companyRole       CompanyRole @default(STAFF)
+  lastLoginAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company       Company? @relation(fields: [companyId], references: [id])
+  companyId     String?
+
+  driverProfile DriverProfile?
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  refreshTokens RefreshToken[]
+  apiKeys       ApiKey[]
+
+  @@index([companyId])
+  @@index([role])
+}
+
+model Company {
+  id                 String        @id @default(cuid())
+  type               CompanyType
+  status             CompanyStatus @default(PENDING_VERIFICATION)
+  kycStatus          KYCStatus     @default(NOT_SUBMITTED)
+  /// Company-default UI language for transactional emails/SMS templates and
+  /// new team members. Individual users can still override via `User.preferredLanguage`.
+  defaultLanguage    String        @default("ar")
+
+  nameAr             String
+  nameEn             String?
+  crNumber           String?       @unique
+  vatNumber          String?
+  logo               String?
+
+  city               String
+  region             String
+  address            String?
+
+  contactPhone       String
+  contactEmail       String
+  website            String?
+
+  commissionRate     Float         @default(0.08)
+  creditLimit        Float         @default(0)
+  walletBalance      Float         @default(0)
+
+  subscriptionPlan   String        @default("basic")
+  subscriptionEndsAt DateTime?
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  users           User[]
+  trucks          Truck[]
+  drivers         DriverProfile[]
+
+  ordersAsClient        Order[] @relation("ClientOrders")
+  ordersAsCarrier       Order[] @relation("CarrierOrders")
+  ordersDirectlyTargeted Order[] @relation("TargetCarrierOrders")
+
+  bids             Bid[]
+  invoicesIssued   Invoice[]     @relation("IssuerInvoices")
+  invoicesReceived Invoice[]     @relation("ReceiverInvoices")
+  kycDocuments     KYCDocument[]
+  transactions     Transaction[]
+  reviews          Review[]      @relation("ReviewedCompany")
+  reviewsGiven     Review[]      @relation("ReviewerCompany")
+  supportTickets   SupportTicket[]
+  savedAddresses   SavedAddress[]
+
+  @@index([type, status])
+  @@index([city])
+}
+
+model KYCDocument {
+  id         String    @id @default(cuid())
+  companyId  String
+  company    Company   @relation(fields: [companyId], references: [id])
+
+  type       String
+  fileUrl    String
+  status     KYCStatus @default(PENDING)
+  notes      String?
+  reviewedBy String?
+  reviewedAt DateTime?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Truck {
+  id               String    @id @default(cuid())
+  companyId        String
+  company          Company   @relation(fields: [companyId], references: [id])
+
+  plateNumber      String    @unique
+  type             TruckType
+  capacity         Float
+  length           Float?
+  width            Float?
+  height           Float?
+
+  make             String?
+  model            String?
+  year             Int?
+
+  hasRefrigeration Boolean   @default(false)
+  hasGPS           Boolean   @default(false)
+  isActive         Boolean   @default(true)
+
+  photos           String[]
+  documents        String[]
+
+  currentDriverId  String?
+  currentDriver    DriverProfile? @relation(fields: [currentDriverId], references: [id])
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  orderTrucks      OrderTruck[]
+
+  @@index([companyId])
+  @@index([type])
+}
+
+model DriverProfile {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id])
+  companyId       String
+  company         Company      @relation(fields: [companyId], references: [id])
+
+  licenseNumber   String       @unique
+  licenseExpiry   DateTime
+  licenseType     String
+
+  status          DriverStatus @default(OFF_DUTY)
+  currentLat      Float?
+  currentLng      Float?
+  lastLocationAt  DateTime?
+
+  rating          Float        @default(0)
+  totalTrips      Int          @default(0)
+
+  photo           String?
+  isActive        Boolean      @default(true)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  assignedTrucks  Truck[]
+  orderDrivers    OrderDriver[]
+  locationHistory LocationHistory[]
+}
+
+model Order {
+  id                    String      @id @default(cuid())
+  orderNumber           String      @unique @default(cuid())
+  status                OrderStatus @default(DRAFT)
+
+  /// "OPEN" → all carriers can bid; "DIRECT" → only targetCarrier sees it.
+  /// String (not enum) so we can add modes without a migration; validated at the DTO.
+  mode                  String      @default("OPEN")
+  targetCarrierId       String?
+  targetCarrier         Company?    @relation("TargetCarrierOrders", fields: [targetCarrierId], references: [id])
+
+  /// "SAME_CITY" | "INTER_CITY" — drives Wizard UI + distance/route assumptions.
+  tripType              String      @default("INTER_CITY")
+  /// "MORNING" (8-12) | "EVENING" (12-18) | "ALL_DAY" (8-18) — client's preferred pickup band.
+  pickupWindow          String      @default("ALL_DAY")
+
+  clientId              String
+  client                Company     @relation("ClientOrders", fields: [clientId], references: [id])
+  carrierId             String?
+  carrier               Company?    @relation("CarrierOrders", fields: [carrierId], references: [id])
+
+  cargoType             CargoType
+  cargoDescription      String
+  weight                Float
+  pallets               Int?
+  volume                Float?
+
+  originCity            String
+  originRegion          String
+  originAddress         String
+  originLat             Float?
+  originLng             Float?
+
+  destinationCity       String
+  destinationRegion     String
+  destinationAddress    String
+  destinationLat        Float?
+  destinationLng        Float?
+
+  requiredTruckType     TruckType
+  requiresRefrigeration Boolean     @default(false)
+  requiresInsurance     Boolean     @default(false)
+  specialInstructions   String?
+
+  pickupDate            DateTime
+  deliveryDate          DateTime?
+  bidDeadline           DateTime?
+
+  clientBudget          Float?
+  agreedPrice           Float?
+  commissionAmount      Float?
+  carrierAmount         Float?
+
+  actualPickupAt        DateTime?
+  actualDeliveryAt      DateTime?
+
+  poNumber              String?
+  bolNumber             String?
+  documents             String[]
+
+  clientRating          Int?
+  carrierRating         Int?
+
+  notes                 String?
+  cancelReason          String?
+
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  bids           Bid[]
+  orderTrucks    OrderTruck[]
+  orderDrivers   OrderDriver[]
+  trackingEvents TrackingEvent[]
+  payment        Payment?
+  invoice        Invoice?
+  dispute        Dispute?
+  review         Review?
+
+  @@index([clientId, status])
+  @@index([carrierId, status])
+  @@index([status])
+  @@index([pickupDate])
+  @@index([originCity, destinationCity])
+}
+
+model Bid {
+  id            String    @id @default(cuid())
+  orderId       String
+  order         Order     @relation(fields: [orderId], references: [id])
+  carrierId     String
+  carrier       Company   @relation(fields: [carrierId], references: [id])
+
+  amount        Float
+  status        BidStatus @default(PENDING)
+
+  /// Legacy ETA fields — kept on the model for back-compat with any older
+  /// bids but no longer collected via the carrier form (v0.8.x replaced
+  /// them with an explicit `proposedDeliveryDate` date picker).
+  estimatedDays Int @default(0)
+  estimatedHours Int?
+  /// If the carrier wants a different pickup date than what the client
+  /// requested, they set this. Empty = bid agrees with `order.pickupDate`.
+  proposedPickupDate DateTime?
+  /// Carrier's concrete proposed delivery date. Replaces the older
+  /// days/hours duration fields. If null, falls back to `order.deliveryDate`
+  /// when displaying "expected delivery" on the order detail page.
+  proposedDeliveryDate DateTime?
+  notes         String?
+
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([orderId, carrierId])
+  @@index([orderId, status])
+}
+
+model OrderTruck {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  truckId   String
+  truck     Truck    @relation(fields: [truckId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([orderId, truckId])
+}
+
+model OrderDriver {
+  id         String        @id @default(cuid())
+  orderId    String
+  order      Order         @relation(fields: [orderId], references: [id])
+  driverId   String
+  driver     DriverProfile @relation(fields: [driverId], references: [id])
+
+  assignedAt DateTime      @default(now())
+
+  @@unique([orderId, driverId])
+}
+
+model TrackingEvent {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+
+  status      String
+  description String
+
+  lat         Float?
+  lng         Float?
+  city        String?
+
+  photos      String[]
+  signature   String?
+  notes       String?
+
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model LocationHistory {
+  id         String        @id @default(cuid())
+  driverId   String
+  driver     DriverProfile @relation(fields: [driverId], references: [id])
+
+  lat        Float
+  lng        Float
+  speed      Float?
+
+  recordedAt DateTime      @default(now())
+
+  @@index([driverId, recordedAt])
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  orderId          String        @unique
+  order            Order         @relation(fields: [orderId], references: [id])
+
+  status           PaymentStatus @default(PENDING)
+  totalAmount      Float
+  commissionAmount Float
+  carrierAmount    Float
+
+  paymentMethod    String?
+  transactionRef   String?
+
+  paidAt           DateTime?
+  heldAt           DateTime?
+  releasedAt       DateTime?
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  type        String
+  amount      Float
+  balance     Float
+
+  reference   String?
+  description String
+
+  orderId     String?
+  invoiceId   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([companyId, createdAt])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique @default(cuid())
+  status        InvoiceStatus @default(DRAFT)
+
+  orderId       String?       @unique
+  order         Order?        @relation(fields: [orderId], references: [id])
+
+  issuerId      String
+  issuer        Company       @relation("IssuerInvoices", fields: [issuerId], references: [id])
+  receiverId    String
+  receiver      Company       @relation("ReceiverInvoices", fields: [receiverId], references: [id])
+
+  amount        Float
+  vatAmount     Float         @default(0)
+  totalAmount   Float
+
+  vatNumber     String?
+  crNumber      String?
+
+  notes         String?
+  pdfUrl        String?
+
+  dueDate       DateTime?
+  paidAt        DateTime?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  orderId     String        @unique
+  order       Order         @relation(fields: [orderId], references: [id])
+
+  status      DisputeStatus @default(OPEN)
+  reason      String
+  description String
+
+  openedBy    String
+  assignedTo  String?
+
+  resolution  String?
+  resolvedAt  DateTime?
+
+  attachments String[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  orderId        String   @unique
+  order          Order    @relation(fields: [orderId], references: [id])
+
+  reviewerId     String
+  reviewer       Company  @relation("ReviewerCompany", fields: [reviewerId], references: [id])
+  reviewedId     String
+  reviewed       Company  @relation("ReviewedCompany", fields: [reviewedId], references: [id])
+
+  rating         Int
+  comment        String?
+
+  onTime         Boolean?
+  cargoCondition Boolean?
+  communication  Boolean?
+
+  createdAt      DateTime @default(now())
+
+  @@index([reviewedId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+
+  type      NotificationType
+  titleAr   String
+  titleEn   String?
+  bodyAr    String
+  bodyEn    String?
+
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+
+  data      Json?
+
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+
+  action       String
+  resourceType String
+  resourceId   String?
+
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json?
+
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  token     String   @unique
+  isRevoked Boolean  @default(false)
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+
+  name       String
+  key        String    @unique
+  isActive   Boolean   @default(true)
+  lastUsedAt DateTime?
+
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String   @default("general")
+  updatedAt DateTime @updatedAt
+}
+
+model SupportTicket {
+  id          String                @id @default(cuid())
+  subject     String
+  category    SupportTicketCategory
+  description String
+  status      SupportTicketStatus   @default(OPEN)
+
+  // The user who opened the ticket. Company optional — staff users have a
+  // company, but internal admins may open tickets without one.
+  openedBy    String
+  companyId   String?
+  company     Company?              @relation(fields: [companyId], references: [id])
+
+  attachments String[]
+  // Plain text response from support; richer thread later if needed.
+  resolution  String?
+  resolvedAt  DateTime?
+  assignedTo  String?
+
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+}
+
+enum AddressKind {
+  PICKUP
+  DESTINATION
+  BOTH
+}
+
+model SavedAddress {
+  id           String      @id @default(cuid())
+  companyId    String
+  company      Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  label        String
+  city         String
+  region       String?
+  address      String
+  contactName  String?
+  contactPhone String?
+  kind         AddressKind @default(BOTH)
+  isDefault    Boolean     @default(false)
+  lat          Float?
+  lng          Float?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([companyId])
+}

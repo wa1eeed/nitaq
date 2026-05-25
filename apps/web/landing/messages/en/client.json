@@ -1,0 +1,55 @@
+{
+  "appName": "Naqla Logistics",
+  "appSubtitle": "Client Portal",
+  "nav": {
+    "dashboard": "Dashboard",
+    "orders": "My Orders",
+    "tracking": "Live Tracking",
+    "addresses": "Addresses",
+    "finance": "Finance",
+    "invoices": "Invoices",
+    "disputes": "Disputes",
+    "support": "Support",
+    "notifications": "Notifications",
+    "company": "Company Info",
+    "settings": "Company Settings"
+  },
+  "groups": {
+    "platform": "Client Portal",
+    "finance": "Finance",
+    "support": "Support",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "activeOrders": "Active Orders",
+    "completed": "Completed",
+    "totalSpent": "Total Spent",
+    "totalOrders": "Total Orders",
+    "recentOrders": "Recent Orders",
+    "viewAll": "View All",
+    "pendingTasks": "Tasks Needing Attention"
+  },
+  "addresses": {
+    "title": "Saved Addresses",
+    "subtitle": "Frequently used pickup and delivery locations",
+    "addNew": "Add Address",
+    "label": "Label",
+    "city": "City",
+    "kind": "Type",
+    "kindPickup": "Pickup",
+    "kindDestination": "Destination",
+    "kindBoth": "Both",
+    "default": "Default",
+    "makeDefault": "Make default"
+  },
+  "tracking": {
+    "title": "Live Tracking",
+    "active": "Active Shipments",
+    "live": "Live",
+    "currentLocation": "Current Vehicle Location",
+    "remaining": "Remaining",
+    "estimatedArrival": "Estimated Arrival",
+    "progress": "Progress"
+  }
+}

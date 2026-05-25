@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    // CommonJS output so the package can be `require()`'d by the NestJS API
+    // (which is CJS). Node ≥ 22 with strict ESM resolution would otherwise
+    // reject the extensionless imports the bundler-style output produces.
+    // The web apps' bundlers (webpack/turbopack) read .d.ts via the
+    // package's "types" field — unchanged.
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"]
+}

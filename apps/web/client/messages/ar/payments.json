@@ -1,0 +1,39 @@
+{
+  "title": "المدفوعات",
+  "wallet": "المحفظة",
+  "balance": "الرصيد الحالي",
+  "transactions": "المعاملات",
+  "escrow": "محتجز (Escrow)",
+  "released": "مُفرج عنه",
+  "commission": "العمولة",
+  "vat": "ضريبة القيمة المضافة",
+  "netAmount": "الصافي",
+  "totalRevenue": "إجمالي الإيراد",
+  "totalSpent": "إجمالي الإنفاق",
+  "invoice": "فاتورة",
+  "invoices": "الفواتير",
+  "exportPDF": "تصدير PDF",
+  "exportExcel": "تصدير Excel",
+  "statementOfAccount": "كشف الحساب",
+  "transactionType": {
+    "credit": "إيداع",
+    "debit": "خصم",
+    "commission": "عمولة",
+    "payout": "صرف",
+    "refund": "استرداد",
+    "escrowHold": "احتجاز",
+    "escrowRelease": "إفراج"
+  },
+  "invoiceStatus": {
+    "issued": "صادرة",
+    "paid": "مسددة",
+    "overdue": "متأخرة",
+    "cancelled": "ملغاة"
+  },
+  "paymentStatus": {
+    "held": "محتجز",
+    "released": "مُفرج عنه",
+    "refunded": "مستردّ",
+    "disputed": "متنازع عليه"
+  }
+}

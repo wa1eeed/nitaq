@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Naqla brand colors mapped to shadcn HSL tokens ─────────────
+ *
+ * Brand:
+ *   --primary  #0A3D3A  →  174 71% 14%
+ *   --accent   #00C9A7  →  170 100% 39%   (kept as `--mint` since shadcn
+ *                                            uses `--accent` for hover bg)
+ *   --gold     #F0C040  →   43 84% 60%
+ */
+@layer base {
+  :root {
+    --background:         174 30% 97%;
+    --foreground:         174 65%  9%;
+
+    --card:                 0  0% 100%;
+    --card-foreground:    174 65%  9%;
+
+    --popover:              0  0% 100%;
+    --popover-foreground: 174 65%  9%;
+
+    /* Brand primary = #0A3D3A */
+    --primary:            174 71% 14%;
+    --primary-foreground:   0  0% 100%;
+
+    --secondary:          174 14% 94%;
+    --secondary-foreground: 174 65% 14%;
+
+    --muted:              174 14% 94%;
+    --muted-foreground:   174 12% 42%;
+
+    /* shadcn `accent` = hover/highlight surface (light teal-tinted) */
+    --accent:             174 72% 95%;
+    --accent-foreground:  174 71% 22%;
+
+    --destructive:          0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success:            160 84% 39%;
+    --success-foreground:   0  0% 100%;
+
+    --warning:             32 95% 44%;
+    --warning-foreground:   0  0% 100%;
+
+    --border:             174 16% 88%;
+    --input:              174 16% 88%;
+    --ring:               174 71% 22%;
+
+    /* Naqla brand accents (Naqla-specific) */
+    --mint:               170 100% 39%;
+    --gold:                43  84% 60%;
+
+    --radius:             0.625rem;
+  }
+
+  .dark {
+    --background:         174 35%  4%;
+    --foreground:         174 30% 95%;
+    --card:               174 35%  6%;
+    --card-foreground:    174 30% 95%;
+    --popover:            174 35%  6%;
+    --popover-foreground: 174 30% 95%;
+
+    --primary:            170 100% 45%;
+    --primary-foreground: 174  71% 14%;
+
+    --secondary:          174 20% 12%;
+    --secondary-foreground: 174 30% 95%;
+
+    --muted:              174 20% 12%;
+    --muted-foreground:   174 12% 60%;
+
+    --accent:             174 30% 14%;
+    --accent-foreground:  174 30% 95%;
+
+    --destructive:          0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border:             174 20% 14%;
+    --input:              174 20% 14%;
+    --ring:               170 100% 45%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  /* Inter font for numeric content */
+  .num, .tabular-nums {
+    font-family: var(--font-inter), Inter, ui-monospace, monospace;
+    font-feature-settings: 'tnum' 1;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+  }
+}

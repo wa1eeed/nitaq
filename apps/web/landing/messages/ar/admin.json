@@ -1,0 +1,59 @@
+{
+  "appName": "نقلة لوجيستك",
+  "appSubtitle": "لوحة الإدارة",
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "companies": "الناقلون والعملاء",
+    "kyc": "اعتماد الشركات",
+    "orders": "الطلبات",
+    "disputes": "النزاعات",
+    "trucks": "كل الشاحنات",
+    "drivers": "كل السائقين",
+    "payments": "المدفوعات",
+    "wallets": "محافظ الشركات",
+    "reports": "التقارير",
+    "support": "الدعم الفني",
+    "notifications": "الإشعارات",
+    "promotions": "الترويج والعروض",
+    "audit": "سجل التدقيق",
+    "legal": "الصفحات القانونية",
+    "seo": "إعدادات SEO",
+    "settings": "إعدادات المنصة"
+  },
+  "groups": {
+    "platform": "إدارة المنصة",
+    "fleet": "الأسطول",
+    "finance": "المالية",
+    "system": "النظام",
+    "legalSeo": "القانوني والـ SEO",
+    "settings": "الإعدادات"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "نظرة عامة على نشاط المنصة",
+    "totalCompanies": "إجمالي الشركات",
+    "totalOrders": "إجمالي الطلبات",
+    "openDisputes": "نزاعات مفتوحة",
+    "platformRevenue": "إيراد المنصة"
+  },
+  "settings": {
+    "title": "إعدادات المنصة",
+    "tabs": {
+      "financial": "المالية",
+      "compliance": "الامتثال",
+      "notifications": "الإشعارات",
+      "truckTypes": "أنواع الشاحنات",
+      "brands": "البراندات والموديلات",
+      "general": "عامة"
+    }
+  },
+  "kyc": {
+    "title": "اعتماد الشركات",
+    "queue": "طابور الاعتماد",
+    "review": "مراجعة",
+    "approve": "اعتماد",
+    "reject": "رفض",
+    "rejectReason": "سبب الرفض",
+    "documentsRequired": "المستندات المطلوبة"
+  }
+}

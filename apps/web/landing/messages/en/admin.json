@@ -1,0 +1,59 @@
+{
+  "appName": "Naqla Logistics",
+  "appSubtitle": "Admin Dashboard",
+  "nav": {
+    "dashboard": "Dashboard",
+    "companies": "Carriers & Clients",
+    "kyc": "KYC Approval",
+    "orders": "Orders",
+    "disputes": "Disputes",
+    "trucks": "All Trucks",
+    "drivers": "All Drivers",
+    "payments": "Payments",
+    "wallets": "Company Wallets",
+    "reports": "Reports",
+    "support": "Support",
+    "notifications": "Notifications",
+    "promotions": "Promotions",
+    "audit": "Audit Log",
+    "legal": "Legal Pages",
+    "seo": "SEO Settings",
+    "settings": "Platform Settings"
+  },
+  "groups": {
+    "platform": "Platform Management",
+    "fleet": "Fleet",
+    "finance": "Finance",
+    "system": "System",
+    "legalSeo": "Legal & SEO",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of platform activity",
+    "totalCompanies": "Total Companies",
+    "totalOrders": "Total Orders",
+    "openDisputes": "Open Disputes",
+    "platformRevenue": "Platform Revenue"
+  },
+  "settings": {
+    "title": "Platform Settings",
+    "tabs": {
+      "financial": "Financial",
+      "compliance": "Compliance",
+      "notifications": "Notifications",
+      "truckTypes": "Truck Types",
+      "brands": "Brands & Models",
+      "general": "General"
+    }
+  },
+  "kyc": {
+    "title": "KYC Approval",
+    "queue": "Approval Queue",
+    "review": "Review",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectReason": "Reject Reason",
+    "documentsRequired": "Required Documents"
+  }
+}

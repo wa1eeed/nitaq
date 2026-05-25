@@ -1,0 +1,101 @@
+{
+  "title": "إعدادات الشركة",
+  "subtitle": "بيانات الشركة، الفريق، التفضيلات، والمستندات",
+  "tabs": {
+    "company": "بيانات الشركة",
+    "team": "الفريق",
+    "settings": "الإعدادات",
+    "kyc": "المستندات"
+  },
+  "company": {
+    "info": "المعلومات الأساسية",
+    "verifiedAccount": "حساب موثّق",
+    "awaitingVerification": "بانتظار التحقق",
+    "nameAr": "الاسم (عربي)",
+    "nameEn": "Name (English)",
+    "crNumber": "السجل التجاري",
+    "vatNumber": "الرقم الضريبي",
+    "city": "المدينة",
+    "region": "المنطقة",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "joinDate": "تاريخ الانضمام",
+    "updateBtn": "تحديث البيانات",
+    "activitySummary": "ملخّص النشاط",
+    "monthlyVolume": "حجم النقل الشهري",
+    "kycStatus": "حالة التحقّق (KYC)"
+  },
+  "team": {
+    "title": "أعضاء الفريق",
+    "subtitle": "إدارة من يمكنه الوصول لحساب شركتك على المنصة",
+    "addMember": "إضافة عضو",
+    "addMemberTitle": "إضافة عضو جديد للفريق",
+    "addMemberSubtitle": "سيُرسل للعضو إشعار SMS بإضافته للفريق",
+    "noMembers": "لا يوجد أعضاء بعد. أضف عضواً جديداً.",
+    "fullName": "الاسم الكامل",
+    "phone": "رقم الجوال",
+    "phoneRequired": "مطلوب — لإرسال إشعار الإضافة",
+    "email": "البريد الإلكتروني (اختياري)",
+    "selectRole": "اختر دور العضو",
+    "memberRole": "الدور",
+    "memberStatus": "الحالة",
+    "addedAt": "تاريخ الإضافة",
+    "active": "نشط",
+    "suspended": "موقوف",
+    "pendingActivation": "بانتظار التفعيل",
+    "owner": "المالك",
+    "ownerProtected": "لا يمكن حذف المالك أو تغيير دوره",
+    "actions": {
+      "editRole": "تعديل الدور",
+      "suspend": "إيقاف العضو",
+      "activate": "تنشيط",
+      "remove": "حذف من الفريق",
+      "confirmRemove": "حذف من الفريق؟",
+      "confirmRemoveBody": "سيفقد العضو الوصول لحساب الشركة فوراً. لا يمكن التراجع.",
+      "confirmSuspend": "إيقاف العضو؟",
+      "confirmSuspendBody": "يمكنك تنشيطه لاحقاً بنفس الصلاحيات."
+    },
+    "roles": {
+      "OWNER": {
+        "label": "المالك",
+        "icon": "👑",
+        "description": "صاحب الحساب — صلاحيات كاملة بدون قيود"
+      },
+      "ADMIN": {
+        "label": "مدير",
+        "icon": "👑"
+      },
+      "STAFF": {
+        "label": "مشرف عمليات",
+        "icon": "📦"
+      },
+      "DISPATCH": {
+        "label": "مشرف أسطول",
+        "icon": "🚚"
+      },
+      "FINANCE": {
+        "label": "محاسب",
+        "icon": "💰"
+      }
+    },
+    "permissions": "الصلاحيات",
+    "canDo": "يستطيع",
+    "cannotDo": "لا يستطيع",
+    "smsNotice": "سيستلم العضو SMS على جواله بإضافته لفريق الشركة + رابط الانضمام.",
+    "noPermissionTitle": "ليس لديك صلاحية",
+    "noPermissionBody": "هذه الصفحة متاحة فقط للمالك أو الـ Admin."
+  },
+  "preferences": {
+    "title": "تفضيلات العرض",
+    "language": "اللغة",
+    "languageHint": "يُطبَّق على لوحتك الشخصية فقط"
+  },
+  "kyc": {
+    "title": "مستندات التحقّق",
+    "subtitle": "تخضع لمراجعة فريق الامتثال",
+    "uploadDoc": "رفع مستند",
+    "approved": "معتمد",
+    "notUploaded": "لم يُرفع",
+    "viewDoc": "عرض"
+  }
+}
