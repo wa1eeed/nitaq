@@ -15,32 +15,41 @@ const CARRIER_URL = process.env.NEXT_PUBLIC_CARRIER_URL ?? 'http://localhost:300
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 const FEATURES = [
-  { icon: Radio,       title: 'سوق مفتوح للعروض',        desc: 'انشر طلبك وادع عشرات مقدّمي الخدمة المعتمدين للتقديم بأسعار تنافسية في دقائق.' },
-  { icon: UserSearch,  title: 'إسناد مباشر لمقدّم خدمة', desc: 'لديك مزوّد مفضّل؟ أرسل له الطلب مباشرة ويقبل أو يقترح سعراً بديلاً.' },
-  { icon: MapPin,      title: 'متابعة لحظية للتنفيذ',    desc: 'تابع تقدّم خدمتك لحظةً بلحظة من بدء التنفيذ حتى الإنجاز الكامل.' },
-  { icon: Wallet,      title: 'مدفوعات Escrow الآمنة',   desc: 'تُحتجَز أموالك في حساب وسيط ولا تُحوَّل لمقدّم الخدمة إلا بعد تأكيد الإنجاز.' },
-  { icon: ShieldCheck, title: 'مزوّدون موثّقون فقط',     desc: 'كل شركة خدمات تخضع لتحقّق KYC: سجل تجاري، وثائق الترخيص، وتقييمات حقيقية.' },
-  { icon: Star,        title: 'نظام تقييم شفّاف',        desc: 'قيّم مقدّمي الخدمة بعد كل طلب، واطّلع على تقييمات الآخرين قبل اختيارك.' },
+  { icon: Radio,       title: 'عروض تنافسية شفافة',         desc: 'مزاد مفتوح أو إسناد مباشر لمزوّد محدّد — أنت تختار الأنسب لطبيعة طلبك.' },
+  { icon: Wallet,      title: 'دفع آمن بنظام Escrow',        desc: 'المبلغ محجوز في حساب وسيط ولا يُحوَّل للمزوّد إلا بعد تأكيدك لاستلام الخدمة.' },
+  { icon: ShieldCheck, title: 'مزوّدون موثّقون بالسجل التجاري', desc: 'كل مزوّد يخضع لتحقّق KYC: سجل تجاري، وثائق ترخيص، وتقييمات حقيقية من عملاء فعليين.' },
+  { icon: MapPin,      title: 'تتبّع تقدّم الطلب',           desc: 'راقب حالة خدمتك لحظةً بلحظة من البداية حتى التسليم الكامل.' },
+  { icon: Star,        title: 'فريق دعم متخصص',              desc: 'نزاعات، تذاكر دعم، ومتابعة على مدار الساعة — فريقنا في خدمتك دائماً.' },
+  { icon: TrendingUp,  title: 'تقارير وتحليلات',             desc: 'لوحة متابعة شاملة لكل طلب ومصروف — قرارات أذكى مبنية على بيانات حقيقية.' },
 ];
 
 const STEPS = [
-  { num: '١', title: 'أنشئ طلبك',        desc: 'صف الخدمة التي تحتاجها، حدّد الموقع والميزانية في 5 خطوات بسيطة.' },
-  { num: '٢', title: 'استقبل العروض',    desc: 'يقدّم مقدّمو خدمة معتمدون عروضهم — قارن السعر، التقييم، والمدة.' },
-  { num: '٣', title: 'اختر وادفع',       desc: 'يُحتجَز المبلغ في Escrow حتى الإنجاز. لا مفاجآت ولا رسوم خفيّة.' },
-  { num: '٤', title: 'تابع وأكّد الإنجاز', desc: 'راقب تقدّم الخدمة لحظياً. عند التأكيد يُفرَج المبلغ لمقدّم الخدمة تلقائياً.' },
+  { num: '١', title: 'أنشئ طلب خدمة',         desc: 'حدّد احتياجك، نوع الخدمة، الميزانية، والموقع — في خطوات بسيطة وسريعة.' },
+  { num: '٢', title: 'استقبل عروض المزوّدين', desc: 'قارن الأسعار والتقييمات وتواصل مع المزوّدين المعتمدين مباشرةً.' },
+  { num: '٣', title: 'اختر واطلب',            desc: 'اقبل العرض الأنسب — والدفع محمي بنظام Escrow حتى اكتمال الخدمة.' },
+  { num: '٤', title: 'استلم وأقيّم',          desc: 'تأكيد استلامك للخدمة يُفرج عن المبلغ تلقائياً ويُسجَّل تقييمك للمزوّد.' },
 ];
 
 const TESTIMONIALS = [
-  { name: 'وليد الحربي',  role: 'مدير المشتريات · شركة الجزيرة للطاقة',    quote: 'وفّرنا ٢٢٪ من تكاليف الخدمات خلال شهرين، مع شفافية كاملة في كل طلب.' },
-  { name: 'سارة العمري',  role: 'مدير عمليات · مؤسسة الواحة للأغذية',      quote: 'متابعة التنفيذ اللحظية أنقذتنا من تأخيرات كثيرة — نعرف حالة طلباتنا دائماً.' },
-  { name: 'فهد الدوسري',  role: 'مدير · شركة المسار للخدمات المتكاملة',    quote: 'منصّة سهلة تجلب لنا طلبات حقيقية يومياً، والتحصيل يصل لحسابنا أسبوعياً.' },
+  { name: 'خالد الشمري',  role: 'مدير المشتريات · شركة التقنية المتقدمة، الرياض',   quote: 'وفّرنا ٣٠٪ من تكلفة الاستشارات خلال الربع الأول — نِطاق غيّر طريقة تعاملنا مع مزوّدي الخدمات كلياً.' },
+  { name: 'أحمد القحطاني', role: 'مهندس معتمد · مقدّم خدمة على نِطاق',               quote: 'زاد دخلي الشهري بنسبة ٤٥٪ منذ انضمامي — الطلبات حقيقية والمدفوعات منتظمة بدون تأخير.' },
+  { name: 'نورا السبيعي',  role: 'مدير العمليات · مجموعة الوطن التجارية، جدة',       quote: 'كنا نعاني من صعوبة إيجاد فنيين معتمدين — الآن نجد المزوّد المناسب خلال ساعات وبتقييمات موثّقة.' },
 ];
 
 const STATS = [
-  { raw: 1200,  suffix: '+', label: 'مزوّد معتمد' },
-  { raw: 25,    suffix: '+', label: 'مدينة مغطّاة' },
-  { raw: 98,    suffix: '%', label: 'معدّل إتمام الطلبات' },
-  { raw: 15000, suffix: '+', label: 'طلب منجز' },
+  { raw: 500,   suffix: '+',  label: 'مزوّد خدمة معتمد' },
+  { raw: 12000, suffix: '+',  label: 'طلب خدمة منجز' },
+  { raw: 98,    suffix: '%',  label: 'معدّل رضا العملاء', displayValue: '98.4%' },
+  { raw: 15,    suffix: '',   label: 'مدينة سعودية' },
+];
+
+const CATEGORIES = [
+  { icon: Briefcase,    label: 'استشارات وإدارة' },
+  { icon: Star,         label: 'تصميم وإبداع' },
+  { icon: Zap,          label: 'تطوير تقني' },
+  { icon: CheckCircle2, label: 'صيانة وتركيبات' },
+  { icon: UserSearch,   label: 'تدريب وتطوير' },
+  { icon: Package,      label: 'خدمات لوجستية' },
 ];
 
 const NAV = [
@@ -74,13 +83,15 @@ function useCounter(target: number, active: boolean) {
   return count;
 }
 
-function StatCard({ raw, suffix, label }: { raw: number; suffix: string; label: string }) {
+function StatCard({ raw, suffix, label, displayValue }: { raw: number; suffix: string; label: string; displayValue?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const count  = useCounter(raw, inView);
-  const display = raw >= 1000
-    ? `${(count / 1000).toFixed(count >= raw ? 0 : 1)}K${suffix}`
-    : `${count}${suffix}`;
+  const display = displayValue && count >= raw
+    ? displayValue
+    : raw >= 1000
+      ? `${(count / 1000).toFixed(count >= raw ? 0 : 1)}K${suffix}`
+      : `${count}${suffix}`;
   return (
     <motion.div
       ref={ref}
@@ -359,11 +370,11 @@ export default function LandingPage() {
 
             <motion.h1 variants={fadeUp}
               className="text-[44px] sm:text-[62px] md:text-[76px] leading-[1.06] font-extrabold tracking-tight">
-              احصل على خدماتك{' '}
+              ابحث عن أفضل{' '}
               <span className="relative inline-block">
                 <span className="text-transparent bg-clip-text"
                   style={{ backgroundImage: 'linear-gradient(135deg, #00C9A7 0%, #059669 100%)' }}>
-                  بثقة تامة
+                  مزوّدي الخدمات المعتمدين
                 </span>
                 <motion.span
                   initial={{ scaleX: 0, originX: 1 }}
@@ -377,8 +388,8 @@ export default function LandingPage() {
 
             <motion.p variants={fadeUp}
               className="mt-6 text-base sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              منصة <strong className="text-foreground font-semibold">نِطاق</strong> تربطك بأفضل مقدّمي الخدمات في المملكة —
-              أسعار شفافة، متابعة لحظية، ومدفوعات Escrow آمنة تماماً.
+              منصة <strong className="text-foreground font-semibold">نِطاق</strong> تربط شركتك بمئات مقدّمي الخدمات الموثّقين —
+              عروض شفافة، دفع آمن، وتقييمات حقيقية.
             </motion.p>
 
             <motion.div variants={fadeUp}
@@ -390,8 +401,8 @@ export default function LandingPage() {
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold text-white shadow-lg"
                   style={{ background: 'linear-gradient(135deg, #0A3D3A 0%, #00C9A7 100%)' }}
                 >
-                  <Package className="h-4 w-4" />
-                  ابدأ كعميل — مجاناً
+                  <Briefcase className="h-4 w-4" />
+                  ابدأ الآن — مجاناً
                 </motion.button>
               </Link>
               <Link href={`${CARRIER_URL}/login`}>
@@ -400,8 +411,8 @@ export default function LandingPage() {
                   whileTap={{ scale: 0.97 }}
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold border border-border hover:bg-muted/60 transition-colors"
                 >
-                  <Briefcase className="h-4 w-4" />
-                  انضم كمقدّم خدمة
+                  <UserSearch className="h-4 w-4" />
+                  تصفّح مزوّدي الخدمات
                 </motion.button>
               </Link>
             </motion.div>
@@ -549,8 +560,8 @@ export default function LandingPage() {
             <motion.span variants={fadeUp} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-4">
               كيف نعمل
             </motion.span>
-            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight">٤ خطوات وخدمتك في الطريق</motion.h2>
-            <motion.p variants={fadeUp} className="mt-4 text-base text-muted-foreground">عملية مبسّطة — بدون مكالمات لا نهائية أو مفاجآت.</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight">٤ خطوات وخدمتك على الطريق الصحيح</motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-base text-muted-foreground">عملية مبسّطة — بدون مكالمات لا نهائية أو مفاجآت في الأسعار.</motion.p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-4 relative">
@@ -584,12 +595,12 @@ export default function LandingPage() {
               className="rounded-2xl border bg-card p-8 sm:p-10"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 mb-5">
-                <Package className="h-6 w-6" />
+                <Briefcase className="h-6 w-6" />
               </div>
-              <h3 className="text-2xl font-bold">للعملاء</h3>
-              <p className="mt-3 text-base text-muted-foreground">شركات أو أفراد — وفّر وقتك ومالك مع أسعار تنافسية وضمانات قوية.</p>
+              <h3 className="text-2xl font-bold">للشركات العميلة</h3>
+              <p className="mt-3 text-base text-muted-foreground">وفّر على شركتك وقتاً ومالاً — مزوّدون معتمدون وأسعار تنافسية بضمانات قوية.</p>
               <ul className="mt-6 space-y-3">
-                {['انشر طلباً في دقائق واحصل على عروض متعددة', 'قارن السعر والتقييم والمدة قبل الاختيار', 'ادفع مرّة واحدة عبر Escrow الآمن', 'تابع تنفيذ طلبك لحظياً وأكّد الإنجاز'].map(t => (
+                {['انشر طلب خدمة في دقائق واحصل على عروض متعددة', 'قارن السعر والتقييم والخبرة قبل الاختيار', 'ادفع عبر Escrow الآمن — مالك محمي حتى التسليم', 'تابع تنفيذ طلبك لحظياً وأكّد الإنجاز'].map(t => (
                   <li key={t} className="flex items-start gap-2.5 text-sm">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500 mt-0.5" />
                     <span>{t}</span>
@@ -598,7 +609,7 @@ export default function LandingPage() {
               </ul>
               <Link href={`${CLIENT_URL}/login`}
                 className="inline-flex items-center gap-1.5 mt-8 text-sm font-semibold text-primary hover:underline">
-                ابدأ كعميل
+                ابدأ مجاناً
                 <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
               </Link>
             </motion.div>
@@ -637,6 +648,32 @@ export default function LandingPage() {
                 </Link>
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Service Categories ──────────────────────────────────────────────── */}
+      <section className="py-16 border-y bg-muted/20">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-4">
+              فئات الخدمات
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">تصفّح حسب نوع الخدمة</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {CATEGORIES.map(({ icon: Icon, label }) => (
+              <motion.div
+                key={label}
+                whileHover={{ y: -4, boxShadow: '0 12px 32px -8px rgba(0,0,0,0.1)' }}
+                className="flex flex-col items-center gap-3 rounded-2xl border bg-card p-5 cursor-default text-center transition-shadow"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="text-sm font-medium leading-snug">{label}</span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -704,8 +741,8 @@ export default function LandingPage() {
               backgroundSize: '24px 24px',
             }} />
             <div className="relative">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">جاهز لطلب أول خدمة لك؟</h2>
-              <p className="mt-3 text-base text-white/80 max-w-xl mx-auto">سجّل خلال دقيقتين وتلقَّ عروض مقدّمي خدمة معتمدين قبل ما تكمّل قهوتك.</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">ابدأ مجاناً اليوم</h2>
+              <p className="mt-3 text-base text-white/80 max-w-xl mx-auto">انضم لآلاف الشركات السعودية التي تستخدم نِطاق لإدارة خدماتها — سجّل خلال دقيقتين.</p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href={`${CLIENT_URL}/login`}>
                   <motion.button
@@ -713,7 +750,7 @@ export default function LandingPage() {
                     whileTap={{ scale: 0.97 }}
                     className="px-8 py-3.5 rounded-xl text-sm font-semibold bg-white text-primary"
                   >
-                    ابدأ كعميل
+                    ابدأ مجاناً — للشركات
                   </motion.button>
                 </Link>
                 <Link href={`${CARRIER_URL}/login`}>
@@ -722,7 +759,7 @@ export default function LandingPage() {
                     whileTap={{ scale: 0.97 }}
                     className="px-8 py-3.5 rounded-xl text-sm font-semibold border border-white/40 text-white hover:bg-white/10 transition-colors"
                   >
-                    انضم كمقدّم خدمة
+                    انضم كمزوّد خدمة
                   </motion.button>
                 </Link>
               </div>

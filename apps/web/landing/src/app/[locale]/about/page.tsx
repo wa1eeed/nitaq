@@ -18,9 +18,9 @@ const VALUES = [
 
 const STATS = [
   { num: '500+',     label: 'مزوّد خدمة معتمد' },
-  { num: '12,000+',  label: 'طلب شهرياً' },
+  { num: '12,000+',  label: 'طلب خدمة منجز' },
   { num: '15',       label: 'مدينة سعودية' },
-  { num: '98.4%',    label: 'معدّل إتمام الطلبات' },
+  { num: '98.4%',    label: 'معدّل رضا العملاء' },
 ];
 
 export default function AboutPage() {
@@ -31,7 +31,7 @@ export default function AboutPage() {
         <div className="max-w-[1280px] mx-auto px-6 py-16 text-center">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">عن نِطاق</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            نُعيد تعريف قطاع الخدمات في المملكة العربية السعودية عبر منصة تقنية متكاملة تربط الشركات والأفراد بأفضل مقدّمي الخدمات المعتمدين، بشفافية كاملة وأمان مالي مضمون.
+            نِطاق سوق B2B متخصص يربط الشركات السعودية بمئات مزوّدي الخدمات الموثّقين — مستشارين، مهندسين، مصممين، فنيين، ومطورين — بعروض شفافة ودفع آمن بنظام Escrow.
           </p>
         </div>
       </section>
@@ -56,12 +56,12 @@ export default function AboutPage() {
               <Target className="h-5 w-5" />
               رسالتنا
             </div>
-            <h2 className="text-3xl font-bold mb-4">رقمنة قطاع الخدمات في المملكة</h2>
+            <h2 className="text-3xl font-bold mb-4">بناء سوق خدمات B2B موثوق في المملكة</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              نهدف إلى توحيد سوق الخدمات في منصة واحدة شفافة، حيث يجد العميل أفضل الأسعار والمزوّدين في دقائق، ويجد مقدّم الخدمة طلبات حقيقية ومستقرة لتوسيع أعماله.
+              نهدف إلى توحيد سوق خدمات الأعمال في منصة واحدة شفافة، حيث تجد الشركات أفضل مزوّدي الخدمات المعتمدين في دقائق — استشارات، تطوير تقني، صيانة، تصميم، وأكثر.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              نُسهم بذلك في تحقيق أهداف رؤية المملكة 2030 لرقمنة قطاع الخدمات، الذي يُعد من الركائز الأساسية للاقتصاد الوطني.
+              نُسهم بذلك في تحقيق أهداف رؤية المملكة 2030 لرقمنة الاقتصاد وتطوير قطاع الخدمات، وتمكين رواد الأعمال ومقدّمي الخدمات من التوسع والنمو.
             </p>
           </div>
 
@@ -70,12 +70,12 @@ export default function AboutPage() {
               <Lightbulb className="h-5 w-5" />
               رؤيتنا
             </div>
-            <h2 className="text-3xl font-bold mb-4">المنصة الأولى للخدمات</h2>
+            <h2 className="text-3xl font-bold mb-4">المنصة الأولى لخدمات الأعمال B2B</h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              أن نكون المنصة الأولى لخدمات الأعمال في الشرق الأوسط، نخدم آلاف الشركات يومياً عبر شبكة موسّعة من مقدّمي الخدمات المعتمدين.
+              أن نكون المرجع الأول لخدمات الأعمال في السعودية والشرق الأوسط — نخدم آلاف الشركات يومياً عبر شبكة من مزوّدي الخدمات الموثّقين بالسجل التجاري والشهادات المهنية.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              نسعى لتقديم تجربة مستخدم سلسة، تكنولوجيا متقدمة (تتبع لحظي، Escrow، AI matching)، ودعم على مدار الساعة.
+              نسعى لتقديم تجربة مبسّطة وآمنة: مزاد شفاف، Escrow مضمون، مطابقة ذكية بالذكاء الاصطناعي، ودعم متخصص على مدار الساعة.
             </p>
           </div>
         </div>
@@ -120,14 +120,14 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-3">جاهز للبدء؟</h2>
-          <p className="opacity-90 mb-6">انضم لآلاف الشركات التي تستخدم نِطاق يومياً</p>
+          <h2 className="text-3xl font-bold mb-3">ابدأ مجاناً اليوم</h2>
+          <p className="opacity-90 mb-6">انضم لآلاف الشركات السعودية التي تستخدم نِطاق لإدارة خدماتها</p>
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <Button asChild variant="secondary" size="lg">
-              <a href={`${process.env.NEXT_PUBLIC_CLIENT_URL ?? 'http://localhost:3002'}/register`}>سجّل كعميل</a>
+              <a href={`${process.env.NEXT_PUBLIC_CLIENT_URL ?? 'http://localhost:3002'}/register`}>سجّل شركتك مجاناً</a>
             </Button>
             <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-              <a href={`${process.env.NEXT_PUBLIC_CARRIER_URL ?? 'http://localhost:3003'}/register`}>سجّل كمقدّم خدمة</a>
+              <a href={`${process.env.NEXT_PUBLIC_CARRIER_URL ?? 'http://localhost:3003'}/register`}>انضم كمزوّد خدمة</a>
             </Button>
           </div>
         </div>
