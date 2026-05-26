@@ -45,7 +45,7 @@ export const OrderStatus = {
 } as const;
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
-export const TruckType = {
+export const ServiceType = {
   SMALL_FLATBED: 'SMALL_FLATBED',
   MEDIUM_FLATBED: 'MEDIUM_FLATBED',
   LARGE_FLATBED: 'LARGE_FLATBED',
@@ -57,7 +57,11 @@ export const TruckType = {
   BOX_TRUCK: 'BOX_TRUCK',
   LOWBED: 'LOWBED',
 } as const;
-export type TruckType = (typeof TruckType)[keyof typeof TruckType];
+export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType];
+/** @deprecated use ServiceType */
+export const TruckType = ServiceType;
+/** @deprecated use ServiceType */
+export type TruckType = ServiceType;
 
 export const CargoType = {
   GENERAL: 'GENERAL',
@@ -107,8 +111,8 @@ export const NotificationType = {
   BID_REJECTED: 'BID_REJECTED',
   ORDER_ASSIGNED: 'ORDER_ASSIGNED',
   ORDER_CONFIRMED: 'ORDER_CONFIRMED',
-  SHIPMENT_STARTED: 'SHIPMENT_STARTED',
-  SHIPMENT_DELIVERED: 'SHIPMENT_DELIVERED',
+  SERVICE_STARTED: 'SERVICE_STARTED',
+  SERVICE_COMPLETED: 'SERVICE_COMPLETED',
   PAYMENT_RECEIVED: 'PAYMENT_RECEIVED',
   PAYMENT_RELEASED: 'PAYMENT_RELEASED',
   KYC_APPROVED: 'KYC_APPROVED',
@@ -127,9 +131,13 @@ export const DisputeStatus = {
 } as const;
 export type DisputeStatus = (typeof DisputeStatus)[keyof typeof DisputeStatus];
 
-export const DriverStatus = {
+export const EmployeeStatus = {
   AVAILABLE: 'AVAILABLE',
-  ON_TRIP: 'ON_TRIP',
+  ON_ASSIGNMENT: 'ON_ASSIGNMENT',
   OFF_DUTY: 'OFF_DUTY',
 } as const;
-export type DriverStatus = (typeof DriverStatus)[keyof typeof DriverStatus];
+export type EmployeeStatus = (typeof EmployeeStatus)[keyof typeof EmployeeStatus];
+/** @deprecated use EmployeeStatus */
+export const DriverStatus = EmployeeStatus;
+/** @deprecated use EmployeeStatus */
+export type DriverStatus = EmployeeStatus;

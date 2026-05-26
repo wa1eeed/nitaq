@@ -2,7 +2,7 @@
  * Workflow Engine — single source of truth for order lifecycle transitions,
  * fee calculations, escrow timing, and the notification matrix.
  *
- * All UI surfaces (client order detail, carrier order detail, admin payments,
+ * All UI surfaces (client order detail, provider order detail, admin payments,
  * admin disputes) should consult these helpers rather than re-deriving the
  * rules inline. When the backend ships, the same rules move into a NestJS
  * service; the shapes here stay stable so the UI never needs to change.
@@ -109,7 +109,7 @@ export function cancellationPolicy(order: Pick<Order, 'status' | 'agreedPrice' |
     return {
       tier: 'DISPUTE_ONLY',
       feeRate: 0, feeAmount: 0, refundAmount: 0,
-      blockedReason: 'الشحنة في الطريق — لا يمكن الإلغاء، افتح نزاعاً لو فيه مشكلة',
+      blockedReason: 'الطلب قيد التنفيذ — لا يمكن الإلغاء، افتح نزاعاً لو فيه مشكلة',
       suggestDispute: true,
     };
   }
@@ -126,7 +126,7 @@ export function cancellationPolicy(order: Pick<Order, 'status' | 'agreedPrice' |
 // Escrow rules
 // ──────────────────────────────────────────────────────────────────────
 
-/** Platform commission applied when the carrier receives funds (8%). */
+/** Platform commission applied when the provider receives funds (8%). */
 export const COMMISSION_RATE = 0.08;
 
 /** Hours after delivery before the platform auto-releases escrow. */
@@ -137,19 +137,19 @@ export interface EscrowBreakdown {
   total: number;
   /** Platform commission (8% of total). */
   commission: number;
-  /** Amount the carrier will actually receive. */
-  carrierAmount: number;
+  /** Amount the provider will actually receive. */
+  providerAmount: number;
 }
 
 /** Computes the 8/92 split when an order completes. */
 export function escrowBreakdown(total: number): EscrowBreakdown {
   const commission = total * COMMISSION_RATE;
-  return { total, commission, carrierAmount: total - commission };
+  return { total, commission, providerAmount: total - commission };
 }
 
 /**
  * If the order is DELIVERED, returns the milliseconds remaining until the
- * platform auto-releases escrow to the carrier (72h from the delivery
+ * platform auto-releases escrow to the provider (72h from the delivery
  * timestamp). Returns `null` for orders not in DELIVERED state.
  */
 export function escrowAutoReleaseAt(deliveredAt: Date | string | null | undefined): Date | null {
@@ -172,19 +172,19 @@ export function escrowMsRemaining(deliveredAt: Date | string | null | undefined,
  * Valid forward transitions. Each transition lists who can initiate it.
  * Reverse moves (e.g. un-cancel) are deliberately absent.
  */
-export const TRANSITIONS: Record<OrderStatus, { to: OrderStatus; actor: 'CLIENT' | 'CARRIER' | 'ADMIN' | 'SYSTEM' }[]> = {
+export const TRANSITIONS: Record<OrderStatus, { to: OrderStatus; actor: 'CLIENT' | 'PROVIDER' | 'ADMIN' | 'SYSTEM' }[]> = {
   DRAFT:      [{ to: 'PUBLISHED', actor: 'CLIENT' }, { to: 'CANCELLED', actor: 'CLIENT' }],
   PUBLISHED:  [{ to: 'BIDDING',   actor: 'SYSTEM' }, { to: 'ASSIGNED', actor: 'CLIENT' }, { to: 'CANCELLED', actor: 'CLIENT' }],
   BIDDING:    [{ to: 'ASSIGNED',  actor: 'CLIENT' }, { to: 'CANCELLED', actor: 'CLIENT' }],
-  ASSIGNED:   [{ to: 'CONFIRMED', actor: 'CARRIER' }, { to: 'CANCELLED', actor: 'CLIENT' }],
-  CONFIRMED:  [{ to: 'IN_TRANSIT', actor: 'CARRIER' }, { to: 'CANCELLED', actor: 'CLIENT' }],
-  IN_TRANSIT: [{ to: 'DELIVERED', actor: 'CARRIER' }],
+  ASSIGNED:   [{ to: 'CONFIRMED', actor: 'PROVIDER' }, { to: 'CANCELLED', actor: 'CLIENT' }],
+  CONFIRMED:  [{ to: 'IN_TRANSIT', actor: 'PROVIDER' }, { to: 'CANCELLED', actor: 'CLIENT' }],
+  IN_TRANSIT: [{ to: 'DELIVERED', actor: 'PROVIDER' }],
   DELIVERED:  [{ to: 'COMPLETED', actor: 'CLIENT' }, { to: 'COMPLETED', actor: 'SYSTEM' }], // SYSTEM = auto-release
   COMPLETED:  [],
   CANCELLED:  [],
 };
 
-export function canTransition(from: OrderStatus, to: OrderStatus, actor: 'CLIENT' | 'CARRIER' | 'ADMIN' | 'SYSTEM'): boolean {
+export function canTransition(from: OrderStatus, to: OrderStatus, actor: 'CLIENT' | 'PROVIDER' | 'ADMIN' | 'SYSTEM'): boolean {
   return (TRANSITIONS[from] ?? []).some((t) => t.to === to && (t.actor === actor || actor === 'ADMIN'));
 }
 
@@ -192,7 +192,7 @@ export function canTransition(from: OrderStatus, to: OrderStatus, actor: 'CLIENT
 // Notification matrix
 // ──────────────────────────────────────────────────────────────────────
 
-export type Audience = 'admin' | 'client' | 'carrier';
+export type Audience = 'admin' | 'client' | 'provider';
 
 export interface NotificationSpec {
   audience: Audience;
@@ -209,64 +209,64 @@ export interface NotificationSpec {
  * the side effects of each transition in one auditable place.
  */
 export const NOTIFICATION_MATRIX: Record<string, NotificationSpec[]> = {
-  // Client published an order — carriers see a new opportunity
+  // Client published an order — providers see a new opportunity
   ORDER_PUBLISHED: [
-    { audience: 'carrier', kind: 'NEW_OPPORTUNITY', titleTemplate: 'طلب جديد متاح', bodyTemplate: '{originCity} ← {destinationCity}, {weightKg} كجم' },
+    { audience: 'provider', kind: 'NEW_OPPORTUNITY', titleTemplate: 'طلب خدمة جديد متاح', bodyTemplate: '{originCity} — {cargoType}' },
   ],
 
-  // Carrier submitted a bid — client sees it
+  // Provider submitted a bid — client sees it
   BID_SUBMITTED: [
-    { audience: 'client', kind: 'ORDER_BID', titleTemplate: 'عرض جديد على طلبك', bodyTemplate: '{carrierName} قدّم {price} ر.س' },
+    { audience: 'client', kind: 'ORDER_BID', titleTemplate: 'عرض جديد على طلبك', bodyTemplate: '{providerName} قدّم {price} ر.س' },
   ],
 
   // Client accepted a bid — winner + losers + admin all notified
   BID_ACCEPTED: [
-    { audience: 'carrier', kind: 'ORDER_ACCEPTED', titleTemplate: '✓ تم قبول عرضك', bodyTemplate: 'الطلب {orderNumber} — استعد للاستلام' },
-    { audience: 'carrier', kind: 'ORDER_BID',      titleTemplate: '✗ لم يُختر عرضك', bodyTemplate: 'تم قبول عرض آخر على الطلب {orderNumber}' },
-    { audience: 'admin',   kind: 'ORDER_ACCEPTED', titleTemplate: 'طلب مُسنَد', bodyTemplate: '{orderNumber} → {carrierName} بقيمة {price} ر.س' },
+    { audience: 'provider', kind: 'ORDER_ACCEPTED', titleTemplate: '✓ تم قبول عرضك', bodyTemplate: 'الطلب {orderNumber} — استعد للتنفيذ' },
+    { audience: 'provider', kind: 'ORDER_BID',      titleTemplate: '✗ لم يُختر عرضك', bodyTemplate: 'تم قبول عرض آخر على الطلب {orderNumber}' },
+    { audience: 'admin',    kind: 'ORDER_ACCEPTED', titleTemplate: 'طلب مُسنَد', bodyTemplate: '{orderNumber} → {providerName} بقيمة {price} ر.س' },
   ],
 
-  // Carrier confirmed pickup — client + admin
+  // Provider confirmed start — client + admin
   ORDER_CONFIRMED: [
-    { audience: 'client',  kind: 'ORDER_PICKED_UP', titleTemplate: 'تأكيد تحميل البضاعة', bodyTemplate: '{carrierName} بدأ تحميل الطلب {orderNumber}' },
+    { audience: 'client',  kind: 'ORDER_PICKED_UP', titleTemplate: 'تأكيد بدء الخدمة', bodyTemplate: '{providerName} بدأ تنفيذ الطلب {orderNumber}' },
     { audience: 'admin',   kind: 'ORDER_PICKED_UP', titleTemplate: 'انطلاق طلب', bodyTemplate: '{orderNumber}' },
   ],
 
-  // Carrier marked in-transit — client gets ETA
+  // Provider marked in-progress — client gets ETA
   ORDER_IN_TRANSIT: [
-    { audience: 'client', kind: 'ORDER_PICKED_UP', titleTemplate: 'الشحنة في الطريق', bodyTemplate: 'الوصول المتوقّع {estimatedArrival}' },
+    { audience: 'client', kind: 'ORDER_PICKED_UP', titleTemplate: 'الطلب قيد التنفيذ', bodyTemplate: 'الإنجاز المتوقّع {estimatedArrival}' },
   ],
 
-  // Carrier marked delivered — client + admin
+  // Provider marked completed — client + admin
   ORDER_DELIVERED: [
-    { audience: 'client', kind: 'ORDER_DELIVERED', titleTemplate: 'تم تسليم شحنتك', bodyTemplate: 'أكّد الاستلام خلال 72 ساعة لإفراج المبلغ للناقل' },
-    { audience: 'admin',  kind: 'ORDER_DELIVERED', titleTemplate: 'طلب مُسلَّم', bodyTemplate: '{orderNumber} — escrow معلَّق' },
+    { audience: 'client', kind: 'ORDER_DELIVERED', titleTemplate: 'اكتملت خدمتك', bodyTemplate: 'أكّد الإنجاز خلال 72 ساعة لإفراج المبلغ لمقدّم الخدمة' },
+    { audience: 'admin',  kind: 'ORDER_DELIVERED', titleTemplate: 'طلب مُنجَز', bodyTemplate: '{orderNumber} — escrow معلَّق' },
   ],
 
   // Client confirmed receipt OR 72h elapsed — escrow released
   ESCROW_RELEASED: [
-    { audience: 'carrier', kind: 'PAYMENT_RELEASED', titleTemplate: 'تم إفراج المبلغ', bodyTemplate: '{carrierAmount} ر.س مُحوَّل لمحفظتك (الطلب {orderNumber})' },
-    { audience: 'client',  kind: 'ORDER_DELIVERED',  titleTemplate: 'إغلاق الطلب', bodyTemplate: 'الطلب {orderNumber} مُكتمل' },
+    { audience: 'provider', kind: 'PAYMENT_RELEASED', titleTemplate: 'تم إفراج المبلغ', bodyTemplate: '{providerAmount} ر.س مُحوَّل لمحفظتك (الطلب {orderNumber})' },
+    { audience: 'client',   kind: 'ORDER_DELIVERED',  titleTemplate: 'إغلاق الطلب', bodyTemplate: 'الطلب {orderNumber} مُكتمل' },
   ],
 
   // Either party cancelled
   ORDER_CANCELLED: [
-    { audience: 'client',  kind: 'ORDER_DELIVERED', titleTemplate: 'تم إلغاء الطلب', bodyTemplate: '{orderNumber}{feeMsg}' },
-    { audience: 'carrier', kind: 'ORDER_DELIVERED', titleTemplate: 'تم إلغاء طلب', bodyTemplate: '{orderNumber}{compensationMsg}' },
-    { audience: 'admin',   kind: 'ORDER_DELIVERED', titleTemplate: 'إلغاء طلب', bodyTemplate: '{orderNumber} — {tier}' },
+    { audience: 'client',   kind: 'ORDER_DELIVERED', titleTemplate: 'تم إلغاء الطلب', bodyTemplate: '{orderNumber}{feeMsg}' },
+    { audience: 'provider', kind: 'ORDER_DELIVERED', titleTemplate: 'تم إلغاء طلب', bodyTemplate: '{orderNumber}{compensationMsg}' },
+    { audience: 'admin',    kind: 'ORDER_DELIVERED', titleTemplate: 'إلغاء طلب', bodyTemplate: '{orderNumber} — {tier}' },
   ],
 
   // Either party opened a dispute
   DISPUTE_OPENED: [
-    { audience: 'admin',   kind: 'DISPUTE_NEW', titleTemplate: 'نزاع جديد', bodyTemplate: '{orderNumber} — {raisedBy}: {reason}' },
-    { audience: 'client',  kind: 'DISPUTE_NEW', titleTemplate: 'فُتح نزاع على طلبك', bodyTemplate: 'سيراجعه فريق نقلة' },
-    { audience: 'carrier', kind: 'DISPUTE_NEW', titleTemplate: 'فُتح نزاع على طلب', bodyTemplate: '{orderNumber}' },
+    { audience: 'admin',    kind: 'DISPUTE_NEW', titleTemplate: 'نزاع جديد', bodyTemplate: '{orderNumber} — {raisedBy}: {reason}' },
+    { audience: 'client',   kind: 'DISPUTE_NEW', titleTemplate: 'فُتح نزاع على طلبك', bodyTemplate: 'سيراجعه فريق نِطاق' },
+    { audience: 'provider', kind: 'DISPUTE_NEW', titleTemplate: 'فُتح نزاع على طلب', bodyTemplate: '{orderNumber}' },
   ],
 
   // Admin resolved a dispute (4 outcomes)
   DISPUTE_RESOLVED: [
-    { audience: 'client',  kind: 'DISPUTE_NEW', titleTemplate: 'قرار النزاع', bodyTemplate: '{resolution}' },
-    { audience: 'carrier', kind: 'DISPUTE_NEW', titleTemplate: 'قرار النزاع', bodyTemplate: '{resolution}' },
+    { audience: 'client',   kind: 'DISPUTE_NEW', titleTemplate: 'قرار النزاع', bodyTemplate: '{resolution}' },
+    { audience: 'provider', kind: 'DISPUTE_NEW', titleTemplate: 'قرار النزاع', bodyTemplate: '{resolution}' },
   ],
 
   // Admin-triggered alerts

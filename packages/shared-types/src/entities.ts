@@ -4,13 +4,13 @@ import type {
   CompanyStatus,
   CompanyType,
   DisputeStatus,
-  DriverStatus,
+  EmployeeStatus,
   InvoiceStatus,
   KYCStatus,
   NotificationType,
   OrderStatus,
   PaymentStatus,
-  TruckType,
+  ServiceType,
   UserRole,
 } from './enums';
 
@@ -61,7 +61,7 @@ export interface Order {
   orderNumber: string;
   status: OrderStatus;
   clientId: string;
-  carrierId: string | null;
+  providerId: string | null;
   cargoType: CargoType;
   cargoDescription: string;
   weight: number;
@@ -77,7 +77,7 @@ export interface Order {
   destinationAddress: string;
   destinationLat: number | null;
   destinationLng: number | null;
-  requiredTruckType: TruckType;
+  requiredServiceType: ServiceType;
   requiresRefrigeration: boolean;
   requiresInsurance: boolean;
   specialInstructions: string | null;
@@ -87,27 +87,27 @@ export interface Order {
   clientBudget: number | null;
   agreedPrice: number | null;
   commissionAmount: number | null;
-  carrierAmount: number | null;
+  providerAmount: number | null;
   actualPickupAt: string | null;
   actualDeliveryAt: string | null;
   poNumber: string | null;
   bolNumber: string | null;
   documents: string[];
   clientRating: number | null;
-  carrierRating: number | null;
+  providerRating: number | null;
   notes: string | null;
   cancelReason: string | null;
   createdAt: string;
   updatedAt: string;
   client?: Company;
-  carrier?: Company | null;
+  provider?: Company | null;
   bids?: Bid[];
 }
 
 export interface Bid {
   id: string;
   orderId: string;
-  carrierId: string;
+  providerId: string;
   amount: number;
   status: BidStatus;
   estimatedDays: number;
@@ -115,14 +115,14 @@ export interface Bid {
   expiresAt: string | null;
   createdAt: string;
   updatedAt: string;
-  carrier?: Company;
+  provider?: Company;
 }
 
-export interface Truck {
+export interface Service {
   id: string;
   companyId: string;
-  plateNumber: string;
-  type: TruckType;
+  serviceCode: string;
+  type: ServiceType;
   capacity: number;
   length: number | null;
   width: number | null;
@@ -135,28 +135,32 @@ export interface Truck {
   isActive: boolean;
   photos: string[];
   documents: string[];
-  currentDriverId: string | null;
+  currentEmployeeId: string | null;
   createdAt: string;
   updatedAt: string;
 }
+/** @deprecated use Service */
+export type Truck = Service;
 
-export interface Driver {
+export interface Employee {
   id: string;
   userId: string;
   companyId: string;
   licenseNumber: string;
   licenseExpiry: string;
   licenseType: string;
-  status: DriverStatus;
+  status: EmployeeStatus;
   currentLat: number | null;
   currentLng: number | null;
   lastLocationAt: string | null;
   rating: number;
-  totalTrips: number;
+  totalAssignments: number;
   photo: string | null;
   isActive: boolean;
   user?: User;
 }
+/** @deprecated use Employee */
+export type Driver = Employee;
 
 export interface Payment {
   id: string;
@@ -164,7 +168,7 @@ export interface Payment {
   status: PaymentStatus;
   totalAmount: number;
   commissionAmount: number;
-  carrierAmount: number;
+  providerAmount: number;
   paymentMethod: string | null;
   transactionRef: string | null;
   paidAt: string | null;

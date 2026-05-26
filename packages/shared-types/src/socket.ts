@@ -2,7 +2,7 @@ export const SocketEvents = {
   // Client → Server
   ORDER_SUBSCRIBE: 'order:subscribe',
   ORDER_UNSUBSCRIBE: 'order:unsubscribe',
-  DRIVER_LOCATION: 'driver:location',
+  EMPLOYEE_LOCATION: 'employee:location',
 
   // Server → Client
   ORDER_STATUS_CHANGED: 'order:status_changed',
@@ -23,15 +23,15 @@ export interface OrderStatusChangedPayload {
 export interface NewBidPayload {
   orderId: string;
   bidId: string;
-  carrierId: string;
-  carrierName: string;
+  providerId: string;
+  providerName: string;
   amount: number;
   createdAt: string;
 }
 
 export interface LocationUpdatePayload {
   orderId: string;
-  driverId: string;
+  employeeId: string;
   lat: number;
   lng: number;
   speed: number | null;

@@ -23,6 +23,11 @@ interface ApiOrder {
   // Prisma-style field names that differ from the mock:
   weight?: number;
   requiredTruckType?: string;
+  // API still uses carrier* field names — mapped to provider* in normalized shape
+  carrierId?: string;
+  carrierAmount?: number;
+  carrierRating?: number;
+  carrier?: unknown;
   // Optional relations / aggregations:
   _count?: { bids?: number };
   bids?: Bid[];
@@ -52,8 +57,17 @@ export function normalizeOrder(input: ApiOrder | Order | null | undefined): Orde
     weightKg: (o.weight ?? o.weightKg ?? 0) as number,
     truckType: (o.requiredTruckType ?? o.truckType ?? '') as string,
     bidCount: (o._count?.bids ?? o.bidCount ?? (Array.isArray(o.bids) ? o.bids.length : 0)) as number,
+    // Normalize carrier* → provider* (API uses old names; UI uses new names)
+    carrierId: (o.carrierId ?? o.providerId ?? null) as string | null,
+    providerId: (o.providerId ?? o.carrierId ?? null) as string | null,
+    carrierAmount: (o.carrierAmount ?? o.providerAmount ?? null) as number | null,
+    providerAmount: (o.providerAmount ?? o.carrierAmount ?? null) as number | null,
+    carrierRating: (o.carrierRating ?? o.providerRating ?? null) as number | null,
+    providerRating: (o.providerRating ?? o.carrierRating ?? null) as number | null,
+    carrier: (o.carrier ?? o.provider ?? null) as unknown,
+    provider: (o.provider ?? o.carrier ?? null) as unknown,
     ...(bids ? { bids } : {}),
-  } as Order;
+  } as unknown as Order;
 }
 
 /**
@@ -107,44 +121,48 @@ function unwrapList(input: unknown): unknown[] {
 }
 
 /**
- * Maps an API Truck (Prisma fields: `type` / `capacity` / `year`) into the
- * mock Truck shape used by the carrier fleet UI (`truckType` / `capacityKg` /
+ * Maps an API Service (Prisma fields: `type` / `capacity` / `year`) into the
+ * mock Service shape used by the provider fleet UI (`serviceType` / `capacityKg` /
  * `modelYear`). Capacity unit: backend stores tons in `capacity`, but the
  * mock + UI assume kg via `capacityKg`. We compute both so the UI works
  * regardless of which field it reads.
  *
  * Idempotent — re-running on an already-normalized object keeps the mock keys.
  */
-export function normalizeTruck<T extends object>(input: T | null | undefined): T | null {
+export function normalizeService<T extends object>(input: T | null | undefined): T | null {
   if (!input) return null;
   const t = input as Record<string, unknown>;
-  // API stores capacity in tons (carrier form value × 1). Mock uses kg.
   const capacityTons = (t.capacity as number | undefined)
     ?? ((t.capacityKg as number | undefined) ? ((t.capacityKg as number) / 1000) : undefined);
   const capacityKg = (t.capacityKg as number | undefined)
     ?? ((t.capacity as number | undefined) != null ? ((t.capacity as number) * 1000) : 0);
   return {
     ...t,
+    serviceType: (t.serviceType as string | undefined) ?? (t.truckType as string | undefined) ?? (t.type as string | undefined) ?? '',
     truckType: (t.truckType as string | undefined) ?? (t.type as string | undefined) ?? '',
+    serviceCode: (t.serviceCode as string | undefined) ?? (t.plateNumber as string | undefined) ?? '',
     capacityKg,
     capacity: capacityTons ?? 0,
     modelYear: (t.modelYear as number | undefined) ?? (t.year as number | undefined) ?? 0,
-    // Computed fields used by the table — preserve mock defaults when API omits.
     status: (t.status as string | undefined) ?? 'AVAILABLE',
   } as unknown as T;
 }
+/** @deprecated use normalizeService */
+export const normalizeTruck = normalizeService;
 
-export function normalizeTruckList<T extends object>(input: unknown): T[] {
+export function normalizeServiceList<T extends object>(input: unknown): T[] {
   return unwrapList(input)
-    .map((t) => normalizeTruck(t as T))
+    .map((t) => normalizeService(t as T))
     .filter((t): t is T => t !== null);
 }
+/** @deprecated use normalizeServiceList */
+export const normalizeTruckList = normalizeServiceList;
 
 /**
  * Maps an API Payment (Prisma fields: `status` / `totalAmount` /
- * `commissionAmount` / `carrierAmount`) into the mock Payment shape (`state`
- * / `amount` / `commission` / `vat`). API has no VAT field — we default to 0
- * to prevent `NaN` in `.toLocaleString()` math downstream.
+ * `commissionAmount` / `carrierAmount`) into the normalized Payment shape (`state`
+ * / `amount` / `commission` / `vat` / `providerAmount`). API has no VAT field —
+ * we default to 0 to prevent `NaN` in `.toLocaleString()` math downstream.
  */
 export function normalizePayment<T extends object>(input: T | null | undefined): T | null {
   if (!input) return null;
@@ -152,6 +170,7 @@ export function normalizePayment<T extends object>(input: T | null | undefined):
   const amount = (p.amount as number | undefined) ?? (p.totalAmount as number | undefined) ?? 0;
   const commission =
     (p.commission as number | undefined) ?? (p.commissionAmount as number | undefined) ?? 0;
+  const providerAmount = (p.providerAmount as number | undefined) ?? (p.carrierAmount as number | undefined) ?? (amount - commission);
   return {
     ...p,
     state: (p.state as string | undefined) ?? (p.status as string | undefined) ?? 'PENDING',
@@ -160,8 +179,8 @@ export function normalizePayment<T extends object>(input: T | null | undefined):
     commission,
     commissionAmount: commission,
     vat: (p.vat as number | undefined) ?? 0,
-    carrierAmount:
-      (p.carrierAmount as number | undefined) ?? (amount - commission),
+    providerAmount,
+    carrierAmount: providerAmount,
     paidAt: p.paidAt ?? p.heldAt ?? p.createdAt ?? null,
   } as unknown as T;
 }

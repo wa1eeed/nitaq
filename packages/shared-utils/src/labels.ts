@@ -4,38 +4,42 @@ export const orderStatusLabels: Record<string, { ar: string; en: string }> = {
   BIDDING: { ar: 'قيد العروض', en: 'Bidding' },
   ASSIGNED: { ar: 'مُسند', en: 'Assigned' },
   CONFIRMED: { ar: 'مؤكد', en: 'Confirmed' },
-  IN_TRANSIT: { ar: 'في الطريق', en: 'In transit' },
-  DELIVERED: { ar: 'تم التسليم', en: 'Delivered' },
-  COMPLETED: { ar: 'مكتمل', en: 'Completed' },
+  IN_TRANSIT: { ar: 'قيد التنفيذ', en: 'In progress' },
+  DELIVERED: { ar: 'مكتمل', en: 'Completed' },
+  COMPLETED: { ar: 'مغلق', en: 'Closed' },
   CANCELLED: { ar: 'ملغى', en: 'Cancelled' },
   DISPUTED: { ar: 'نزاع', en: 'Disputed' },
 };
 
-export const truckTypeLabels: Record<string, { ar: string; en: string }> = {
-  SMALL_FLATBED: { ar: 'مسطح صغير', en: 'Small flatbed' },
-  MEDIUM_FLATBED: { ar: 'مسطح متوسط', en: 'Medium flatbed' },
-  LARGE_FLATBED: { ar: 'مسطح كبير', en: 'Large flatbed' },
-  REFRIGERATED: { ar: 'مبرد', en: 'Refrigerated' },
-  CONTAINER_20: { ar: 'حاوية 20 قدم', en: '20ft container' },
-  CONTAINER_40: { ar: 'حاوية 40 قدم', en: '40ft container' },
-  TANKER: { ar: 'صهريج', en: 'Tanker' },
-  CURTAINSIDER: { ar: 'ستائر جانبية', en: 'Curtainsider' },
-  BOX_TRUCK: { ar: 'صندوقية', en: 'Box truck' },
-  LOWBED: { ar: 'لوبيد', en: 'Lowbed' },
+export const serviceTypeLabels: Record<string, { ar: string; en: string }> = {
+  SMALL_FLATBED: { ar: 'استشارات', en: 'Consulting' },
+  MEDIUM_FLATBED: { ar: 'تصميم', en: 'Design' },
+  LARGE_FLATBED: { ar: 'تركيب', en: 'Installation' },
+  REFRIGERATED: { ar: 'صيانة', en: 'Maintenance' },
+  CONTAINER_20: { ar: 'دعم تقني', en: 'Technical Support' },
+  CONTAINER_40: { ar: 'تدريب', en: 'Training' },
+  TANKER: { ar: 'خدمات تقنية', en: 'IT Services' },
+  CURTAINSIDER: { ar: 'لوجستيات', en: 'Logistics' },
+  BOX_TRUCK: { ar: 'إدارة مشاريع', en: 'Project Management' },
+  LOWBED: { ar: 'أخرى', en: 'Other' },
 };
+/** @deprecated use serviceTypeLabels */
+export const truckTypeLabels = serviceTypeLabels;
 
-export const cargoTypeLabels: Record<string, { ar: string; en: string }> = {
-  GENERAL: { ar: 'بضائع عامة', en: 'General' },
-  FOOD: { ar: 'مواد غذائية', en: 'Food' },
+export const serviceCategoryLabels: Record<string, { ar: string; en: string }> = {
+  GENERAL: { ar: 'خدمات عامة', en: 'General Services' },
+  FOOD: { ar: 'تموين وأغذية', en: 'Catering & Food' },
   CHEMICALS: { ar: 'مواد كيميائية', en: 'Chemicals' },
-  ELECTRONICS: { ar: 'إلكترونيات', en: 'Electronics' },
-  FURNITURE: { ar: 'أثاث', en: 'Furniture' },
-  CONSTRUCTION: { ar: 'مواد بناء', en: 'Construction' },
-  AUTOMOTIVE: { ar: 'قطع سيارات', en: 'Automotive' },
-  MEDICAL: { ar: 'مستلزمات طبية', en: 'Medical' },
-  HAZARDOUS: { ar: 'مواد خطرة', en: 'Hazardous' },
-  FRAGILE: { ar: 'هشة', en: 'Fragile' },
+  ELECTRONICS: { ar: 'تقنية ومعلومات', en: 'Technology & IT' },
+  FURNITURE: { ar: 'تركيب وتجميع', en: 'Installation & Assembly' },
+  CONSTRUCTION: { ar: 'إنشاء وهندسة', en: 'Construction & Engineering' },
+  AUTOMOTIVE: { ar: 'سيارات ونقليات', en: 'Automotive' },
+  MEDICAL: { ar: 'رعاية صحية', en: 'Healthcare' },
+  HAZARDOUS: { ar: 'مواد متخصصة', en: 'Specialized Materials' },
+  FRAGILE: { ar: 'قابل للكسر', en: 'Fragile' },
 };
+/** @deprecated use serviceCategoryLabels */
+export const cargoTypeLabels = serviceCategoryLabels;
 
 export const kycStatusLabels: Record<string, { ar: string; en: string }> = {
   NOT_SUBMITTED: { ar: 'لم يُقدّم', en: 'Not submitted' },
