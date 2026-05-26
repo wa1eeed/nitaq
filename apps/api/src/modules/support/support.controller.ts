@@ -26,7 +26,7 @@ class UpdateTicketDto {
 @ApiTags('support')
 @ApiBearerAuth()
 @UseGuards(RolesGuard)
-@Roles('CLIENT_ADMIN', 'CLIENT_USER', 'CARRIER_ADMIN', 'CARRIER_USER', 'ADMIN', 'SUPER_ADMIN')
+@Roles('CLIENT_ADMIN', 'CLIENT_USER', 'PROVIDER_ADMIN', 'PROVIDER_USER', 'ADMIN', 'SUPER_ADMIN')
 @Controller('support/tickets')
 export class SupportController {
   constructor(private support: SupportService) {}

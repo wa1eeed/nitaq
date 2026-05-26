@@ -71,7 +71,7 @@ export class AuthService {
         passwordHash,
         firstName: dto.firstName,
         lastName: dto.lastName,
-        role: dto.companyType === 'CLIENT' ? 'CLIENT_ADMIN' : 'CARRIER_ADMIN',
+        role: dto.companyType === 'CLIENT' ? 'CLIENT_ADMIN' : 'PROVIDER_ADMIN',
         companyId: company.id,
         // The first user of a newly-registered company is the OWNER. The OWNER
         // role is permanent — only invitable members get other roles.

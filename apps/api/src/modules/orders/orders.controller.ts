@@ -9,7 +9,7 @@ import { Audit } from '../../common/audit/audit.decorator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { OrdersService } from './orders.service';
 import {
-  AssignDriverDto, AssignOrderDto, CancelOrderDto, CreateOrderDto,
+  AssignEmployeeDto, AssignOrderDto, CancelOrderDto, CreateOrderDto,
   CreateTrackingEventDto, UpdateOrderDto,
 } from './dto/create-order.dto';
 import type { OrderStatus } from '../../generated/prisma';
@@ -100,7 +100,7 @@ export class OrdersController {
 
   @Post(':id/assign-driver')
   @Audit({ action: 'order.assignDriver', resourceType: 'Order', idFrom: 'param', idKey: 'id' })
-  assignDriver(@Param('id') id: string, @Body() dto: AssignDriverDto, @CurrentUser() actor: AuthUser) {
+  assignDriver(@Param('id') id: string, @Body() dto: AssignEmployeeDto, @CurrentUser() actor: AuthUser) {
     return this.orders.assignDriver(id, dto, actor);
   }
 

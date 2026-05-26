@@ -18,28 +18,28 @@ export class DisputesService {
     if (actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN') {
       return this.prisma.dispute.findMany({
         orderBy: { createdAt: 'desc' },
-        include: { order: { select: { orderNumber: true, clientId: true, carrierId: true } } },
+        include: { order: { select: { orderNumber: true, clientId: true, providerId: true } } },
       });
     }
     if (!actor.companyId) return [];
     return this.prisma.dispute.findMany({
       where: {
-        order: { OR: [{ clientId: actor.companyId }, { carrierId: actor.companyId }] },
+        order: { OR: [{ clientId: actor.companyId }, { providerId: actor.companyId }] },
       },
       orderBy: { createdAt: 'desc' },
-      include: { order: { select: { orderNumber: true, clientId: true, carrierId: true } } },
+      include: { order: { select: { orderNumber: true, clientId: true, providerId: true } } },
     });
   }
 
   async findByIdForActor(id: string, actor: AuthUser) {
     const dispute = await this.prisma.dispute.findUnique({
       where: { id },
-      include: { order: { select: { orderNumber: true, clientId: true, carrierId: true } } },
+      include: { order: { select: { orderNumber: true, clientId: true, providerId: true } } },
     });
     if (!dispute) throw new NotFoundException({ code: 'DISPUTE_NOT_FOUND', message: 'النزاع غير موجود' });
     if (actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN') return dispute;
     const isOwner =
-      dispute.order.clientId === actor.companyId || dispute.order.carrierId === actor.companyId;
+      dispute.order.clientId === actor.companyId || dispute.order.providerId === actor.companyId;
     if (!isOwner) throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     return dispute;
   }
@@ -54,7 +54,7 @@ export class DisputesService {
     }
     const order = await this.prisma.order.findUnique({ where: { id: input.orderId } });
     if (!order) throw new NotFoundException({ code: 'ORDER_NOT_FOUND', message: 'الطلب غير موجود' });
-    const isParty = order.clientId === actor.companyId || order.carrierId === actor.companyId;
+    const isParty = order.clientId === actor.companyId || order.providerId === actor.companyId;
     if (!isParty) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لست طرفاً في هذا الطلب' });
     }

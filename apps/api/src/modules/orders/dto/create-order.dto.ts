@@ -28,9 +28,9 @@ export class CreateOrderDto {
   @IsString() cargoDescription!: string;
   @IsNumber() @Min(1) weight!: number;
 
-  /// OPEN (default) → marketplace; DIRECT → only `targetCarrierId` sees it.
+  /// OPEN (default) → marketplace; DIRECT → only `targetProviderId` sees it.
   @IsOptional() @IsEnum(MODES) mode?: (typeof MODES)[number];
-  @IsOptional() @IsString() targetCarrierId?: string;
+  @IsOptional() @IsString() targetProviderId?: string;
   /// DIRECT only — pre-agreed price skips the negotiation phase and auto-assigns on publish.
   @IsOptional() @Type(() => Number) @IsNumber() @Min(0) agreedPriceUpfront?: number;
 
@@ -54,7 +54,7 @@ export class CreateOrderDto {
   @IsOptional() @IsNumber() destinationLat?: number;
   @IsOptional() @IsNumber() destinationLng?: number;
 
-  @IsEnum(TRUCKS) requiredTruckType!: (typeof TRUCKS)[number];
+  @IsEnum(TRUCKS) requiredServiceType!: (typeof TRUCKS)[number];
   @IsOptional() @IsBoolean() requiresRefrigeration?: boolean;
   @IsOptional() @IsBoolean() requiresInsurance?: boolean;
   @IsOptional() @IsString() specialInstructions?: string;
@@ -91,7 +91,7 @@ export class CreateTrackingEventDto {
 }
 
 export class AssignOrderDto {
-  @IsString() carrierId!: string;
+  @IsString() providerId!: string;
   @IsNumber() agreedPrice!: number;
 }
 
@@ -99,6 +99,6 @@ export class CancelOrderDto {
   @IsString() reason!: string;
 }
 
-export class AssignDriverDto {
-  @IsString() driverId!: string;
+export class AssignEmployeeDto {
+  @IsString() employeeId!: string;
 }

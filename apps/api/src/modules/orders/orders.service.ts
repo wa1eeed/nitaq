@@ -4,11 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { DriverStatus } from '../../generated/prisma';
+import type { EmployeeStatus } from '../../generated/prisma';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { PaginationDto, paginate } from '../../common/dto/pagination.dto';
 import {
-  AssignDriverDto,
+  AssignEmployeeDto,
   AssignOrderDto,
   CancelOrderDto,
   CreateOrderDto,
@@ -41,10 +41,10 @@ export class OrdersService {
 
     if (actor.role === 'CLIENT_ADMIN' || actor.role === 'CLIENT_USER') {
       where.clientId = actor.companyId ?? '__none__';
-    } else if (actor.role === 'CARRIER_ADMIN' || actor.role === 'CARRIER_USER') {
+    } else if (actor.role === 'PROVIDER_ADMIN' || actor.role === 'PROVIDER_USER') {
       const myId = actor.companyId ?? '__none__';
       if (mine) {
-        where.carrierId = myId;
+        where.providerId = myId;
       } else {
         // Providers see three buckets simultaneously:
         //   1. OPEN marketplace orders (PUBLISHED/BIDDING + mode=OPEN)
@@ -52,8 +52,8 @@ export class OrdersService {
         //   3. Orders already assigned to them (any status)
         where.OR = [
           { AND: [{ mode: 'OPEN' }, { status: { in: ['PUBLISHED', 'BIDDING'] } }] },
-          { AND: [{ mode: 'DIRECT' }, { targetCarrierId: myId }] },
-          { carrierId: myId },
+          { AND: [{ mode: 'DIRECT' }, { targetProviderId: myId }] },
+          { providerId: myId },
         ];
       }
     }
@@ -66,13 +66,13 @@ export class OrdersService {
         orderBy: { [sort]: order },
         include: {
           client: { select: { id: true, nameAr: true, logo: true } },
-          carrier: { select: { id: true, nameAr: true, logo: true } },
+          provider: { select: { id: true, nameAr: true, logo: true } },
           _count: { select: { bids: true } },
           // Lean bid subset so the provider list can answer "did I already bid
           // on this order?" without a second round-trip. We only need the
-          // carrierId + status to drive the row CTA (تفاصيل / إعادة تقديم /
+          // providerId + status to drive the row CTA (تفاصيل / إعادة تقديم /
           // قدّم عرضاً) — full bid bodies are still fetched in the detail page.
-          bids: { select: { id: true, carrierId: true, status: true, amount: true } },
+          bids: { select: { id: true, providerId: true, status: true, amount: true } },
         },
       }),
       this.prisma.order.count({ where }),
@@ -85,15 +85,15 @@ export class OrdersService {
       where: { id },
       include: {
         client: true,
-        carrier: true,
-        bids: { include: { carrier: { select: { id: true, nameAr: true, nameEn: true, logo: true, city: true, region: true, contactPhone: true } } }, orderBy: { amount: 'asc' } },
+        provider: true,
+        bids: { include: { provider: { select: { id: true, nameAr: true, nameEn: true, logo: true, city: true, region: true, contactPhone: true } } }, orderBy: { amount: 'asc' } },
         trackingEvents: { orderBy: { createdAt: 'desc' } },
         payment: true,
         invoice: true,
-        orderDrivers: {
+        orderEmployees: {
           orderBy: { assignedAt: 'desc' },
           include: {
-            driver: {
+            employee: {
               include: {
                 user: { select: { firstName: true, lastName: true, phone: true } },
               },
@@ -118,12 +118,12 @@ export class OrdersService {
         clientId: actor.companyId,
         // v0.6.0 workflow fields — defaults preserve old behavior.
         mode: dto.mode ?? 'OPEN',
-        targetCarrierId: dto.mode === 'DIRECT' ? dto.targetCarrierId : null,
+        targetProviderId: dto.mode === 'DIRECT' ? dto.targetProviderId : null,
         // Pre-seed agreed price for DIRECT orders with upfront price.
         ...(dto.mode === 'DIRECT' && dto.agreedPriceUpfront ? {
           agreedPrice:      dto.agreedPriceUpfront,
           commissionAmount: +(dto.agreedPriceUpfront * 0.08).toFixed(2),
-          carrierAmount:    +(dto.agreedPriceUpfront * 0.92).toFixed(2),
+          providerAmount:   +(dto.agreedPriceUpfront * 0.92).toFixed(2),
         } : {}),
         tripType: dto.tripType ?? (dto.originCity === dto.destinationCity ? 'SAME_CITY' : 'INTER_CITY'),
         pickupWindow: dto.pickupWindow ?? 'ALL_DAY',
@@ -142,7 +142,7 @@ export class OrdersService {
         destinationAddress: dto.destinationAddress,
         destinationLat: dto.destinationLat,
         destinationLng: dto.destinationLng,
-        requiredTruckType: dto.requiredTruckType,
+        requiredServiceType: dto.requiredServiceType,
         requiresRefrigeration: dto.requiresRefrigeration ?? false,
         requiresInsurance: dto.requiresInsurance ?? false,
         specialInstructions: dto.specialInstructions,
@@ -183,10 +183,10 @@ export class OrdersService {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'الطلب منشور بالفعل' });
     }
     // DIRECT + pre-agreed price: skip negotiation, assign immediately.
-    if (order.mode === 'DIRECT' && order.agreedPrice && order.targetCarrierId) {
+    if (order.mode === 'DIRECT' && order.agreedPrice && order.targetProviderId) {
       return this.prisma.order.update({
         where: { id },
-        data: { status: 'ASSIGNED', carrierId: order.targetCarrierId },
+        data: { status: 'ASSIGNED', providerId: order.targetProviderId },
       });
     }
     return this.prisma.order.update({
@@ -208,10 +208,10 @@ export class OrdersService {
     return this.prisma.order.update({
       where: { id },
       data: {
-        carrierId: dto.carrierId,
+        providerId: dto.providerId,
         agreedPrice: dto.agreedPrice,
         commissionAmount: commission,
-        carrierAmount: dto.agreedPrice - commission,
+        providerAmount: dto.agreedPrice - commission,
         status: 'ASSIGNED',
       },
     });
@@ -219,7 +219,7 @@ export class OrdersService {
 
   async confirm(id: string, actor: AuthUser) {
     const order = await this.requireOrder(id);
-    if (order.carrierId !== actor.companyId && !this.isAdmin(actor)) {
+    if (order.providerId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
     if (order.status !== 'ASSIGNED') {
@@ -249,7 +249,7 @@ export class OrdersService {
    */
   async deliver(id: string, actor: AuthUser) {
     const order = await this.requireOrder(id);
-    if (order.carrierId !== actor.companyId && !this.isAdmin(actor)) {
+    if (order.providerId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
     if (!['CONFIRMED', 'IN_TRANSIT'].includes(order.status)) {
@@ -286,41 +286,41 @@ export class OrdersService {
         data: { status: 'RELEASED', releasedAt: new Date() },
       });
       // Set assigned employees back to AVAILABLE once order completes.
-      const assigned = await tx.orderDriver.findMany({ where: { orderId: id }, select: { driverId: true } });
+      const assigned = await tx.orderEmployee.findMany({ where: { orderId: id }, select: { employeeId: true } });
       if (assigned.length > 0) {
-        await tx.driverProfile.updateMany({
-          where: { id: { in: assigned.map((d) => d.driverId) } },
-          data: { status: 'AVAILABLE' as DriverStatus },
+        await tx.employeeProfile.updateMany({
+          where: { id: { in: assigned.map((d) => d.employeeId) } },
+          data: { status: 'AVAILABLE' as EmployeeStatus },
         });
       }
       return updatedOrder;
     });
   }
 
-  async assignDriver(orderId: string, dto: AssignDriverDto, actor: AuthUser) {
+  async assignDriver(orderId: string, dto: AssignEmployeeDto, actor: AuthUser) {
     const order = await this.requireOrder(orderId);
-    if (order.carrierId !== actor.companyId && !this.isAdmin(actor)) {
+    if (order.providerId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
     if (!['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'].includes(order.status)) {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'لا يمكن إسناد سائق في هذه المرحلة' });
     }
-    const driver = await this.prisma.driverProfile.findUnique({ where: { id: dto.driverId } });
+    const driver = await this.prisma.employeeProfile.findUnique({ where: { id: dto.employeeId } });
     if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'الموظف غير موجود' });
     if (driver.companyId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'الموظف لا ينتمي لشركتك' });
     }
     return this.prisma.$transaction(async (tx) => {
-      await tx.orderDriver.upsert({
-        where: { orderId_driverId: { orderId, driverId: dto.driverId } },
-        create: { orderId, driverId: dto.driverId },
+      await tx.orderEmployee.upsert({
+        where: { orderId_employeeId: { orderId, employeeId: dto.employeeId } },
+        create: { orderId, employeeId: dto.employeeId },
         update: { assignedAt: new Date() },
       });
-      await tx.driverProfile.update({
-        where: { id: dto.driverId },
-        data: { status: 'ON_TRIP' as DriverStatus },
+      await tx.employeeProfile.update({
+        where: { id: dto.employeeId },
+        data: { status: 'ON_ASSIGNMENT' as EmployeeStatus },
       });
-      return { ok: true, driverId: dto.driverId };
+      return { ok: true, driverId: dto.employeeId };
     });
   }
 
@@ -341,7 +341,7 @@ export class OrdersService {
     if (order.mode !== 'DIRECT') {
       throw new BadRequestException({ code: 'NOT_DIRECT', message: 'هذا الإجراء خاص بالطلبات المباشرة' });
     }
-    if (order.targetCarrierId !== actor.companyId) {
+    if (order.targetProviderId !== actor.companyId) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لست مزود الخدمة المستهدف' });
     }
     if (!['PUBLISHED', 'BIDDING'].includes(order.status)) {
@@ -350,7 +350,7 @@ export class OrdersService {
     // Move order back to PUBLISHED so client can reassign or open to marketplace.
     return this.prisma.order.update({
       where: { id },
-      data: { status: 'PUBLISHED', targetCarrierId: null },
+      data: { status: 'PUBLISHED', targetProviderId: null },
     });
   }
 
@@ -364,8 +364,8 @@ export class OrdersService {
   async addTrackingEvent(id: string, dto: CreateTrackingEventDto, actor: AuthUser) {
     const order = await this.requireOrder(id);
     const allowed =
-      order.carrierId === actor.companyId ||
-      actor.role === 'DRIVER' ||
+      order.providerId === actor.companyId ||
+      actor.role === 'EMPLOYEE' ||
       this.isAdmin(actor);
     if (!allowed) throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
 
@@ -393,12 +393,12 @@ export class OrdersService {
     return order;
   }
 
-  private assertViewAccess(order: { clientId: string; carrierId: string | null; status: string }, actor: AuthUser) {
+  private assertViewAccess(order: { clientId: string; providerId: string | null; status: string }, actor: AuthUser) {
     if (this.isAdmin(actor)) return;
     if (order.clientId === actor.companyId) return;
-    if (order.carrierId === actor.companyId) return;
+    if (order.providerId === actor.companyId) return;
     if (
-      (actor.role === 'CARRIER_ADMIN' || actor.role === 'CARRIER_USER') &&
+      (actor.role === 'PROVIDER_ADMIN' || actor.role === 'PROVIDER_USER') &&
       ['PUBLISHED', 'BIDDING'].includes(order.status)
     ) {
       return;

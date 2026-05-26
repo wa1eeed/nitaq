@@ -12,7 +12,7 @@ export class PaymentsService {
     const { page = 1, limit = 20, sort = 'createdAt', order = 'desc' } = query;
     const where: Prisma.PaymentWhereInput = this.isAdmin(actor)
       ? {}
-      : { order: { OR: [{ clientId: actor.companyId ?? '' }, { carrierId: actor.companyId ?? '' }] } };
+      : { order: { OR: [{ clientId: actor.companyId ?? '' }, { providerId: actor.companyId ?? '' }] } };
     const [items, total] = await Promise.all([
       this.prisma.payment.findMany({
         where, skip: (page - 1) * limit, take: limit,
@@ -24,9 +24,9 @@ export class PaymentsService {
             select: {
               orderNumber: true,
               clientId: true,
-              carrierId: true,
+              providerId: true,
               client: { select: { id: true, nameAr: true, logo: true } },
-              carrier: { select: { id: true, nameAr: true, logo: true } },
+              provider: { select: { id: true, nameAr: true, logo: true } },
             },
           },
         },
@@ -39,7 +39,7 @@ export class PaymentsService {
   async findById(id: string, actor: AuthUser) {
     const p = await this.prisma.payment.findUnique({ where: { id }, include: { order: true } });
     if (!p) throw new NotFoundException({ code: 'PAYMENT_NOT_FOUND', message: 'الدفعة غير موجودة' });
-    if (!this.isAdmin(actor) && p.order.clientId !== actor.companyId && p.order.carrierId !== actor.companyId) {
+    if (!this.isAdmin(actor) && p.order.clientId !== actor.companyId && p.order.providerId !== actor.companyId) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
     return p;
@@ -56,7 +56,7 @@ export class PaymentsService {
         orderId,
         totalAmount: order.agreedPrice,
         commissionAmount: order.commissionAmount ?? 0,
-        carrierAmount: order.carrierAmount ?? 0,
+        providerAmount: order.providerAmount ?? 0,
         status: 'PENDING',
       },
     });
@@ -77,17 +77,17 @@ export class PaymentsService {
         where: { id },
         data: { status: 'RELEASED', releasedAt: new Date() },
       });
-      if (payment.order.carrierId) {
+      if (payment.order.providerId) {
         // Credit the provider wallet
         const carrier = await tx.company.update({
-          where: { id: payment.order.carrierId },
-          data: { walletBalance: { increment: payment.carrierAmount } },
+          where: { id: payment.order.providerId },
+          data: { walletBalance: { increment: payment.providerAmount } },
         });
         await tx.transaction.create({
           data: {
-            companyId: payment.order.carrierId,
+            companyId: payment.order.providerId,
             type: 'credit',
-            amount: payment.carrierAmount,
+            amount: payment.providerAmount,
             balance: carrier.walletBalance,
             reference: payment.transactionRef ?? payment.id,
             description: `دفع طلب ${payment.order.orderNumber}`,

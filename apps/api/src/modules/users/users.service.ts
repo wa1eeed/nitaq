@@ -41,7 +41,7 @@ export class UsersService {
       where: { id: userId },
       include: {
         company: { include: { kycDocuments: true } },
-        driverProfile: true,
+        employeeProfile: true,
         notifications: true,
         auditLogs: { take: 200, orderBy: { createdAt: 'desc' } },
       },

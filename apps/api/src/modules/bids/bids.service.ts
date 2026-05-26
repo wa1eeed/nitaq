@@ -10,7 +10,7 @@ export class BidsService {
   async list(orderId: string) {
     return this.prisma.bid.findMany({
       where: { orderId },
-      include: { carrier: { select: { id: true, nameAr: true, logo: true, status: true } } },
+      include: { provider: { select: { id: true, nameAr: true, logo: true, status: true } } },
       orderBy: { amount: 'asc' },
     });
   }
@@ -30,17 +30,17 @@ export class BidsService {
     // REJECTED/WITHDRAWN/EXPIRED → allow re-bid: upsert flips status back to PENDING.
     // ACCEPTED → terminal lock; further edits are not allowed.
     const existing = await this.prisma.bid.findUnique({
-      where: { orderId_carrierId: { orderId, carrierId: actor.companyId } },
+      where: { orderId_providerId: { orderId, providerId: actor.companyId } },
     });
     if (existing && existing.status === 'ACCEPTED') {
       throw new BadRequestException({ code: 'BID_LOCKED', message: 'العرض مقبول بالفعل' });
     }
 
     const bid = await this.prisma.bid.upsert({
-      where: { orderId_carrierId: { orderId, carrierId: actor.companyId } },
+      where: { orderId_providerId: { orderId, providerId: actor.companyId } },
       create: {
         orderId,
-        carrierId: actor.companyId,
+        providerId: actor.companyId,
         amount: dto.amount,
         estimatedDays: dto.estimatedDays ?? 0,
         estimatedHours: dto.estimatedHours,
@@ -67,7 +67,7 @@ export class BidsService {
 
   async update(orderId: string, id: string, dto: UpdateBidDto, actor: AuthUser) {
     const bid = await this.requireBid(id);
-    if (bid.carrierId !== actor.companyId) {
+    if (bid.providerId !== actor.companyId) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'هذا ليس عرضك' });
     }
     if (bid.status !== 'PENDING') {
@@ -95,14 +95,14 @@ export class BidsService {
       // assign the order to the winning provider
       const commissionRate = 0.08;
       const commission = +(bid.amount * commissionRate).toFixed(2);
-      const carrierAmount = +(bid.amount - commission).toFixed(2);
+      const providerAmount = +(bid.amount - commission).toFixed(2);
       await tx.order.update({
         where: { id: orderId },
         data: {
-          carrierId: bid.carrierId,
+          providerId: bid.providerId,
           agreedPrice: bid.amount,
           commissionAmount: commission,
-          carrierAmount,
+          providerAmount,
           status: 'ASSIGNED',
         },
       });
@@ -115,14 +115,14 @@ export class BidsService {
           orderId,
           totalAmount: bid.amount,
           commissionAmount: commission,
-          carrierAmount,
+          providerAmount,
           status: 'HELD',
           heldAt: new Date(),
         },
         update: {
           totalAmount: bid.amount,
           commissionAmount: commission,
-          carrierAmount,
+          providerAmount,
           status: 'HELD',
           heldAt: new Date(),
         },
@@ -142,7 +142,7 @@ export class BidsService {
 
   async withdraw(orderId: string, id: string, actor: AuthUser) {
     const bid = await this.requireBid(id);
-    if (bid.carrierId !== actor.companyId) {
+    if (bid.providerId !== actor.companyId) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'هذا ليس عرضك' });
     }
     if (bid.status !== 'PENDING') {

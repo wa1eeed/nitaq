@@ -28,13 +28,13 @@ export class AdminService {
       this.prisma.company.count({ where: { status: 'ACTIVE' } }),
       this.prisma.order.count({ where: { status: { in: ['PUBLISHED', 'BIDDING', 'ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'] } } }),
       this.prisma.dispute.count({ where: { status: { in: ['OPEN', 'UNDER_REVIEW'] } } }),
-      this.prisma.driverProfile.count({ where: { status: 'ON_TRIP' } }),
+      this.prisma.employeeProfile.count({ where: { status: 'ON_ASSIGNMENT' } }),
       this.prisma.order.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
         include: {
           client: { select: { nameAr: true } },
-          carrier: { select: { nameAr: true } },
+          provider: { select: { nameAr: true } },
         },
       }),
     ]);
@@ -66,7 +66,7 @@ export class AdminService {
         }
       : {};
     const [items, total] = await Promise.all([
-      this.prisma.driverProfile.findMany({
+      this.prisma.employeeProfile.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
@@ -74,7 +74,7 @@ export class AdminService {
         include: {
           user: { select: { firstName: true, lastName: true, phone: true, nationalId: true } },
           company: { select: { id: true, nameAr: true } },
-          orderDrivers: {
+          orderEmployees: {
             where: { order: { status: { in: ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'] } } },
             orderBy: { assignedAt: 'desc' },
             take: 1,
@@ -84,7 +84,7 @@ export class AdminService {
           },
         },
       }),
-      this.prisma.driverProfile.count({ where }),
+      this.prisma.employeeProfile.count({ where }),
     ]);
     return paginate(items, total, page, limit);
   }
@@ -92,7 +92,7 @@ export class AdminService {
   async listCompanies(query: PaginationDto, type?: string, status?: string) {
     const { page = 1, limit = 20, sort = 'createdAt', order = 'desc', search } = query;
     const where: Prisma.CompanyWhereInput = {
-      ...(type ? { type: type as 'CLIENT' | 'CARRIER' } : {}),
+      ...(type ? { type: type as 'CLIENT' | 'PROVIDER' } : {}),
       ...(status ? { status: status as CompanyStatus } : {}),
       ...(search ? {
         OR: [
@@ -134,7 +134,7 @@ export class AdminService {
         orderBy: { [sort]: order },
         include: {
           client: { select: { nameAr: true } },
-          carrier: { select: { nameAr: true } },
+          provider: { select: { nameAr: true } },
         },
       }),
       this.prisma.order.count({ where }),
@@ -148,7 +148,7 @@ export class AdminService {
     const [items, total] = await Promise.all([
       this.prisma.dispute.findMany({
         where, skip: (page - 1) * limit, take: limit, orderBy: { createdAt: 'desc' },
-        include: { order: { select: { orderNumber: true, clientId: true, carrierId: true } } },
+        include: { order: { select: { orderNumber: true, clientId: true, providerId: true } } },
       }),
       this.prisma.dispute.count({ where }),
     ]);
@@ -273,18 +273,18 @@ export class AdminService {
         this.prisma.order.count({ where: { status: 'CANCELLED', createdAt: { gte: from, lte: to } } }),
         this.prisma.order.findMany({
           where: { createdAt: { gte: from, lte: to } },
-          select: { id: true, status: true, clientId: true, originCity: true, destinationCity: true, agreedPrice: true, commissionAmount: true, carrierId: true },
+          select: { id: true, status: true, clientId: true, originCity: true, destinationCity: true, agreedPrice: true, commissionAmount: true, providerId: true },
         }),
-        this.prisma.company.count({ where: { type: 'CARRIER', status: 'ACTIVE' } }),
+        this.prisma.company.count({ where: { type: 'PROVIDER', status: 'ACTIVE' } }),
         this.prisma.company.count({
           where: {
-            type: 'CARRIER',
-            ordersAsCarrier: { some: { status: { in: ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'] } } },
+            type: 'PROVIDER',
+            ordersAsProvider: { some: { status: { in: ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'] } } },
           },
         }),
         this.prisma.bid.findMany({
           where: { createdAt: { gte: from, lte: to } },
-          select: { orderId: true, carrierId: true, createdAt: true, order: { select: { createdAt: true } } },
+          select: { orderId: true, providerId: true, createdAt: true, order: { select: { createdAt: true } } },
           orderBy: { createdAt: 'asc' },
         }),
       ]);
@@ -330,10 +330,10 @@ export class AdminService {
       const rv = routeMap.get(rKey) ?? { count: 0, gmv: 0 };
       rv.count++; rv.gmv += o.agreedPrice ?? 0;
       routeMap.set(rKey, rv);
-      if (o.carrierId && (o.status === 'COMPLETED' || o.status === 'DELIVERED')) {
-        const cv = carrierRevMap.get(o.carrierId) ?? { revenue: 0, count: 0 };
+      if (o.providerId && (o.status === 'COMPLETED' || o.status === 'DELIVERED')) {
+        const cv = carrierRevMap.get(o.providerId) ?? { revenue: 0, count: 0 };
         cv.revenue += o.agreedPrice ?? 0; cv.count++;
-        carrierRevMap.set(o.carrierId, cv);
+        carrierRevMap.set(o.providerId, cv);
       }
     }
     const totalClients = clientOrderCounts.size;
@@ -422,8 +422,8 @@ export class AdminService {
           where: { createdAt: { gte: from, lte: to } },
           select: { status: true },
         }),
-        this.prisma.driverProfile.count(),
-        this.prisma.driverProfile.count({ where: { status: 'AVAILABLE' } }),
+        this.prisma.employeeProfile.count(),
+        this.prisma.employeeProfile.count({ where: { status: 'AVAILABLE' } }),
       ]);
 
     const onTimeCount = completedOrders.filter(
@@ -462,8 +462,8 @@ export class AdminService {
       await Promise.all([
         this.prisma.company.count({ where: { type: 'CLIENT', createdAt: { gte: from, lte: to } } }),
         this.prisma.company.count({ where: { type: 'CLIENT', createdAt: { gte: prevFrom, lte: prevTo } } }),
-        this.prisma.company.count({ where: { type: 'CARRIER', createdAt: { gte: from, lte: to } } }),
-        this.prisma.company.count({ where: { type: 'CARRIER', createdAt: { gte: prevFrom, lte: prevTo } } }),
+        this.prisma.company.count({ where: { type: 'PROVIDER', createdAt: { gte: from, lte: to } } }),
+        this.prisma.company.count({ where: { type: 'PROVIDER', createdAt: { gte: prevFrom, lte: prevTo } } }),
         this.prisma.order.count({ where: { createdAt: { gte: from, lte: to } } }),
         this.prisma.order.count({ where: { createdAt: { gte: prevFrom, lte: prevTo } } }),
         this.prisma.order.aggregate({

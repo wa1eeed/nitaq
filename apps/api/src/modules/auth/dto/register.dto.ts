@@ -29,8 +29,8 @@ export class RegisterDto {
   @MinLength(2)
   lastName!: string;
 
-  @IsEnum(['CLIENT', 'CARRIER'] as const, { message: 'نوع الحساب غير صالح' })
-  companyType!: 'CLIENT' | 'CARRIER';
+  @IsEnum(['CLIENT', 'PROVIDER'] as const, { message: 'نوع الحساب غير صالح' })
+  companyType!: 'CLIENT' | 'PROVIDER';
 
   @IsString()
   @MinLength(2)

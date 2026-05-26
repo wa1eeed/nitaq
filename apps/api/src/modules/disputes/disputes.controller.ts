@@ -22,7 +22,7 @@ class CreateDisputeDto {
 @ApiTags('disputes')
 @ApiBearerAuth()
 @UseGuards(RolesGuard)
-@Roles('CLIENT_ADMIN', 'CLIENT_USER', 'CARRIER_ADMIN', 'CARRIER_USER', 'ADMIN', 'SUPER_ADMIN')
+@Roles('CLIENT_ADMIN', 'CLIENT_USER', 'PROVIDER_ADMIN', 'PROVIDER_USER', 'ADMIN', 'SUPER_ADMIN')
 @Controller('disputes')
 export class DisputesController {
   constructor(private disputes: DisputesService) {}

@@ -82,7 +82,7 @@ export class TeamMembersService {
     // Map CompanyRole → UserRole on the platform side
     const userRole = company.type === 'CLIENT'
       ? (dto.role === 'ADMIN' ? 'CLIENT_ADMIN' : 'CLIENT_USER')
-      : (dto.role === 'ADMIN' ? 'CARRIER_ADMIN' : 'CARRIER_USER');
+      : (dto.role === 'ADMIN' ? 'PROVIDER_ADMIN' : 'PROVIDER_USER');
 
     const [firstName, ...rest] = dto.fullName.trim().split(/\s+/);
     const lastName = rest.join(' ') || '—';

@@ -3,15 +3,21 @@ export const UserRole = {
   ADMIN: 'ADMIN',
   CLIENT_ADMIN: 'CLIENT_ADMIN',
   CLIENT_USER: 'CLIENT_USER',
-  CARRIER_ADMIN: 'CARRIER_ADMIN',
-  CARRIER_USER: 'CARRIER_USER',
-  DRIVER: 'DRIVER',
+  PROVIDER_ADMIN: 'PROVIDER_ADMIN',
+  PROVIDER_USER: 'PROVIDER_USER',
+  EMPLOYEE: 'EMPLOYEE',
+  // @deprecated — kept for runtime back-compat during migration
+  CARRIER_ADMIN: 'PROVIDER_ADMIN',
+  CARRIER_USER: 'PROVIDER_USER',
+  DRIVER: 'EMPLOYEE',
 } as const;
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export const CompanyType = {
   CLIENT: 'CLIENT',
-  CARRIER: 'CARRIER',
+  PROVIDER: 'PROVIDER',
+  // @deprecated — kept for runtime back-compat during migration
+  CARRIER: 'PROVIDER',
 } as const;
 export type CompanyType = (typeof CompanyType)[keyof typeof CompanyType];
 

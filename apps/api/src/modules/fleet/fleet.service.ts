@@ -16,21 +16,21 @@ export class FleetService {
       ...(search ? { plateNumber: { contains: search, mode: 'insensitive' as const } } : {}),
     };
     const [items, total] = await Promise.all([
-      this.prisma.truck.findMany({ where, skip: (page - 1) * limit, take: limit, orderBy: { [sort]: order } }),
-      this.prisma.truck.count({ where }),
+      this.prisma.service.findMany({ where, skip: (page - 1) * limit, take: limit, orderBy: { [sort]: order } }),
+      this.prisma.service.count({ where }),
     ]);
     return paginate(items, total, page, limit);
   }
 
   async createTruck(dto: CreateTruckDto, actor: AuthUser) {
     if (!actor.companyId) throw new BadRequestException({ code: 'NO_COMPANY', message: 'لا توجد شركة' });
-    return this.prisma.truck.create({
+    return this.prisma.service.create({
       data: { ...dto, companyId: actor.companyId, photos: dto.photos ?? [], documents: dto.documents ?? [] },
     });
   }
 
   async getTruck(id: string, actor: AuthUser) {
-    const truck = await this.prisma.truck.findUnique({ where: { id }, include: { currentDriver: true } });
+    const truck = await this.prisma.service.findUnique({ where: { id }, include: { currentEmployee: true } });
     if (!truck) throw new NotFoundException({ code: 'TRUCK_NOT_FOUND', message: 'الخدمة غير موجودة' });
     if (truck.companyId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
@@ -40,7 +40,7 @@ export class FleetService {
 
   async updateTruck(id: string, dto: UpdateTruckDto, actor: AuthUser) {
     await this.getTruck(id, actor);
-    return this.prisma.truck.update({
+    return this.prisma.service.update({
       where: { id },
       data: { ...dto, photos: dto.photos ?? undefined, documents: dto.documents ?? undefined },
     });
@@ -51,19 +51,19 @@ export class FleetService {
     const { page = 1, limit = 20, sort = 'createdAt', order = 'desc' } = query;
     const where = { companyId: actor.companyId };
     const [items, total] = await Promise.all([
-      this.prisma.driverProfile.findMany({
+      this.prisma.employeeProfile.findMany({
         where, skip: (page - 1) * limit, take: limit,
         orderBy: { [sort]: order },
         include: { user: { select: { firstName: true, lastName: true, phone: true, avatar: true } } },
       }),
-      this.prisma.driverProfile.count({ where }),
+      this.prisma.employeeProfile.count({ where }),
     ]);
     return paginate(items, total, page, limit);
   }
 
   async createDriver(dto: CreateDriverDto, actor: AuthUser) {
     if (!actor.companyId) throw new BadRequestException({ code: 'NO_COMPANY', message: 'لا توجد شركة' });
-    return this.prisma.driverProfile.create({
+    return this.prisma.employeeProfile.create({
       data: {
         userId: dto.userId,
         companyId: actor.companyId,
@@ -89,13 +89,13 @@ export class FleetService {
           phone: dto.phone,
           firstName: firstName ?? dto.fullName,
           lastName: rest.join(' ') || '',
-          role: 'DRIVER',
+          role: 'EMPLOYEE',
           companyId: actor.companyId!,
           nationalId: dto.nationalId,
           preferredLanguage: 'ar',
         },
       });
-      return tx.driverProfile.create({
+      return tx.employeeProfile.create({
         data: {
           userId: user.id,
           companyId: actor.companyId!,
@@ -113,12 +113,12 @@ export class FleetService {
   async getAvailableDrivers(actor: AuthUser) {
     if (!actor.companyId) throw new BadRequestException({ code: 'NO_COMPANY', message: 'لا توجد شركة' });
     // Employees currently assigned to an active order.
-    const busy = await this.prisma.orderDriver.findMany({
+    const busy = await this.prisma.orderEmployee.findMany({
       where: { order: { status: { in: ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'] } } },
-      select: { driverId: true },
+      select: { employeeId: true },
     });
-    const busyIds = busy.map((d) => d.driverId);
-    return this.prisma.driverProfile.findMany({
+    const busyIds = busy.map((d) => d.employeeId);
+    return this.prisma.employeeProfile.findMany({
       where: {
         companyId: actor.companyId,
         status: 'AVAILABLE',
@@ -131,7 +131,7 @@ export class FleetService {
   }
 
   async getDriver(id: string, actor: AuthUser) {
-    const driver = await this.prisma.driverProfile.findUnique({
+    const driver = await this.prisma.employeeProfile.findUnique({
       where: { id }, include: { user: true },
     });
     if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'الموظف غير موجود' });
@@ -143,15 +143,15 @@ export class FleetService {
 
   async updateDriverLocation(id: string, dto: LocationDto, actor: AuthUser) {
     // The employee can update their own location; provider admin can too.
-    const driver = await this.prisma.driverProfile.findUnique({ where: { id } });
+    const driver = await this.prisma.employeeProfile.findUnique({ where: { id } });
     if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'الموظف غير موجود' });
     if (driver.userId !== actor.id && driver.companyId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
     await this.prisma.locationHistory.create({
-      data: { driverId: id, lat: dto.lat, lng: dto.lng, speed: dto.speed },
+      data: { employeeId: id, lat: dto.lat, lng: dto.lng, speed: dto.speed },
     });
-    return this.prisma.driverProfile.update({
+    return this.prisma.employeeProfile.update({
       where: { id },
       data: { currentLat: dto.lat, currentLng: dto.lng, lastLocationAt: new Date() },
     });

@@ -8,7 +8,7 @@ export class TrackingService {
   async driverHistory(driverId: string, from?: string, to?: string) {
     return this.prisma.locationHistory.findMany({
       where: {
-        driverId,
+        employeeId: driverId,
         ...(from || to ? {
           recordedAt: {
             ...(from ? { gte: new Date(from) } : {}),

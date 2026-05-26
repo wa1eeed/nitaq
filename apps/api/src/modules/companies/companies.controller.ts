@@ -18,7 +18,7 @@ function reqMeta(req: any) {
 }
 
 class CompaniesQueryDto extends PaginationDto {
-  @IsOptional() @IsIn(['CLIENT', 'CARRIER']) type?: 'CLIENT' | 'CARRIER';
+  @IsOptional() @IsIn(['CLIENT', 'PROVIDER']) type?: 'CLIENT' | 'PROVIDER';
   @IsOptional() @IsString() status?: string;
 }
 

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// Naqla Logistics — Prisma Schema
+// Nitaq Services Platform — Prisma Schema
 // ─────────────────────────────────────────────────────────────
 
 generator client {
@@ -20,24 +20,24 @@ enum UserRole {
   ADMIN
   CLIENT_ADMIN
   CLIENT_USER
-  CARRIER_ADMIN
-  CARRIER_USER
-  DRIVER
+  PROVIDER_ADMIN
+  PROVIDER_USER
+  EMPLOYEE
 }
 
 enum CompanyType {
   CLIENT
-  CARRIER
+  PROVIDER
 }
 
 /// Per-company role of a user inside their company account. Controls which
 /// company features they can access. Different from UserRole (which is the
-/// platform-wide kind: admin / client_admin / carrier_admin / driver).
+/// platform-wide kind: admin / client_admin / provider_admin / employee).
 enum CompanyRole {
   OWNER     // single per company; created at signup
   ADMIN     // full access except cannot remove the owner
   STAFF     // (client side) operations: create/track orders
-  DISPATCH  // (carrier side) accept orders, manage fleet
+  DISPATCH  // (provider side) accept orders, manage fleet
   FINANCE   // read-only on invoices/payments + export
 }
 
@@ -68,11 +68,11 @@ enum OrderStatus {
   DISPUTED
 }
 
-enum TruckType {
-  // The carrier add-truck UI uses the catalog in
-  // packages/shared-utils/src/mock-data.ts → DEFAULT_TRUCK_TYPES.
+enum ServiceType {
+  // The provider add-service UI uses the catalog in
+  // packages/shared-utils/src/mock-data.ts → DEFAULT_SERVICE_TYPES.
   // Keep this enum a superset of those IDs so the form can submit any value
-  // the carrier selects without a manual mapping.
+  // the provider selects without a manual mapping.
   SMALL_VAN
   SMALL_FLATBED
   MEDIUM_FLATBED
@@ -131,8 +131,8 @@ enum NotificationType {
   BID_REJECTED
   ORDER_ASSIGNED
   ORDER_CONFIRMED
-  SHIPMENT_STARTED
-  SHIPMENT_DELIVERED
+  SERVICE_STARTED
+  SERVICE_COMPLETED
   PAYMENT_RECEIVED
   PAYMENT_RELEASED
   KYC_APPROVED
@@ -164,9 +164,9 @@ enum SupportTicketCategory {
   GENERAL
 }
 
-enum DriverStatus {
+enum EmployeeStatus {
   AVAILABLE
-  ON_TRIP
+  ON_ASSIGNMENT
   OFF_DUTY
 }
 
@@ -188,20 +188,20 @@ model User {
   preferredLanguage String  @default("ar")
   nationalId        String?
   /// Per-company role inside the user's company account.
-  /// Only meaningful for users that belong to a company (CLIENT/CARRIER).
+  /// Only meaningful for users that belong to a company (CLIENT/PROVIDER).
   companyRole       CompanyRole @default(STAFF)
   lastLoginAt     DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  company       Company? @relation(fields: [companyId], references: [id])
-  companyId     String?
+  company         Company? @relation(fields: [companyId], references: [id])
+  companyId       String?
 
-  driverProfile DriverProfile?
-  notifications Notification[]
-  auditLogs     AuditLog[]
-  refreshTokens RefreshToken[]
-  apiKeys       ApiKey[]
+  employeeProfile EmployeeProfile?
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  refreshTokens   RefreshToken[]
+  apiKeys         ApiKey[]
 
   @@index([companyId])
   @@index([role])
@@ -240,13 +240,13 @@ model Company {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
-  users           User[]
-  trucks          Truck[]
-  drivers         DriverProfile[]
+  users            User[]
+  services         Service[]
+  employees        EmployeeProfile[]
 
-  ordersAsClient        Order[] @relation("ClientOrders")
-  ordersAsCarrier       Order[] @relation("CarrierOrders")
-  ordersDirectlyTargeted Order[] @relation("TargetCarrierOrders")
+  ordersAsClient         Order[] @relation("ClientOrders")
+  ordersAsProvider       Order[] @relation("ProviderOrders")
+  ordersDirectlyTargeted Order[] @relation("TargetProviderOrders")
 
   bids             Bid[]
   invoicesIssued   Invoice[]     @relation("IssuerInvoices")
@@ -278,69 +278,69 @@ model KYCDocument {
   updatedAt  DateTime  @updatedAt
 }
 
-model Truck {
-  id               String    @id @default(cuid())
-  companyId        String
-  company          Company   @relation(fields: [companyId], references: [id])
+model Service {
+  id                 String      @id @default(cuid())
+  companyId          String
+  company            Company     @relation(fields: [companyId], references: [id])
 
-  plateNumber      String    @unique
-  type             TruckType
-  capacity         Float
-  length           Float?
-  width            Float?
-  height           Float?
+  plateNumber        String      @unique
+  type               ServiceType
+  capacity           Float
+  length             Float?
+  width              Float?
+  height             Float?
 
-  make             String?
-  model            String?
-  year             Int?
+  make               String?
+  model              String?
+  year               Int?
 
-  hasRefrigeration Boolean   @default(false)
-  hasGPS           Boolean   @default(false)
-  isActive         Boolean   @default(true)
+  hasRefrigeration   Boolean     @default(false)
+  hasGPS             Boolean     @default(false)
+  isActive           Boolean     @default(true)
 
-  photos           String[]
-  documents        String[]
+  photos             String[]
+  documents          String[]
 
-  currentDriverId  String?
-  currentDriver    DriverProfile? @relation(fields: [currentDriverId], references: [id])
+  currentEmployeeId  String?
+  currentEmployee    EmployeeProfile? @relation(fields: [currentEmployeeId], references: [id])
 
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
 
-  orderTrucks      OrderTruck[]
+  orderServices      OrderService[]
 
   @@index([companyId])
   @@index([type])
 }
 
-model DriverProfile {
-  id              String       @id @default(cuid())
-  userId          String       @unique
-  user            User         @relation(fields: [userId], references: [id])
+model EmployeeProfile {
+  id              String         @id @default(cuid())
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id])
   companyId       String
-  company         Company      @relation(fields: [companyId], references: [id])
+  company         Company        @relation(fields: [companyId], references: [id])
 
-  licenseNumber   String       @unique
+  licenseNumber   String         @unique
   licenseExpiry   DateTime
   licenseType     String
 
-  status          DriverStatus @default(OFF_DUTY)
+  status          EmployeeStatus @default(OFF_DUTY)
   currentLat      Float?
   currentLng      Float?
   lastLocationAt  DateTime?
 
-  rating          Float        @default(0)
-  totalTrips      Int          @default(0)
+  rating          Float          @default(0)
+  totalAssignments Int           @default(0)
 
   photo           String?
-  isActive        Boolean      @default(true)
+  isActive        Boolean        @default(true)
 
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
-  assignedTrucks  Truck[]
-  orderDrivers    OrderDriver[]
-  locationHistory LocationHistory[]
+  assignedServices Service[]
+  orderEmployees   OrderEmployee[]
+  locationHistory  LocationHistory[]
 }
 
 model Order {
@@ -348,11 +348,11 @@ model Order {
   orderNumber           String      @unique @default(cuid())
   status                OrderStatus @default(DRAFT)
 
-  /// "OPEN" → all carriers can bid; "DIRECT" → only targetCarrier sees it.
+  /// "OPEN" → all providers can bid; "DIRECT" → only targetProvider sees it.
   /// String (not enum) so we can add modes without a migration; validated at the DTO.
   mode                  String      @default("OPEN")
-  targetCarrierId       String?
-  targetCarrier         Company?    @relation("TargetCarrierOrders", fields: [targetCarrierId], references: [id])
+  targetProviderId      String?
+  targetProvider        Company?    @relation("TargetProviderOrders", fields: [targetProviderId], references: [id])
 
   /// "SAME_CITY" | "INTER_CITY" — drives Wizard UI + distance/route assumptions.
   tripType              String      @default("INTER_CITY")
@@ -361,8 +361,8 @@ model Order {
 
   clientId              String
   client                Company     @relation("ClientOrders", fields: [clientId], references: [id])
-  carrierId             String?
-  carrier               Company?    @relation("CarrierOrders", fields: [carrierId], references: [id])
+  providerId            String?
+  provider              Company?    @relation("ProviderOrders", fields: [providerId], references: [id])
 
   cargoType             CargoType
   cargoDescription      String
@@ -382,7 +382,7 @@ model Order {
   destinationLat        Float?
   destinationLng        Float?
 
-  requiredTruckType     TruckType
+  requiredServiceType   ServiceType
   requiresRefrigeration Boolean     @default(false)
   requiresInsurance     Boolean     @default(false)
   specialInstructions   String?
@@ -394,7 +394,7 @@ model Order {
   clientBudget          Float?
   agreedPrice           Float?
   commissionAmount      Float?
-  carrierAmount         Float?
+  providerAmount        Float?
 
   actualPickupAt        DateTime?
   actualDeliveryAt      DateTime?
@@ -404,7 +404,7 @@ model Order {
   documents             String[]
 
   clientRating          Int?
-  carrierRating         Int?
+  providerRating        Int?
 
   notes                 String?
   cancelReason          String?
@@ -412,17 +412,17 @@ model Order {
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
 
-  bids           Bid[]
-  orderTrucks    OrderTruck[]
-  orderDrivers   OrderDriver[]
-  trackingEvents TrackingEvent[]
-  payment        Payment?
-  invoice        Invoice?
-  dispute        Dispute?
-  review         Review?
+  bids            Bid[]
+  orderServices   OrderService[]
+  orderEmployees  OrderEmployee[]
+  trackingEvents  TrackingEvent[]
+  payment         Payment?
+  invoice         Invoice?
+  dispute         Dispute?
+  review          Review?
 
   @@index([clientId, status])
-  @@index([carrierId, status])
+  @@index([providerId, status])
   @@index([status])
   @@index([pickupDate])
   @@index([originCity, destinationCity])
@@ -432,21 +432,21 @@ model Bid {
   id            String    @id @default(cuid())
   orderId       String
   order         Order     @relation(fields: [orderId], references: [id])
-  carrierId     String
-  carrier       Company   @relation(fields: [carrierId], references: [id])
+  providerId    String
+  provider      Company   @relation(fields: [providerId], references: [id])
 
   amount        Float
   status        BidStatus @default(PENDING)
 
   /// Legacy ETA fields — kept on the model for back-compat with any older
-  /// bids but no longer collected via the carrier form (v0.8.x replaced
+  /// bids but no longer collected via the provider form (v0.8.x replaced
   /// them with an explicit `proposedDeliveryDate` date picker).
   estimatedDays Int @default(0)
   estimatedHours Int?
-  /// If the carrier wants a different pickup date than what the client
+  /// If the provider wants a different pickup date than what the client
   /// requested, they set this. Empty = bid agrees with `order.pickupDate`.
   proposedPickupDate DateTime?
-  /// Carrier's concrete proposed delivery date. Replaces the older
+  /// Provider's concrete proposed delivery date. Replaces the older
   /// days/hours duration fields. If null, falls back to `order.deliveryDate`
   /// when displaying "expected delivery" on the order detail page.
   proposedDeliveryDate DateTime?
@@ -456,32 +456,32 @@ model Bid {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  @@unique([orderId, carrierId])
+  @@unique([orderId, providerId])
   @@index([orderId, status])
 }
 
-model OrderTruck {
+model OrderService {
   id        String   @id @default(cuid())
   orderId   String
   order     Order    @relation(fields: [orderId], references: [id])
-  truckId   String
-  truck     Truck    @relation(fields: [truckId], references: [id])
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id])
 
   createdAt DateTime @default(now())
 
-  @@unique([orderId, truckId])
+  @@unique([orderId, serviceId])
 }
 
-model OrderDriver {
-  id         String        @id @default(cuid())
+model OrderEmployee {
+  id         String          @id @default(cuid())
   orderId    String
-  order      Order         @relation(fields: [orderId], references: [id])
-  driverId   String
-  driver     DriverProfile @relation(fields: [driverId], references: [id])
+  order      Order           @relation(fields: [orderId], references: [id])
+  employeeId String
+  employee   EmployeeProfile @relation(fields: [employeeId], references: [id])
 
-  assignedAt DateTime      @default(now())
+  assignedAt DateTime        @default(now())
 
-  @@unique([orderId, driverId])
+  @@unique([orderId, employeeId])
 }
 
 model TrackingEvent {
@@ -507,17 +507,17 @@ model TrackingEvent {
 }
 
 model LocationHistory {
-  id         String        @id @default(cuid())
-  driverId   String
-  driver     DriverProfile @relation(fields: [driverId], references: [id])
+  id         String          @id @default(cuid())
+  employeeId String
+  employee   EmployeeProfile @relation(fields: [employeeId], references: [id])
 
   lat        Float
   lng        Float
   speed      Float?
 
-  recordedAt DateTime      @default(now())
+  recordedAt DateTime        @default(now())
 
-  @@index([driverId, recordedAt])
+  @@index([employeeId, recordedAt])
 }
 
 model Payment {
@@ -528,7 +528,7 @@ model Payment {
   status           PaymentStatus @default(PENDING)
   totalAmount      Float
   commissionAmount Float
-  carrierAmount    Float
+  providerAmount   Float
 
   paymentMethod    String?
   transactionRef   String?

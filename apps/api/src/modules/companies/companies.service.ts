@@ -8,7 +8,7 @@ import type { KYCStatus, Prisma } from '../../generated/prisma';
 export class CompaniesService {
   constructor(private prisma: PrismaService) {}
 
-  async list(query: PaginationDto, type?: 'CLIENT' | 'CARRIER', status?: string) {
+  async list(query: PaginationDto, type?: 'CLIENT' | 'PROVIDER', status?: string) {
     const { page = 1, limit = 20, sort = 'createdAt', order = 'desc', search } = query;
     const where: Prisma.CompanyWhereInput = {
       ...(type ? { type } : {}),
@@ -39,7 +39,7 @@ export class CompaniesService {
   async findById(id: string) {
     const company = await this.prisma.company.findUnique({
       where: { id },
-      include: { kycDocuments: true, _count: { select: { users: true, trucks: true } } },
+      include: { kycDocuments: true, _count: { select: { users: true, services: true } } },
     });
     if (!company) throw new NotFoundException({ code: 'COMPANY_NOT_FOUND', message: 'الشركة غير موجودة' });
     return company;
@@ -87,12 +87,12 @@ export class CompaniesService {
 
   async stats(id: string) {
     const [orders, completedRevenue, activeBids] = await Promise.all([
-      this.prisma.order.count({ where: { OR: [{ clientId: id }, { carrierId: id }] } }),
+      this.prisma.order.count({ where: { OR: [{ clientId: id }, { providerId: id }] } }),
       this.prisma.order.aggregate({
-        where: { status: 'COMPLETED', OR: [{ clientId: id }, { carrierId: id }] },
+        where: { status: 'COMPLETED', OR: [{ clientId: id }, { providerId: id }] },
         _sum: { agreedPrice: true },
       }),
-      this.prisma.bid.count({ where: { carrierId: id, status: 'PENDING' } }),
+      this.prisma.bid.count({ where: { providerId: id, status: 'PENDING' } }),
     ]);
     return {
       totalOrders: orders,

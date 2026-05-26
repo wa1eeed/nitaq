@@ -28,7 +28,7 @@ const ACCOUNTS = {
     password: 'Carrier@1234',
     firstName: 'سلطان',
     lastName: 'القحطاني',
-    role: 'CARRIER_ADMIN' as const,
+    role: 'PROVIDER_ADMIN' as const,
   },
 };
 
@@ -142,7 +142,7 @@ async function main() {
   const carrierCo = await prisma.company.upsert({
     where: { crNumber: '1010000002' },
     create: {
-      type: 'CARRIER',
+      type: 'PROVIDER',
       status: 'ACTIVE',
       kycStatus: 'APPROVED',
       nameAr: 'شركة المسار السريع للنقل',
@@ -185,7 +185,7 @@ async function main() {
   });
 
   // ─── Trucks ──────────────────────────────────────────────────
-  await prisma.truck.upsert({
+  await prisma.service.upsert({
     where: { plateNumber: 'ABC-1234' },
     create: {
       companyId: carrierCo.id,
@@ -199,7 +199,7 @@ async function main() {
     },
     update: {},
   });
-  await prisma.truck.upsert({
+  await prisma.service.upsert({
     where: { plateNumber: 'XYZ-5678' },
     create: {
       companyId: carrierCo.id,
@@ -232,7 +232,7 @@ async function main() {
         destinationCity: 'جدة',
         destinationRegion: 'مكة المكرمة',
         destinationAddress: 'ميناء جدة الإسلامي',
-        requiredTruckType: 'LARGE_FLATBED',
+        requiredServiceType: 'LARGE_FLATBED',
         pickupDate: new Date(Date.now() + 86400000 * 3),
         clientBudget: 9500,
       },
