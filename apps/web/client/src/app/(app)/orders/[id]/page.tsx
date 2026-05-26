@@ -749,7 +749,7 @@ function CancelOrderDialog({
               <div>
                 <p className="font-semibold">لا يمكن الإلغاء</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  الشحنة في الطريق. يمكنك فتح نزاع إذا كانت هناك مشكلة.
+                  الخدمة قيد التنفيذ. يمكنك فتح نزاع إذا كانت هناك مشكلة.
                 </p>
               </div>
             </div>
@@ -844,7 +844,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        {/* 3-step progress: استلام → في الطريق → تسليم */}
+        {/* 3-step progress: استلام → قيد التنفيذ → تسليم */}
         <div className="flex items-center gap-2">
           {[
             { s: 1 as const, label: 'الاستلام',  icon: MapPin },
