@@ -8,20 +8,52 @@
 
 ### 🔄 v0.9.16 — Platform Identity Transformation: Trucks → Services (2026-05-26)
 
-**سياق:** نِطاق مشروع مستقل منسوخ من nqlah. هذا الإصدار يبدأ التحويل الرسمي من منصة نقل بضائع إلى منصة خدمات B2B متعددة التخصصات.
+**سياق:** نِطاق مشروع مستقل منسوخ من nqlah. هذا الإصدار يُكمل التحويل الرسمي من منصة نقل بضائع إلى منصة خدمات B2B متعددة التخصصات عبر 9 مراحل.
 
 **المرحلة ١ — حذف تطبيق السائق:**
 - حذف `apps/driver` بالكامل (سيُعاد بناؤه لاحقاً كـ Employee App)
 - تغيير اللغة الافتراضية من `ar` إلى `en` في جميع البورتالات
-- إزالة مكوّنات اختيار اللغة من صفحات الإعدادات والتسجيل
 
 **المرحلة ٢ — تحديث ملفات التوثيق:**
-- `README.md`: تصحيح مسار مجلد carrier في الهيكل + docker build path
-- `GETTING_STARTED.md`: Carrier → Provider في النص، ناقل → مقدّم الخدمة
-- `PENDING_WORK.md`: تنظيف المصطلحات اللوجستية
-- `CLAUDE_CODE_INSTRUCTIONS.md`: Carrier Portal → Provider Portal، تتبع السائق → تتبع الموظف
-- `docs/ARCHITECTURE.md`: تحديث المخططات والأوصاف
-- `docs/API.md`: تحديث المصطلحات في الوثائق
+- `README.md`, `GETTING_STARTED.md`, `PENDING_WORK.md`, `CLAUDE_CODE_INSTRUCTIONS.md`
+- `docs/ARCHITECTURE.md`, `docs/API.md`: مصطلحات carrier/truck/driver → provider/service/employee
+
+**المرحلة ٣ — ملفات الترجمة (72 ملف):**
+- fleet.json, carrier.json, admin.json, landing.json, orders.json, auth.json, settings.json, client.json, notifications.json
+- جميع البورتالات الأربعة × لغتين (en/ar) — مصطلحات شاملة
+
+**المرحلة ٤ — الحزم المشتركة:**
+- `shared-types`: `TruckType` → `ServiceType`, `DriverStatus` → `EmployeeStatus`, `Truck` → `Service`, `Driver` → `Employee`
+- `shared-types/entities`: `carrierId` → `providerId`, `carrierAmount` → `providerAmount` في الواجهات
+- `shared-types/socket`: `DRIVER_LOCATION` → `EMPLOYEE_LOCATION`, payload fields updated
+- `shared-utils/labels`: `truckTypeLabels` → `serviceTypeLabels`, `cargoTypeLabels` → `serviceCategoryLabels`
+- `shared-utils/workflow-engine`: `CARRIER` actor → `PROVIDER`, `Audience` carrier → provider، قوالب الإشعارات
+- `shared-utils/api-adapters`: `normalizeTruck` → `normalizeService`، mapping ثنائي carrier↔provider
+
+**المرحلة ٥ — بورتال Carrier (carrier portal):**
+- `normalizeTruckList/normalizeTruck` → `normalizeServiceList/normalizeService`
+- `order.carrierAmount` → `order.providerAmount` في pages/reports/earnings
+- `breakdown.carrierAmount` → `breakdown.providerAmount` (escrow countdown)
+- `bid.carrierId ?? providerId` pattern لتوافق API
+
+**المرحلة ٦ — بورتال Admin:**
+- `CarrierInfoCard` removed, variables: `carrier` → `provider`, `trucks` → `services`
+- `ApiDriver` → `ApiEmployee`, `persistTruckTypes` → `persistServiceTypes`
+
+**المرحلة ٧ — بورتال Client:**
+- `CarrierInfoCard` → `ProviderInfoCard`, `ApiCarrier` → `ApiProvider`
+- `assignedTruck` → `assignedService`, `driver/driverInitials` → `employee/employeeInitials`
+- Bid display: `embeddedCarrier/fallbackCarrier` → `embeddedProvider/fallbackProvider`
+
+**المرحلة ٨ — Landing Page:**
+- Brand: نقلة لوجيستك → نِطاق، Truck icon → Briefcase
+- جميع النصوص: ناقلين → مقدّمي الخدمة، شحنات → طلبات
+- Provider card، Pricing، CTA، About page كلها مُحدَّثة
+
+**المرحلة ٩ — API:**
+- رسائل الخطأ بالعربية: الشاحنة/السائق/الناقل → الخدمة/الموظف/مزود الخدمة
+- تعليقات الكود في fleet/orders/bids/payments services
+- ملاحظة: Prisma schema (Truck، DriverProfile، carrierId، TruckType) تحتاج `prisma migrate dev` منفصل
 
 ---
 

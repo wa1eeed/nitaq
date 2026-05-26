@@ -1,6 +1,6 @@
 # Pending Work — حالة الربط الحالية (Nitaq Platform)
 
-> آخر تحديث: 2026-05-25 (بعد v0.9.15)
+> آخر تحديث: 2026-05-26 (بعد v0.9.16)
 >
 > الهدف من هذا الملف: نقطة استئناف واضحة. يلخّص ما تبقّى من الربط/الإصلاحات قبل
 > أن نعتبر النظام جاهزاً لـ release v1.0.
@@ -131,8 +131,27 @@
 - لا تكسر الـ stability constraints أعلاه.
 - في حال شك حول backend endpoint: `grep -E "@(Get|Post|Put|Delete|Patch)\(" apps/api/src/modules/*/`.
 
-### آخر ما أُنجز (v0.9.13 → v0.9.15):
+### آخر ما أُنجز (v0.9.13 → v0.9.16):
 
-- **v0.9.13**: Premium UI/UX — framer-motion على client/provider portals (dashboard hero، animated sidebar، EmptyState، PageTransition، split login)
-- **v0.9.14**: Executive KPI Dashboard — 6 analytics endpoints في admin + Bloomberg Terminal dark theme + PDF export (jspdf)
-- **v0.9.15**: Landing page إعادة كتابة كاملة (animated hero, stats counters, testimonials slider, mobile hamburger) + تغيير اسم تبويب التقارير إلى "الملخص الاستراتيجي"
+- **v0.9.13**: Premium UI/UX — framer-motion على client/provider portals
+- **v0.9.14**: Executive KPI Dashboard — 6 analytics endpoints في admin + Bloomberg Terminal + PDF export
+- **v0.9.15**: Landing page إعادة كتابة كاملة (animated hero, stats counters, testimonials slider)
+- **v0.9.16**: تحويل هوية المنصة من لوجستيات إلى خدمات — 9 مراحل كاملة:
+  - مراحل ١-٢: حذف driver app، تحديث التوثيق
+  - مرحلة ٣: 72 ملف ترجمة × 4 بورتالات × 2 لغات
+  - مرحلة ٤: shared-types + shared-utils (ServiceType، EmployeeStatus، normalizeService، serviceTypeLabels، workflow-engine PROVIDER actor)
+  - مراحل ٥-٨: carrier/admin/client/landing portals — provider terminology في الكود
+  - مرحلة ٩: API comments/error messages
+
+### 🔴 ما تبقّى من v0.9.16 (Prisma Migration):
+
+تحويل Prisma schema من logistics → services يحتاج خطوة منفصلة:
+```
+# تشغيل migration لإعادة تسمية:
+# Truck → Service model
+# DriverProfile → EmployeeProfile model
+# TruckType enum → ServiceType enum
+# carrierId → providerId في Order/Bid/Payment
+# carrierAmount → providerAmount في Order/Payment
+```
+لا تبدأ هذه المرحلة إلا بعد backup كامل للـ DB.
