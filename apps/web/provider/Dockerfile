@@ -10,7 +10,7 @@ COPY packages/shared-utils/package.json packages/shared-utils/
 COPY apps/api/package.json apps/api/
 COPY apps/web/admin/package.json apps/web/admin/
 COPY apps/web/client/package.json apps/web/client/
-COPY apps/web/carrier/package.json apps/web/carrier/
+COPY apps/web/provider/package.json apps/web/provider/
 COPY apps/web/landing/package.json apps/web/landing/
 
 RUN pnpm install --frozen-lockfile=false
@@ -24,11 +24,11 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/packages/shared-utils/node_modules ./packages/shared-utils/node_modules
 COPY --from=deps /repo/packages/shared-types/node_modules ./packages/shared-types/node_modules
-COPY --from=deps /repo/apps/web/carrier/node_modules ./apps/web/carrier/node_modules
+COPY --from=deps /repo/apps/web/provider/node_modules ./apps/web/provider/node_modules
 COPY . .
 
 RUN pnpm --filter @naqla/shared-utils run build
-RUN pnpm --filter @naqla/carrier run build
+RUN pnpm --filter @naqla/provider run build
 
 # ─── Stage 3: production runner ────────────────────────────────
 FROM node:20-alpine AS runner
@@ -42,12 +42,12 @@ ENV NODE_ENV=production
 ENV PORT=3003
 ENV HOSTNAME=0.0.0.0
 
-COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/carrier/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/carrier/.next/static      ./apps/web/carrier/.next/static
-COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/carrier/public             ./apps/web/carrier/public
+COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/provider/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/provider/.next/static      ./apps/web/provider/.next/static
+COPY --from=builder --chown=nextjs:nodejs /repo/apps/web/provider/public             ./apps/web/provider/public
 
 USER nextjs
-WORKDIR /app/apps/web/carrier
+WORKDIR /app/apps/web/provider
 EXPOSE 3003
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
