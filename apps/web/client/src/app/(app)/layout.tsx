@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppTopbar } from '@/components/app-topbar';
-import { DEV_BYPASS_TOKEN } from '@naqla/shared-utils';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,16 +12,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const token = localStorage.getItem('nitaq_client_token');
-    // A bare DEV_BYPASS_TOKEN is treated as "not logged in" here too — the API
-    // would reject every request anyway, so sending the user straight to
-    // /login is better than letting the dashboard load + crash on 401.
-    if (!token || token === DEV_BYPASS_TOKEN) {
-      // Clear stale state proactively so re-login uses a clean slate.
-      try {
-        localStorage.removeItem('nitaq_client_token');
-        localStorage.removeItem('nitaq_client_refresh');
-        localStorage.removeItem('nitaq-client-auth');
-      } catch { /* ignore */ }
+    if (!token) {
       router.replace('/login');
       setAuthed(false);
       return;

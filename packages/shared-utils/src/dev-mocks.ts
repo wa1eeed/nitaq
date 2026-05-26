@@ -487,7 +487,7 @@ export function getMockResponse(url: string): unknown | null {
 export const DEV_USERS = {
   admin: {
     id: 'dev-user-admin',
-    email: 'admin@naqla.sa',
+    email: 'admin@nitaq.sa',
     phone: '+966500000001',
     firstName: 'وليد',
     lastName: 'الحربي',
@@ -496,7 +496,7 @@ export const DEV_USERS = {
   },
   client: {
     id: 'dev-user-client',
-    email: 'client@naqla.sa',
+    email: 'client@nitaq.sa',
     phone: '+966500000002',
     firstName: 'أحمد',
     lastName: 'العتيبي',
@@ -505,11 +505,11 @@ export const DEV_USERS = {
   },
   carrier: {
     id: 'dev-user-carrier',
-    email: 'carrier@naqla.sa',
+    email: 'provider@nitaq.sa',
     phone: '+966500000003',
     firstName: 'سلطان',
     lastName: 'القحطاني',
-    role: 'CARRIER_ADMIN',
+    role: 'PROVIDER_ADMIN',
     companyId: 'co-carrier-1' as string | null,
   },
 } as const;

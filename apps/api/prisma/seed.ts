@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // Run: cd apps/api && pnpm db:seed
 const ACCOUNTS = {
   admin: {
-    email: 'admin@naqla.sa',
+    email: 'admin@nitaq.sa',
     phone: '+966500000001',
     password: 'Admin@1234',
     firstName: 'وليد',
@@ -15,7 +15,7 @@ const ACCOUNTS = {
     role: 'SUPER_ADMIN' as const,
   },
   client: {
-    email: 'client@naqla.sa',
+    email: 'client@nitaq.sa',
     phone: '+966500000002',
     password: 'Client@1234',
     firstName: 'أحمد',
@@ -23,9 +23,9 @@ const ACCOUNTS = {
     role: 'CLIENT_ADMIN' as const,
   },
   carrier: {
-    email: 'carrier@naqla.sa',
+    email: 'provider@nitaq.sa',
     phone: '+966500000003',
-    password: 'Carrier@1234',
+    password: 'Provider@1234',
     firstName: 'سلطان',
     lastName: 'القحطاني',
     role: 'PROVIDER_ADMIN' as const,
@@ -45,8 +45,8 @@ async function main() {
     { key: 'vat_rate', value: '0.15', category: 'finance' },
 
     // White-label / branding
-    { key: 'platform_name_ar', value: 'نقلة لوجيستك', category: 'branding' },
-    { key: 'platform_name_en', value: 'Naqla Logistics', category: 'branding' },
+    { key: 'platform_name_ar', value: 'نِطاق', category: 'branding' },
+    { key: 'platform_name_en', value: 'Nitaq', category: 'branding' },
     { key: 'platform_logo', value: '', category: 'branding' }, // URL to logo (PNG/SVG)
 
     // Localization defaults
@@ -242,9 +242,9 @@ async function main() {
   console.log('');
   console.log('✅ Seed complete. Demo accounts (email or phone both work):');
   console.log('');
-  console.log(`   👑 Admin   → ${ACCOUNTS.admin.email}   |  ${ACCOUNTS.admin.phone}  |  ${ACCOUNTS.admin.password}`);
-  console.log(`   🏢 Client  → ${ACCOUNTS.client.email}  |  ${ACCOUNTS.client.phone}  |  ${ACCOUNTS.client.password}`);
-  console.log(`   🚚 Carrier → ${ACCOUNTS.carrier.email} |  ${ACCOUNTS.carrier.phone}  |  ${ACCOUNTS.carrier.password}`);
+  console.log(`   👑 Admin    → ${ACCOUNTS.admin.email}    |  ${ACCOUNTS.admin.phone}  |  ${ACCOUNTS.admin.password}`);
+  console.log(`   🏢 Client   → ${ACCOUNTS.client.email}   |  ${ACCOUNTS.client.phone}  |  ${ACCOUNTS.client.password}`);
+  console.log(`   🤝 Provider → ${ACCOUNTS.carrier.email}  |  ${ACCOUNTS.carrier.phone}  |  ${ACCOUNTS.carrier.password}`);
   console.log('');
 }
 
