@@ -37,7 +37,7 @@ export default function CarrierOrdersPage() {
   const TABS = [
     { key: 'ALL',        label: 'الكل',        count: all.length },
     { key: 'ACTIVE',     label: 'نشطة',         count: all.filter((o) => ['CONFIRMED', 'IN_TRANSIT'].includes(o.status)).length },
-    { key: 'IN_TRANSIT', label: 'في الطريق',    count: all.filter((o) => o.status === 'IN_TRANSIT').length },
+    { key: 'IN_TRANSIT', label: 'قيد التنفيذ',   count: all.filter((o) => o.status === 'IN_TRANSIT').length },
     { key: 'DELIVERED',  label: 'تم التسليم',   count: all.filter((o) => o.status === 'DELIVERED').length },
     { key: 'COMPLETED',  label: 'مكتملة',       count: all.filter((o) => o.status === 'COMPLETED').length },
   ];

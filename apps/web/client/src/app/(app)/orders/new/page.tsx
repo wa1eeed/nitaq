@@ -3,8 +3,8 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
-  Check, ChevronLeft, ChevronRight, Clock, Eye, MapPin, Package, Radio,
-  Search, Send, ShieldCheck, Snowflake, Truck, UserSearch, Wallet,
+  Check, ChevronLeft, ChevronRight, Clock, Eye, Package, Radio,
+  Search, Send, ShieldCheck, Truck, UserSearch, Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,38 +19,18 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/page-header';
-import { Currency } from '@/components/currency';
 import { playSoundIfEnabled } from '@/lib/sound';
 import { DEFAULT_CITIES } from '@naqla/shared-utils';
-import { MapAddressPicker, type MapPoint } from '@/components/map-address-picker';
 import { api, fetcher } from '@/lib/api';
 
-/**
- * Pickup window — the client picks one of three time bands. The carrier then
- * confirms the exact pickup time within that window when they accept the bid.
- */
 export type PickupWindow = 'MORNING' | 'EVENING' | 'ALL_DAY';
 
-/**
- * Trip type — drives Step 2 layout:
- *   SAME_CITY  → one city dropdown + 2 maps (pickup + delivery within that city)
- *   INTER_CITY → two city dropdowns + optional 2 maps for precise points
- */
-export type TripType = 'SAME_CITY' | 'INTER_CITY';
-
 interface FormState {
-  tripType: TripType;
   cargoType: string;
   cargoDescription: string;
-  weightKg: number;
-  originCity: string;
   originAddress: string;
-  /** Precise pickup location set via the map. */
-  originPin: MapPoint | null;
+  originCity: string;
   destinationCity: string;
-  destinationAddress: string;
-  /** Precise delivery location set via the map. */
-  destinationPin: MapPoint | null;
   pickupDate: string;
   pickupWindow: PickupWindow;
   mode: 'OPEN' | 'DIRECT' | null;
@@ -59,38 +39,41 @@ interface FormState {
   agreedPriceUpfront: number | null;
   truckType: string;
   requiresInsurance: boolean;
-  requiresRefrigeration: boolean;
   specialInstructions: string;
 }
 
 const STEPS = [
-  { id: 1, label: 'الشحنة',           icon: Package },
-  { id: 2, label: 'المسار',           icon: MapPin },
+  { id: 1, label: 'الخدمة',           icon: Package },
+  { id: 2, label: 'التوقيت',          icon: Clock },
   { id: 3, label: 'طريقة الإرسال',   icon: Send },
   { id: 4, label: 'المتطلبات',        icon: Wallet },
   { id: 5, label: 'مراجعة',           icon: Eye },
 ];
 
-const CARGO_TYPES = [
-  { value: 'GENERAL',      label: 'بضاعة عامة' },
-  { value: 'FRAGILE',      label: 'بضاعة هشّة' },
-  { value: 'PERISHABLE',   label: 'منتجات قابلة للتلف' },
-  { value: 'HAZARDOUS',    label: 'مواد خطرة' },
-  { value: 'OVERSIZED',    label: 'حمولة استثنائية' },
-  { value: 'CONSTRUCTION', label: 'مواد بناء' },
-  { value: 'AUTOMOTIVE',   label: 'مركبات' },
-  { value: 'LIVESTOCK',    label: 'مواشي' },
+const SERVICE_CATEGORIES = [
+  { value: 'CONSULTING',         label: 'استشارات' },
+  { value: 'DESIGN',             label: 'تصميم' },
+  { value: 'INSTALLATION',       label: 'تركيب وتنصيب' },
+  { value: 'MAINTENANCE',        label: 'صيانة' },
+  { value: 'TECHNICAL_SUPPORT',  label: 'دعم تقني' },
+  { value: 'TRAINING',           label: 'تدريب' },
+  { value: 'IT_SERVICES',        label: 'خدمات تقنية' },
+  { value: 'LOGISTICS',          label: 'لوجستيات' },
+  { value: 'PROJECT_MANAGEMENT', label: 'إدارة مشاريع' },
+  { value: 'OTHER',              label: 'أخرى' },
 ];
 
-const TRUCK_TYPES = [
-  { value: 'SMALL_VAN',         label: 'فان صغير (< 3 طن)' },
-  { value: 'BOX_TRUCK',         label: 'صندوق مغلق (5-10 طن)' },
-  { value: 'MEDIUM_FLATBED',    label: 'مسطح متوسط (12-18 طن)' },
-  { value: 'LARGE_FLATBED',     label: 'مسطح كبير (20-30 طن)' },
-  { value: 'REFRIGERATED',      label: 'مبرّد' },
-  { value: 'TANKER',            label: 'صهريج' },
-  { value: 'LOWBED',            label: 'لوبد' },
-  { value: 'CONTAINER_TRAILER', label: 'حاوية' },
+const SERVICE_TYPES = [
+  { value: 'CONSULTING',         label: 'استشارات' },
+  { value: 'DESIGN',             label: 'تصميم' },
+  { value: 'INSTALLATION',       label: 'تركيب وتنصيب' },
+  { value: 'MAINTENANCE',        label: 'صيانة' },
+  { value: 'TECHNICAL_SUPPORT',  label: 'دعم تقني' },
+  { value: 'TRAINING',           label: 'تدريب' },
+  { value: 'IT_SERVICES',        label: 'خدمات تقنية' },
+  { value: 'LOGISTICS',          label: 'لوجستيات' },
+  { value: 'PROJECT_MANAGEMENT', label: 'إدارة مشاريع' },
+  { value: 'OTHER',              label: 'أخرى' },
 ];
 
 type CatalogCity = { id: string; nameAr: string; nameEn: string; region: string; lat: number; lng: number; active?: boolean };
@@ -106,25 +89,19 @@ export default function NewOrderWizard() {
   const [step, setStep] = useState(1);
   const [carrierSearch, setCarrierSearch] = useState('');
   const [form, setForm] = useState<FormState>({
-    tripType: 'INTER_CITY',
-    cargoType: 'GENERAL',
+    cargoType: 'CONSULTING',
     cargoDescription: '',
-    weightKg: 0,
-    originCity: 'الرياض',
     originAddress: '',
-    originPin: null,
-    destinationCity: 'جدة',
-    destinationAddress: '',
-    destinationPin: null,
+    originCity: 'الرياض',
+    destinationCity: 'الرياض',
     pickupDate: '',
     pickupWindow: 'ALL_DAY',
     mode: null,
     targetCarrierId: null,
     hasPreAgreedPrice: false,
     agreedPriceUpfront: null,
-    truckType: 'LARGE_FLATBED',
+    truckType: 'CONSULTING',
     requiresInsurance: false,
-    requiresRefrigeration: false,
     specialInstructions: '',
   });
 
@@ -138,18 +115,17 @@ export default function NewOrderWizard() {
     [carriersRaw, carrierSearch],
   );
 
-  // Resolve catalogs: DB data takes priority, fall back to static constants
   const activeCities: CatalogCity[] = catalog?.cities
     ? catalog.cities.filter((c) => c.active !== false)
     : DEFAULT_CITIES.filter((c) => c.active);
-  const truckTypesList: { value: string; label: string }[] = catalog?.truckTypes
+  const serviceTypesList: { value: string; label: string }[] = catalog?.truckTypes
     ? catalog.truckTypes.filter((t) => t.active !== false).map((t) => ({ value: t.id, label: t.nameAr }))
-    : TRUCK_TYPES;
+    : SERVICE_TYPES;
 
   const canNext = useMemo(() => {
     switch (step) {
-      case 1: return !!form.cargoType && form.cargoDescription.length > 3 && form.weightKg > 0;
-      case 2: return !!form.originCity && !!form.destinationCity && !!form.pickupDate;
+      case 1: return !!form.cargoType && form.cargoDescription.length > 3;
+      case 2: return !!form.pickupDate;
       case 3: return form.mode === 'OPEN' || (
         form.mode === 'DIRECT' && !!form.targetCarrierId &&
         (!form.hasPreAgreedPrice || (form.agreedPriceUpfront != null && form.agreedPriceUpfront > 0))
@@ -162,48 +138,28 @@ export default function NewOrderWizard() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  /**
-   * Maps the wizard form to the backend `CreateOrderDto` and POSTs it. The
-   * mock interceptor in `api.ts` will fall back to a stub response if the
-   * API is unreachable — so this still works in pure UI demo mode.
-   *
-   * After creation, we immediately publish so the order shows up in carrier
-   * opportunities. Failure of the publish is non-fatal — admin can publish
-   * manually.
-   */
   const submit = async () => {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const origin = activeCities.find((c) => c.nameAr === form.originCity);
-      const dest = activeCities.find((c) => c.nameAr === form.destinationCity);
-
       const body = {
         mode: form.mode ?? 'OPEN',
-        tripType: form.tripType,
-        pickupWindow: form.pickupWindow,
         cargoType: form.cargoType,
         cargoDescription: form.cargoDescription,
-        weight: form.weightKg,
+        weight: 0,
         originCity: form.originCity,
-        originRegion: origin?.region ?? form.originCity,
-        originAddress: form.originAddress || form.originPin?.address || form.originCity,
+        originRegion: form.originCity,
+        originAddress: form.originAddress || form.originCity,
         destinationCity: form.destinationCity,
-        destinationRegion: dest?.region ?? form.destinationCity,
-        destinationAddress: form.destinationAddress || form.destinationPin?.address || form.destinationCity,
+        destinationRegion: form.destinationCity,
+        destinationAddress: form.originAddress || form.destinationCity,
         requiredTruckType: form.truckType,
-        requiresRefrigeration: form.requiresRefrigeration,
+        requiresRefrigeration: false,
         requiresInsurance: form.requiresInsurance,
         pickupDate: form.pickupDate,
-        // Optional fields: use spread so the key is absent (not undefined) when unset.
-        // forbidNonWhitelisted on the backend rejects any key not decorated in the DTO,
-        // and some JSON serializers may include undefined keys — explicit spread avoids this.
-        ...(form.originPin?.lat   != null ? { originLat: form.originPin.lat }     : {}),
-        ...(form.originPin?.lng   != null ? { originLng: form.originPin.lng }     : {}),
-        ...(form.destinationPin?.lat != null ? { destinationLat: form.destinationPin.lat } : {}),
-        ...(form.destinationPin?.lng != null ? { destinationLng: form.destinationPin.lng } : {}),
+        pickupWindow: form.pickupWindow,
+        tripType: 'INTER_CITY',
         ...(form.specialInstructions ? { specialInstructions: form.specialInstructions } : {}),
-        // DIRECT-mode only fields — never present in OPEN requests
         ...(form.mode === 'DIRECT' && form.targetCarrierId
           ? { targetCarrierId: form.targetCarrierId }
           : {}),
@@ -217,9 +173,6 @@ export default function NewOrderWizard() {
       if (!orderId) {
         throw new Error('الـ API رجّع استجابة بدون orderId — تأكّد من حالة الـ Backend');
       }
-      // Publish — required for carriers to see the order. We surface publish
-      // failures (don't swallow) because a created-but-not-published order
-      // looks identical to "submission failed" from the user's view.
       try {
         await api.post(`/orders/${orderId}/publish`, {});
       } catch (publishErr: unknown) {
@@ -240,7 +193,7 @@ export default function NewOrderWizard() {
 
   return (
     <>
-      <PageHeader title="طلب نقل جديد" subtitle="املأ الخطوات التالية لنشر طلبك" />
+      <PageHeader title="طلب خدمة جديد" subtitle="املأ الخطوات التالية لنشر طلبك" />
 
       {/* Stepper */}
       <Card>
@@ -286,135 +239,52 @@ export default function NewOrderWizard() {
       <Card>
         <CardContent className="p-6">
           {step === 1 && (
-            <Step title="تفاصيل الشحنة" description="ما الذي تريد نقله؟">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>نوع البضاعة</Label>
-                  <Select value={form.cargoType} onValueChange={(v) => set('cargoType', v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {CARGO_TYPES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>الوزن (كجم)</Label>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    value={form.weightKg || ''}
-                    onChange={(e) => set('weightKg', Number(e.target.value))}
-                    placeholder="مثال: 12000"
-                  />
-                </div>
+            <Step title="تفاصيل الخدمة" description="ما الخدمة التي تحتاجها؟">
+              <div className="space-y-2">
+                <Label>نوع الخدمة</Label>
+                <Select value={form.cargoType} onValueChange={(v) => set('cargoType', v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {SERVICE_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label>وصف البضاعة</Label>
+                <Label>وصف الطلب</Label>
                 <Textarea
                   value={form.cargoDescription}
                   onChange={(e) => set('cargoDescription', e.target.value)}
-                  placeholder="مثال: 4 حاويات معدّات صناعية معبأة على طبليّات خشبية"
+                  placeholder="مثال: نحتاج تركيب منظومة كاميرات مراقبة في مستودع بالرياض"
                 />
-                <p className="text-xs text-muted-foreground">وصف مختصر يساعد الناقل على فهم الشحنة</p>
+                <p className="text-xs text-muted-foreground">وصف مختصر يساعد مزود الخدمة على فهم المتطلبات</p>
               </div>
             </Step>
           )}
 
           {step === 2 && (
-            <Step title="مسار الشحن" description="نوع الرحلة، المدن، ومواقع الاستلام والتسليم على الخريطة">
-              {/* Trip type selector */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <ChoiceCard
-                  selected={form.tripType === 'SAME_CITY'}
-                  onClick={() => {
-                    set('tripType', 'SAME_CITY');
-                    // sync destination city to origin when switching to same-city
-                    set('destinationCity', form.originCity);
-                  }}
-                  icon={<span className="text-2xl">🏙️</span>}
-                  title="داخل المدينة"
-                  description="استلام وتسليم داخل نفس المدينة"
+            <Step title="التوقيت والموقع" description="حدّد موعد تنفيذ الخدمة وموقعها">
+              <div className="space-y-2">
+                <Label>موقع تنفيذ الخدمة (اختياري)</Label>
+                <Input
+                  value={form.originAddress}
+                  onChange={(e) => set('originAddress', e.target.value)}
+                  placeholder="مثال: حي الملقا، الرياض — المستودع الرئيسي"
                 />
-                <ChoiceCard
-                  selected={form.tripType === 'INTER_CITY'}
-                  onClick={() => set('tripType', 'INTER_CITY')}
-                  icon={<span className="text-2xl">🛣️</span>}
-                  title="بين المدن"
-                  description="رحلة طويلة عبر المسافات"
-                />
+                <p className="text-xs text-muted-foreground">يمكن تركه فارغاً وتحديده لاحقاً مع مزود الخدمة</p>
               </div>
-
-              {/* Cities */}
-              {form.tripType === 'SAME_CITY' ? (
-                <div className="space-y-2">
-                  <Label>المدينة</Label>
-                  <Select
-                    value={form.originCity}
-                    onValueChange={(v) => { set('originCity', v); set('destinationCity', v); }}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {activeCities.map((c) => (
-                        <SelectItem key={c.id} value={c.nameAr}>{c.nameAr}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>مدينة الانطلاق</Label>
-                    <Select value={form.originCity} onValueChange={(v) => set('originCity', v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {activeCities.map((c) => (
-                          <SelectItem key={c.id} value={c.nameAr}>{c.nameAr}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>مدينة الوصول</Label>
-                    <Select value={form.destinationCity} onValueChange={(v) => set('destinationCity', v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {activeCities.map((c) => (
-                          <SelectItem key={c.id} value={c.nameAr}>{c.nameAr}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
-
-              {/* Maps + addresses */}
-              <RouteMapsBlock
-                cities={activeCities}
-                originCity={form.originCity}
-                destinationCity={form.destinationCity}
-                originAddress={form.originAddress}
-                destinationAddress={form.destinationAddress}
-                originPin={form.originPin}
-                destinationPin={form.destinationPin}
-                onOriginAddress={(v) => set('originAddress', v)}
-                onDestAddress={(v) => set('destinationAddress', v)}
-                onOriginPin={(p) => { set('originPin', p); set('originAddress', p.address); }}
-                onDestPin={(p) => { set('destinationPin', p); set('destinationAddress', p.address); }}
-              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>تاريخ الاستلام</Label>
+                  <Label>تاريخ البدء المطلوب</Label>
                   <Input
                     type="date"
-                    /* Past dates make no sense — anchor min to today's local date. */
                     min={new Date().toISOString().slice(0, 10)}
                     value={form.pickupDate}
                     onChange={(e) => set('pickupDate', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>نافذة الاستلام</Label>
+                  <Label>نافذة التوقيت</Label>
                   <Select value={form.pickupWindow} onValueChange={(v) => set('pickupWindow', v as PickupWindow)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -426,20 +296,20 @@ export default function NewOrderWizard() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                💡 الناقل سيؤكّد الوقت الدقيق داخل النافذة عند قبول العرض.
+                💡 مزود الخدمة سيؤكّد الوقت الدقيق داخل النافذة عند قبول العرض.
               </p>
             </Step>
           )}
 
           {step === 3 && (
-            <Step title="كيف تريد إرسال الطلب؟" description="انشره لكل الناقلين أو أرسله مباشرة لناقل محدد">
+            <Step title="كيف تريد إرسال الطلب؟" description="انشره لكل مزودي الخدمة أو أرسله مباشرة لمزود محدد">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ChoiceCard
                   selected={form.mode === 'OPEN'}
                   onClick={() => { set('mode', 'OPEN'); set('targetCarrierId', null); }}
                   icon={<Radio className="h-6 w-6" />}
                   title="نشر للجميع"
-                  description="يظهر طلبك لكل الناقلين المؤهلين وتستقبل عروضاً متعددة للمقارنة."
+                  description="يظهر طلبك لكل مزودي الخدمة المؤهلين وتستقبل عروضاً متعددة للمقارنة."
                   badge="موصى به"
                 />
                 <ChoiceCard
@@ -447,16 +317,16 @@ export default function NewOrderWizard() {
                   onClick={() => set('mode', 'DIRECT')}
                   icon={<UserSearch className="h-6 w-6" />}
                   title="إرسال مباشر"
-                  description="اختر ناقلاً معتمداً وأرسل له الطلب بشكل مباشر."
+                  description="اختر مزوّداً معتمداً وأرسل له الطلب بشكل مباشر."
                 />
               </div>
 
               {form.mode === 'DIRECT' && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>اختر ناقلاً معتمداً</Label>
+                    <Label>اختر مزوّداً معتمداً</Label>
                     <span className="text-xs text-muted-foreground">
-                      {carriersLoading ? 'جارٍ التحميل...' : `${carriers.length} ناقل متاح`}
+                      {carriersLoading ? 'جارٍ التحميل...' : `${carriers.length} مزوّد متاح`}
                     </span>
                   </div>
                   <div className="relative">
@@ -472,12 +342,12 @@ export default function NewOrderWizard() {
                     {carriersLoading && (
                       <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">
                         <Truck className="h-6 w-6 mx-auto mb-2 animate-pulse" />
-                        جارٍ تحميل الناقلين...
+                        جارٍ تحميل المزوّدين...
                       </div>
                     )}
                     {!carriersLoading && carriers.length === 0 && (
                       <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">
-                        لا يوجد ناقلون مطابقون للبحث
+                        لا يوجد مزوّدون مطابقون للبحث
                       </div>
                     )}
                     {carriers.map((c) => (
@@ -507,12 +377,11 @@ export default function NewOrderWizard() {
                     ))}
                   </div>
 
-                  {/* Pre-agreed price toggle */}
                   {form.targetCarrierId && (
                     <div className="rounded-lg border p-4 space-y-3">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <div className="text-sm font-medium">هل لديك سعر متفق مسبقاً مع هذا الناقل؟</div>
+                          <div className="text-sm font-medium">هل لديك سعر متفق مسبقاً مع هذا المزوّد؟</div>
                           <div className="text-xs text-muted-foreground mt-0.5">يتجاوز مرحلة التفاوض ويُسند الطلب مباشرة</div>
                         </div>
                         <div className="flex gap-2 shrink-0">
@@ -565,70 +434,60 @@ export default function NewOrderWizard() {
           )}
 
           {step === 4 && (
-            <Step title="المتطلبات" description="حدّد نوع الشاحنة والخصائص المطلوبة">
+            <Step title="المتطلبات" description="حدّد نوع الخدمة المطلوبة والخصائص الإضافية">
               <div className="space-y-2">
-                <Label>نوع الشاحنة المطلوبة</Label>
+                <Label>نوع الخدمة المطلوبة</Label>
                 <Select value={form.truckType} onValueChange={(v) => set('truckType', v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {truckTypesList.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                    {serviceTypesList.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  الناقلون سيقدّمون عروضهم بالأسعار التنافسية — لا حاجة لتحديد ميزانية مسبقة.
+                  مزودو الخدمة سيقدّمون عروضهم بالأسعار التنافسية — لا حاجة لتحديد ميزانية مسبقة.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <ToggleCard
                   icon={<ShieldCheck className="h-5 w-5" />}
-                  title="تأمين شامل على الشحنة"
-                  description="ضمان قيمة البضاعة"
+                  title="تأمين شامل"
+                  description="ضمان تنفيذ الخدمة وتعويض عند الإخلال"
                   checked={form.requiresInsurance}
                   onChange={(v) => set('requiresInsurance', v)}
-                />
-                <ToggleCard
-                  icon={<Snowflake className="h-5 w-5" />}
-                  title="شاحنة مبرّدة"
-                  description="للمنتجات الحساسة"
-                  checked={form.requiresRefrigeration}
-                  onChange={(v) => set('requiresRefrigeration', v)}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label>تعليمات خاصة (اختياري)</Label>
                 <Textarea value={form.specialInstructions} onChange={(e) => set('specialInstructions', e.target.value)}
-                  placeholder="مثال: التحميل من 7 صباحاً، يلزم تصريح دخول" />
+                  placeholder="مثال: يلزم حضور مهندس موقع، الدخول من الباب الرئيسي فقط" />
               </div>
             </Step>
           )}
 
           {step === 5 && (
             <Step title="مراجعة وإرسال" description="تأكد من المعلومات قبل النشر">
-              <Section title="الشحنة">
-                <Row label="نوع البضاعة" value={CARGO_TYPES.find((c) => c.value === form.cargoType)?.label} />
-                <Row label="الوزن" value={<span className="num">{form.weightKg.toLocaleString('en-US')} كجم</span>} />
-                <Row label="الوصف" value={form.cargoDescription} />
+              <Section title="الخدمة">
+                <Row label="نوع الخدمة" value={SERVICE_CATEGORIES.find((c) => c.value === form.cargoType)?.label} />
+                <Row label="وصف الطلب" value={form.cargoDescription} />
               </Section>
               <Separator />
-              <Section title="المسار">
-                <Row label="من" value={`${form.originCity} — ${form.originAddress || '—'}`} />
-                <Row label="إلى" value={`${form.destinationCity} — ${form.destinationAddress || '—'}`} />
-                <Row label="تاريخ الاستلام" value={form.pickupDate || '—'} />
+              <Section title="التوقيت">
+                <Row label="الموقع" value={form.originAddress || '—'} />
+                <Row label="تاريخ البدء" value={form.pickupDate || '—'} />
               </Section>
               <Separator />
               <Section title="طريقة الإرسال">
                 <Row label="النوع" value={form.mode === 'OPEN' ? 'نشر للجميع' : 'إرسال مباشر'} />
                 {form.mode === 'DIRECT' && form.targetCarrierId && (
-                  <Row label="الناقل" value={carriersRaw?.find((c) => c.id === form.targetCarrierId)?.nameAr ?? '—'} />
+                  <Row label="المزوّد" value={carriersRaw?.find((c) => c.id === form.targetCarrierId)?.nameAr ?? '—'} />
                 )}
               </Section>
               <Separator />
               <Section title="المتطلبات">
-                <Row label="نوع الشاحنة" value={truckTypesList.find((t) => t.value === form.truckType)?.label} />
+                <Row label="نوع الخدمة المطلوبة" value={serviceTypesList.find((t) => t.value === form.truckType)?.label} />
                 <Row label="تأمين" value={form.requiresInsurance ? 'نعم' : 'لا'} />
-                <Row label="تبريد" value={form.requiresRefrigeration ? 'نعم' : 'لا'} />
                 {form.specialInstructions && <Row label="تعليمات" value={form.specialInstructions} />}
               </Section>
             </Step>
@@ -659,73 +518,6 @@ export default function NewOrderWizard() {
         </div>
       )}
     </>
-  );
-}
-
-/**
- * Maps + address pair for the route step. Renders two MapAddressPickers
- * (pickup + delivery) centered on the corresponding city. Drives both the
- * address text fields and the precise pin lat/lng.
- */
-function RouteMapsBlock({
-  cities,
-  originCity, destinationCity,
-  originAddress, destinationAddress,
-  originPin, destinationPin,
-  onOriginAddress, onDestAddress,
-  onOriginPin, onDestPin,
-}: {
-  cities: CatalogCity[];
-  originCity: string;
-  destinationCity: string;
-  originAddress: string;
-  destinationAddress: string;
-  originPin: MapPoint | null;
-  destinationPin: MapPoint | null;
-  onOriginAddress: (v: string) => void;
-  onDestAddress: (v: string) => void;
-  onOriginPin: (p: MapPoint) => void;
-  onDestPin: (p: MapPoint) => void;
-}) {
-  const fallback = cities[0] ?? DEFAULT_CITIES[0];
-  const originCityRec = cities.find((c) => c.nameAr === originCity) ?? fallback;
-  const destCityRec = cities.find((c) => c.nameAr === destinationCity) ?? fallback;
-  const originCenter = { lat: originCityRec.lat, lng: originCityRec.lng };
-  const destCenter = { lat: destCityRec.lat, lng: destCityRec.lng };
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label>📍 موقع الاستلام في {originCity}</Label>
-        <MapAddressPicker
-          center={originCenter}
-          value={originPin ?? undefined}
-          onChange={onOriginPin}
-          label={`موقع الاستلام في ${originCity}`}
-          cityName={originCity}
-        />
-        <Input
-          value={originAddress}
-          onChange={(e) => onOriginAddress(e.target.value)}
-          placeholder="عنوان تفصيلي (اختياري)"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label>📦 موقع التسليم في {destinationCity}</Label>
-        <MapAddressPicker
-          center={destCenter}
-          value={destinationPin ?? undefined}
-          onChange={onDestPin}
-          label={`موقع التسليم في ${destinationCity}`}
-          cityName={destinationCity}
-        />
-        <Input
-          value={destinationAddress}
-          onChange={(e) => onDestAddress(e.target.value)}
-          placeholder="عنوان تفصيلي (اختياري)"
-        />
-      </div>
-    </div>
   );
 }
 

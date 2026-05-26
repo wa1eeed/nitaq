@@ -4,9 +4,8 @@ import { useParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { fetcher, api } from '@/lib/api';
 import {
-  AlertTriangle, ArrowRight, BadgeCheck, Calendar, CheckCircle2, MapPin, MessageSquare,
-  Package, Phone, ShieldCheck, Shield, Snowflake, Star, Timer, Truck, User, UserSearch,
-  Weight, X,
+  AlertTriangle, ArrowRight, BadgeCheck, CheckCircle2, MapPin, MessageSquare,
+  Package, Phone, ShieldCheck, Shield, Star, Timer, Truck, User, UserSearch, X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -21,16 +20,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { PageHeader } from '@/components/page-header';
-import { SaudiPlate, parsePlateString } from '@/components/saudi-plate';
 import { StatusBadge } from '@/components/status-badge';
 import { Currency } from '@/components/currency';
-import { RouteMap } from '@/components/route-map';
 import { EscrowCountdown } from '@/components/escrow-countdown';
 import { playSoundIfEnabled } from '@/lib/sound';
 import { notify } from '@/lib/notify';
 import {
-  BIDS, DRIVERS, ORDERS, TRUCKS, bidsForOrder, companyById, coordsFor, distanceKm,
-  estimatedDurationLabel, primaryRoadFor, formatDate, formatDateTime, formatRelative,
+  BIDS, DRIVERS, ORDERS, TRUCKS, bidsForOrder, companyById, formatDate, formatDateTime, formatRelative,
   lastRound, proposalForOrder, timelineFor,
   cancellationPolicy, escrowBreakdown, COMMISSION_RATE, pickupWindowLabel, estimateDeliveryDate,
   normalizeOrder,
@@ -50,7 +46,7 @@ const CARGO_LABELS: Record<string, string> = {
 const TITLES: Record<string, string> = {
   CREATED: 'إنشاء الطلب', PUBLISHED: 'نشر الطلب', BID_RECEIVED: 'استلام عروض',
   BID_ACCEPTED: 'قبول العرض', CONFIRMED: 'تأكيد التحميل', PICKED_UP: 'تم الاستلام',
-  IN_TRANSIT: 'في الطريق', DELIVERED: 'تم التسليم',
+  IN_TRANSIT: 'قيد التنفيذ', DELIVERED: 'تم التسليم',
   PAYMENT_RELEASED: 'الإفراج عن المبلغ', COMPLETED: 'إغلاق الطلب', CANCELLED: 'إلغاء',
 };
 
@@ -141,7 +137,7 @@ export default function ClientOrderDetail() {
     <>
       <PageHeader
         title={order.orderNumber}
-        subtitle={`${order.originCity} ← ${order.destinationCity} · ${formatDateTime(order.createdAt)}`}
+        subtitle={formatDateTime(order.createdAt)}
         actions={
           <>
             <StatusBadge status={order.status} />
@@ -160,8 +156,6 @@ export default function ClientOrderDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <MapSection order={order} />
-
           {order.carrierId && <ProviderInfoCard order={order} />}
 
           {/* Status + pickup→delivery progress card. Visible once the order
@@ -364,31 +358,16 @@ export default function ClientOrderDetail() {
 
         <div className="space-y-6">
           <Card>
-            <CardHeader><CardTitle>تفاصيل الشحنة</CardTitle></CardHeader>
+            <CardHeader><CardTitle>تفاصيل الطلب</CardTitle></CardHeader>
             <CardContent>
               <dl className="divide-y">
-                {/* Defensive `??` everywhere — order shape may originate from the
-                    API (Prisma fields), the mock data (`weightKg` / `truckType`),
-                    or the normalizer's pass-through when input fields are missing.
-                    Wrapping in `?? 0`/`?? '—'` ensures we never call `.toLocaleString`
-                    on undefined or pass an empty key into a labels map. */}
-                <Row label="نوع البضاعة" icon={Package} value={(order.cargoType && CARGO_LABELS[order.cargoType]) || order.cargoType || '—'} />
+                <Row label="نوع الخدمة" icon={Package} value={(order.cargoType && CARGO_LABELS[order.cargoType]) || order.cargoType || '—'} />
                 <Row label="الوصف" value={order.cargoDescription || '—'} />
-                <Row label="الوزن" icon={Weight} value={<span className="num">{((order.weightKg ?? 0)).toLocaleString('en-US')} كجم</span>} />
-                <Row label="نوع الشاحنة" icon={Truck} value={(order.truckType && TRUCK_LABELS[order.truckType]) || order.truckType || '—'} />
+                <Row label="نوع الخدمة المطلوبة" icon={Truck} value={(order.truckType && TRUCK_LABELS[order.truckType]) || order.truckType || '—'} />
                 <Row label="تأمين" icon={ShieldCheck} value={order.requiresInsurance ? 'مطلوب' : '—'} />
-                <Row label="تبريد" icon={Snowflake} value={order.requiresRefrigeration ? 'مطلوب' : '—'} />
-              </dl>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader><CardTitle>المسار</CardTitle></CardHeader>
-            <CardContent>
-              <dl className="divide-y">
-                <Row label="من" icon={MapPin} value={`${order.originCity} — ${order.originAddress}`} />
-                <Row label="إلى" icon={MapPin} value={`${order.destinationCity} — ${order.destinationAddress}`} />
-                <Row label="موعد الاستلام" icon={Calendar} value={formatDate(order.pickupDate, 'EEEE d MMM · HH:mm')} />
+                {order.originAddress && (
+                  <Row label="موقع التنفيذ" icon={MapPin} value={order.originAddress} />
+                )}
               </dl>
             </CardContent>
           </Card>
@@ -845,7 +824,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
   const meta: Record<string, { text: string; step: 1 | 2 | 3; tone: 'info' | 'warning' | 'success' }> = {
     ASSIGNED:   { text: 'تم إسناد الطلب — الناقل يحضّر للتحميل',  step: 1, tone: 'info' },
     CONFIRMED:  { text: 'الناقل أكّد الموعد — جارٍ التحرّك للاستلام', step: 1, tone: 'info' },
-    IN_TRANSIT: { text: 'الشحنة في الطريق إلى وجهتها',              step: 2, tone: 'warning' },
+    IN_TRANSIT: { text: 'الخدمة قيد التنفيذ',                        step: 2, tone: 'warning' },
     DELIVERED:  { text: 'تم التسليم — يرجى تأكيد الاستلام',         step: 3, tone: 'warning' },
     COMPLETED:  { text: 'الطلب مكتمل ✓',                          step: 3, tone: 'success' },
   };
@@ -869,7 +848,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
         <div className="flex items-center gap-2">
           {[
             { s: 1 as const, label: 'الاستلام',  icon: MapPin },
-            { s: 2 as const, label: 'في الطريق', icon: Truck },
+            { s: 2 as const, label: 'قيد التنفيذ', icon: Truck },
             { s: 3 as const, label: 'التسليم',  icon: CheckCircle2 },
           ].map((step, i, arr) => (
             <div key={step.s} className="flex items-center gap-2 flex-1">
@@ -958,7 +937,6 @@ function ProviderInfoCard({ order }: { order: Order }) {
 
   const initials = (provider.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('');
   const employeeInitials = (employee?.fullName ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('');
-  const plate = assignedService ? parsePlateString(assignedService.plateNumber) : null;
 
   return (
     <Card className="border-success/30 bg-success/[0.03]">
@@ -968,7 +946,7 @@ function ProviderInfoCard({ order }: { order: Order }) {
             <div className="h-8 w-8 rounded-full bg-success/15 text-success grid place-items-center">
               <BadgeCheck className="h-4 w-4" />
             </div>
-            <CardTitle>الناقل المُعتمد</CardTitle>
+            <CardTitle>مزوّد الخدمة المُعتمد</CardTitle>
           </div>
           <Badge variant="success">تم قبول العرض</Badge>
         </div>
@@ -1026,35 +1004,23 @@ function ProviderInfoCard({ order }: { order: Order }) {
           <div className="rounded-lg border bg-card p-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase mb-3">
               <Truck className="h-3.5 w-3.5" />
-              الشاحنة المخصّصة
+              الخدمة المخصّصة
             </div>
-            {assignedService && plate ? (
-              <>
-                <SaudiPlate
-                  letters={plate.letters}
-                  numbers={plate.numbers}
-                  type="public"
-                  size="sm"
-                />
-                <dl className="mt-3 space-y-1.5 text-xs">
+            {assignedService ? (
+              <dl className="space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">نوع الخدمة</dt>
+                  <dd className="font-medium">{TRUCK_LABELS[assignedService.truckType] ?? assignedService.truckType}</dd>
+                </div>
+                {assignedService.modelYear && (
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">النوع</dt>
-                    <dd className="font-medium">{TRUCK_LABELS[assignedService.truckType]}</dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">الحمولة</dt>
-                    <dd className="font-medium num">
-                      {(assignedService.capacityKg / 1000).toFixed(0)} طن
-                    </dd>
-                  </div>
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">الموديل</dt>
+                    <dt className="text-muted-foreground">السنة</dt>
                     <dd className="font-medium num">{assignedService.modelYear}</dd>
                   </div>
-                </dl>
-              </>
+                )}
+              </dl>
             ) : (
-              <div className="text-xs text-muted-foreground py-2">سيتم تخصيص الشاحنة قريباً</div>
+              <div className="text-xs text-muted-foreground py-2">سيتم تخصيص الخدمة قريباً</div>
             )}
           </div>
 
@@ -1062,7 +1028,7 @@ function ProviderInfoCard({ order }: { order: Order }) {
           <div className="rounded-lg border bg-card p-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase mb-3">
               <User className="h-3.5 w-3.5" />
-              السائق
+              الموظف
             </div>
             {employee ? (
               <>
@@ -1081,13 +1047,13 @@ function ProviderInfoCard({ order }: { order: Order }) {
                     <dd className="font-medium num" dir="ltr">{employee.phone}</dd>
                   </div>
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">الرحلات المنجزة</dt>
+                    <dt className="text-muted-foreground">المهام المنجزة</dt>
                     <dd className="font-medium num">{employee.totalTrips.toLocaleString('en-US')}</dd>
                   </div>
                 </dl>
               </>
             ) : (
-              <div className="text-xs text-muted-foreground py-2">سيتم تخصيص السائق قريباً</div>
+              <div className="text-xs text-muted-foreground py-2">سيتم تخصيص الموظف قريباً</div>
             )}
           </div>
         </div>
@@ -1113,43 +1079,6 @@ function ProviderInfoCard({ order }: { order: Order }) {
         )}
       </CardContent>
     </Card>
-  );
-}
-
-function MapSection({ order }: { order: any }) {
-  const o = coordsFor(order.originCity);
-  const d = coordsFor(order.destinationCity);
-  const km = distanceKm(o, d);
-  const duration = estimatedDurationLabel(km);
-  const road = primaryRoadFor(order.originCity, order.destinationCity);
-  const progress = order.status === 'IN_TRANSIT' ? 0.55 : order.status === 'DELIVERED' || order.status === 'COMPLETED' ? 1 : undefined;
-  return (
-    <Card>
-      <RouteMap
-        origin={{ ...o, label: order.originCity }}
-        destination={{ ...d, label: order.destinationCity }}
-        progress={progress}
-        height={300}
-        className="rounded-b-none border-b"
-      />
-      <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
-        <RouteStat icon="📍" label="المسافة" value={<span className="num">{km.toLocaleString('en-US')} كم</span>} />
-        <RouteStat icon="⏱" label="المدة المتوقعة" value={duration} />
-        <RouteStat icon="🛣" label="الطريق الرئيسي" value={road} />
-      </CardContent>
-    </Card>
-  );
-}
-
-function RouteStat({ icon, label, value }: { icon: string; label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="text-2xl" aria-hidden>{icon}</span>
-      <div className="min-w-0">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="mt-0.5 text-sm font-semibold truncate">{value}</div>
-      </div>
-    </div>
   );
 }
 
