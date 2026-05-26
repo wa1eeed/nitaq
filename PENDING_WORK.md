@@ -1,6 +1,6 @@
 # Pending Work — حالة الربط الحالية (Nitaq Platform)
 
-> آخر تحديث: 2026-05-26 (بعد v0.9.16)
+> آخر تحديث: 2026-05-26 (بعد v0.9.16 كامل — Prisma migration مُطبَّق)
 >
 > الهدف من هذا الملف: نقطة استئناف واضحة. يلخّص ما تبقّى من الربط/الإصلاحات قبل
 > أن نعتبر النظام جاهزاً لـ release v1.0.
@@ -118,7 +118,7 @@
 | admin | ✅ | ✅ | ✗ | dashboard/companies/orders/disputes/settings + 6 analytics endpoints (v0.9.14) |
 | **disputes** | ✅ | ✅ | ✗ | جديد في v0.9.0 — POST/GET للأطراف |
 | **support** | ✅ | ✅ | ✗ | جديد في v0.9.0 — Tickets CRUD |
-| addresses | ✅ | ✅ | ✗ | تحتاج `prisma migrate dev` لتفعيل SavedAddress في DB |
+| addresses | ✅ | ✅ | ✗ | migration مُطبَّقة (20260521043732 + 20260526000000) |
 | settings/catalogs | ✅ | — | ✗ | `GET /settings/catalogs` عام (بدون auth) |
 | settings/platform | ✅ | — | ✗ | `GET /settings/platform` عام — logo + name (v0.9.9) |
 
@@ -131,27 +131,17 @@
 - لا تكسر الـ stability constraints أعلاه.
 - في حال شك حول backend endpoint: `grep -E "@(Get|Post|Put|Delete|Patch)\(" apps/api/src/modules/*/`.
 
-### آخر ما أُنجز (v0.9.13 → v0.9.16):
+### آخر ما أُنجز (v0.9.13 → v0.9.16 كامل):
 
 - **v0.9.13**: Premium UI/UX — framer-motion على client/provider portals
 - **v0.9.14**: Executive KPI Dashboard — 6 analytics endpoints في admin + Bloomberg Terminal + PDF export
 - **v0.9.15**: Landing page إعادة كتابة كاملة (animated hero, stats counters, testimonials slider)
-- **v0.9.16**: تحويل هوية المنصة من لوجستيات إلى خدمات — 9 مراحل كاملة:
+- **v0.9.16**: تحويل هوية المنصة من لوجستيات إلى خدمات — 10 مراحل كاملة:
   - مراحل ١-٢: حذف driver app، تحديث التوثيق
   - مرحلة ٣: 72 ملف ترجمة × 4 بورتالات × 2 لغات
   - مرحلة ٤: shared-types + shared-utils (ServiceType، EmployeeStatus، normalizeService، serviceTypeLabels، workflow-engine PROVIDER actor)
   - مراحل ٥-٨: carrier/admin/client/landing portals — provider terminology في الكود
   - مرحلة ٩: API comments/error messages
+  - **مرحلة ١٠ ✅**: Prisma schema migration — `ALTER TYPE/TABLE RENAME` طُبّقت على `naqla_dev`، Prisma client أُعيد توليده، 15 ملف API مُحدَّثة، صفر أخطاء TypeScript
 
-### 🔴 ما تبقّى من v0.9.16 (Prisma Migration):
-
-تحويل Prisma schema من logistics → services يحتاج خطوة منفصلة:
-```
-# تشغيل migration لإعادة تسمية:
-# Truck → Service model
-# DriverProfile → EmployeeProfile model
-# TruckType enum → ServiceType enum
-# carrierId → providerId في Order/Bid/Payment
-# carrierAmount → providerAmount في Order/Payment
-```
-لا تبدأ هذه المرحلة إلا بعد backup كامل للـ DB.
+### ✅ لا يوجد عمل معلّق — المشروع جاهز لـ v1.0 release

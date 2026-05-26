@@ -6,7 +6,7 @@
 
 ## [Unreleased] — قيد التطوير
 
-### 🔄 v0.9.16 — Platform Identity Transformation: Trucks → Services (2026-05-26)
+### ✅ v0.9.16 — Platform Identity Transformation: Trucks → Services (2026-05-26)
 
 **سياق:** نِطاق مشروع مستقل منسوخ من nqlah. هذا الإصدار يُكمل التحويل الرسمي من منصة نقل بضائع إلى منصة خدمات B2B متعددة التخصصات عبر 9 مراحل.
 
@@ -50,10 +50,20 @@
 - جميع النصوص: ناقلين → مقدّمي الخدمة، شحنات → طلبات
 - Provider card، Pricing، CTA، About page كلها مُحدَّثة
 
-**المرحلة ٩ — API:**
+**المرحلة ٩ — API (comments/error messages):**
 - رسائل الخطأ بالعربية: الشاحنة/السائق/الناقل → الخدمة/الموظف/مزود الخدمة
 - تعليقات الكود في fleet/orders/bids/payments services
-- ملاحظة: Prisma schema (Truck، DriverProfile، carrierId، TruckType) تحتاج `prisma migrate dev` منفصل
+
+**المرحلة ١٠ — Prisma Schema Migration (DB rename):**
+- Migration SQL يعتمد `ALTER TYPE/TABLE RENAME` — لا حذف للبيانات
+- Enums: `TruckType→ServiceType`، `DriverStatus→EmployeeStatus`، `ON_TRIP→ON_ASSIGNMENT`
+- Enum values: `CompanyType.CARRIER→PROVIDER`، `UserRole.CARRIER_ADMIN→PROVIDER_ADMIN`، `UserRole.CARRIER_USER→PROVIDER_USER`، `UserRole.DRIVER→EMPLOYEE`
+- Notification types: `SHIPMENT_STARTED→SERVICE_STARTED`، `SHIPMENT_DELIVERED→SERVICE_COMPLETED`
+- Models: `Truck→Service`، `DriverProfile→EmployeeProfile`، `OrderTruck→OrderService`، `OrderDriver→OrderEmployee`
+- Fields: `carrierId→providerId`، `carrierAmount→providerAmount`، `requiredTruckType→requiredServiceType`، `targetCarrierId→targetProviderId`، `driverId→employeeId`، `totalTrips→totalAssignments`، `currentDriverId→currentEmployeeId`
+- جميع ملفات API محدَّثة (15 ملف) — صفر أخطاء TypeScript بعد `prisma generate`
+- `shared-types/enums.ts`: قيم جديدة + deprecated aliases للتوافق مع الـ tokens الموجودة
+- DTOs: `requiredServiceType`، `targetProviderId`، `providerId`، `employeeId`، `AssignEmployeeDto`
 
 ---
 
