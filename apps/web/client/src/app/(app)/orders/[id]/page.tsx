@@ -107,11 +107,11 @@ export default function ClientOrderDetail() {
   const sortedBids = useMemo(() => {
     const arr = [...bids];
     // `bid.price` is set by normalizeBid (aliases API field `amount` → mock field `price`).
-    // For rating sort we look at embedded `bid.carrier` first (live API), then mock fallback.
-    const carrierOf = (bid: typeof BIDS[number]) =>
-      (bid as typeof bid & { carrier?: { rating?: number } }).carrier ?? companyById(bid.carrierId);
+    // For rating sort we look at embedded `bid.provider` first (live API), then mock fallback.
+    const providerOf = (bid: typeof BIDS[number]) =>
+      (bid as typeof bid & { provider?: { rating?: number } }).provider ?? companyById(bid.carrierId);
     if (sort === 'price')  arr.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-    if (sort === 'rating') arr.sort((a, b) => (carrierOf(b)?.rating ?? 0) - (carrierOf(a)?.rating ?? 0));
+    if (sort === 'rating') arr.sort((a, b) => (providerOf(b)?.rating ?? 0) - (providerOf(a)?.rating ?? 0));
     if (sort === 'days')   arr.sort((a, b) => (a.estimatedDays ?? 0) - (b.estimatedDays ?? 0));
     return arr;
   }, [bids, sort]);
@@ -162,7 +162,7 @@ export default function ClientOrderDetail() {
         <div className="lg:col-span-2 space-y-6">
           <MapSection order={order} />
 
-          {order.carrierId && <CarrierInfoCard order={order} />}
+          {order.carrierId && <ProviderInfoCard order={order} />}
 
           {/* Status + pickup→delivery progress card. Visible once the order
               has a carrier assigned. Surfaces what the customer cares about
@@ -210,15 +210,15 @@ export default function ClientOrderDetail() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {sortedBids.map((bid, i) => {
-                  // Prefer the embedded `bid.carrier` from the API response (live data).
-                  // Fall back to `companyById` for mock-data demos where the carrier
+                  // Prefer the embedded `bid.provider` from the API response (live data).
+                  // Fall back to `companyById` for mock-data demos where the provider
                   // lookup still has to walk the mock COMPANIES array.
                   type ExpandedBid = typeof bid & {
-                    carrier?: { id: string; nameAr: string; logo?: string | null; city?: string; rating?: number; completedTrips?: number; responseTimeMins?: number; insurance?: boolean };
+                    provider?: { id: string; nameAr: string; logo?: string | null; city?: string; rating?: number; completedTrips?: number; responseTimeMins?: number; insurance?: boolean };
                   };
-                  const embeddedCarrier = (bid as ExpandedBid).carrier;
-                  const fallbackCarrier = companyById(bid.carrierId);
-                  const c = (embeddedCarrier ?? fallbackCarrier) as NonNullable<typeof fallbackCarrier> | undefined;
+                  const embeddedProvider = (bid as ExpandedBid).provider;
+                  const fallbackProvider = companyById(bid.carrierId);
+                  const c = (embeddedProvider ?? fallbackProvider) as NonNullable<typeof fallbackProvider> | undefined;
                   if (!c) return null;
                   const isBest = sort === 'price' && i === 0;
                   return (
@@ -403,19 +403,19 @@ export default function ClientOrderDetail() {
             <DialogDescription>سيُسند الطلب للناقل ويُحجَز المبلغ في Escrow. تُرفض باقي العروض تلقائياً.</DialogDescription>
           </DialogHeader>
           {acceptBid && (() => {
-            const carrier = (acceptBid as typeof acceptBid & { carrier?: { id: string; nameAr: string; logo?: string | null; rating?: number; completedTrips?: number } }).carrier
+            const provider = (acceptBid as typeof acceptBid & { provider?: { id: string; nameAr: string; logo?: string | null; rating?: number; completedTrips?: number } }).provider
               ?? companyById(acceptBid.carrierId);
             return (
               <div className="space-y-3 py-2">
                 <div className="rounded-lg border bg-muted/30 p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarFallback>{(carrier?.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('')}</AvatarFallback>
+                      <AvatarFallback>{(provider?.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('')}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <div className="font-semibold">{carrier?.nameAr}</div>
+                      <div className="font-semibold">{provider?.nameAr}</div>
                       <div className="text-xs text-muted-foreground">
-                        <Star className="h-3 w-3 inline fill-warning text-warning" /> {carrier?.rating?.toFixed(1)} · {carrier?.completedTrips} رحلة
+                        <Star className="h-3 w-3 inline fill-warning text-warning" /> {provider?.rating?.toFixed(1)} · {provider?.completedTrips} رحلة
                       </div>
                     </div>
                   </div>
@@ -475,28 +475,28 @@ export default function ClientOrderDetail() {
             <DialogDescription>راجع المعلومات قبل القبول أو الرفض.</DialogDescription>
           </DialogHeader>
           {detailsBid && (() => {
-            const carrier = (detailsBid as typeof detailsBid & { carrier?: { id: string; nameAr: string; logo?: string | null; rating?: number; completedTrips?: number; city?: string; responseTimeMins?: number; insurance?: boolean } }).carrier
+            const provider = (detailsBid as typeof detailsBid & { provider?: { id: string; nameAr: string; logo?: string | null; rating?: number; completedTrips?: number; city?: string; responseTimeMins?: number; insurance?: boolean } }).provider
               ?? companyById(detailsBid.carrierId);
             const pickupDiff = dayDiff(detailsBid.proposedPickupDate, order.pickupDate);
             const deliveryDiff = dayDiff(detailsBid.proposedDeliveryDate, order.deliveryDate);
             return (
               <div className="space-y-3 py-2">
-                {/* Carrier card */}
+                {/* Provider card */}
                 <div className="rounded-lg border bg-muted/30 p-4">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
-                      <AvatarFallback>{(carrier?.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('')}</AvatarFallback>
+                      <AvatarFallback>{(provider?.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('')}</AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <div className="font-semibold">{carrier?.nameAr}</div>
+                      <div className="font-semibold">{provider?.nameAr}</div>
                       <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-2 mt-0.5">
                         <span className="inline-flex items-center gap-1">
                           <Star className="h-3 w-3 fill-warning text-warning" />
-                          <span className="num">{carrier?.rating?.toFixed(1) ?? '—'}</span>
-                          {carrier?.completedTrips != null && <span>({carrier.completedTrips} رحلة)</span>}
+                          <span className="num">{provider?.rating?.toFixed(1) ?? '—'}</span>
+                          {provider?.completedTrips != null && <span>({provider.completedTrips} رحلة)</span>}
                         </span>
-                        {carrier?.city && <span>· {carrier.city}</span>}
-                        {carrier?.insurance && <Badge variant="default" className="h-4 text-[10px] gap-1"><Shield className="h-3 w-3" /> تأمين</Badge>}
+                        {provider?.city && <span>· {provider.city}</span>}
+                        {provider?.insurance && <Badge variant="default" className="h-4 text-[10px] gap-1"><Shield className="h-3 w-3" /> تأمين</Badge>}
                       </div>
                     </div>
                   </div>
@@ -932,33 +932,33 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
   );
 }
 
-type ApiCarrier = { id: string; nameAr: string; nameEn?: string; city?: string; contactPhone?: string; contactEmail?: string; rating?: number; completedTrips?: number; responseTimeMins?: number; insurance?: boolean };
-type ApiOrderFull = Order & { carrier?: ApiCarrier };
+type ApiProvider = { id: string; nameAr: string; nameEn?: string; city?: string; contactPhone?: string; contactEmail?: string; rating?: number; completedTrips?: number; responseTimeMins?: number; insurance?: boolean };
+type ApiOrderFull = Order & { provider?: ApiProvider };
 
-function CarrierInfoCard({ order }: { order: Order }) {
-  // Use API-provided carrier data when available, fall back to mock
+function ProviderInfoCard({ order }: { order: Order }) {
+  // Use API-provided provider data when available, fall back to mock
   const apiOrder = order as ApiOrderFull;
-  const carrierFromApi = apiOrder.carrier;
-  const carrierFromMock = companyById(order.carrierId);
-  const carrier = carrierFromApi ?? carrierFromMock;
-  if (!carrier) return null;
+  const providerFromApi = apiOrder.provider;
+  const providerFromMock = companyById(order.carrierId);
+  const provider = providerFromApi ?? providerFromMock;
+  if (!provider) return null;
 
   // Accepted bid from API (bids injected by normalizeOrder) or from mock
   type ApiBid = { id: string; status: string; price?: number; amount?: number; estimatedDays?: number };
   const apiBids = (order as Order & { bids?: ApiBid[] }).bids;
   const acceptedBid = apiBids?.find((b) => b.status === 'ACCEPTED') ?? BIDS.find((b) => b.orderId === order.id && b.status === 'ACCEPTED');
 
-  // Truck and driver data still come from mocks (no dedicated API endpoint on order detail)
-  const assignedTruck =
-    TRUCKS.find((t) => t.carrierId === carrier.id && t.status === 'ON_TRIP') ??
-    TRUCKS.find((t) => t.carrierId === carrier.id);
-  const driver = assignedTruck?.assignedDriverId
-    ? DRIVERS.find((d) => d.id === assignedTruck.assignedDriverId)
-    : DRIVERS.find((d) => d.carrierId === carrier.id);
+  // Service and employee data still come from mocks (no dedicated API endpoint on order detail)
+  const assignedService =
+    TRUCKS.find((t) => t.carrierId === provider.id && t.status === 'ON_TRIP') ??
+    TRUCKS.find((t) => t.carrierId === provider.id);
+  const employee = assignedService?.assignedDriverId
+    ? DRIVERS.find((d) => d.id === assignedService.assignedDriverId)
+    : DRIVERS.find((d) => d.carrierId === provider.id);
 
-  const initials = (carrier.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('');
-  const driverInitials = (driver?.fullName ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('');
-  const plate = assignedTruck ? parsePlateString(assignedTruck.plateNumber) : null;
+  const initials = (provider.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('');
+  const employeeInitials = (employee?.fullName ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('');
+  const plate = assignedService ? parsePlateString(assignedService.plateNumber) : null;
 
   return (
     <Card className="border-success/30 bg-success/[0.03]">
@@ -975,44 +975,44 @@ function CarrierInfoCard({ order }: { order: Order }) {
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {/* Carrier company header */}
+        {/* Provider company header */}
         <div className="flex items-start gap-4">
           <Avatar className="h-14 w-14">
             <AvatarFallback className="text-base">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-semibold text-base">{carrier.nameAr}</h4>
-              {(carrier as { insurance?: boolean }).insurance && <Badge variant="default">تأمين شامل</Badge>}
+              <h4 className="font-semibold text-base">{provider.nameAr}</h4>
+              {(provider as { insurance?: boolean }).insurance && <Badge variant="default">تأمين شامل</Badge>}
               <Badge variant="outline">موثّق</Badge>
             </div>
             <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-              {carrier.rating && (
+              {provider.rating && (
                 <span className="inline-flex items-center gap-1">
                   <Star className="h-3 w-3 fill-warning text-warning" />
-                  <span className="num">{carrier.rating.toFixed(1)}</span>
-                  {(carrier as { completedTrips?: number }).completedTrips != null && (
-                    <span>({(carrier as { completedTrips?: number }).completedTrips} رحلة)</span>
+                  <span className="num">{provider.rating.toFixed(1)}</span>
+                  {(provider as { completedTrips?: number }).completedTrips != null && (
+                    <span>({(provider as { completedTrips?: number }).completedTrips} رحلة)</span>
                   )}
                 </span>
               )}
-              {carrier.city && <span>· {carrier.city}</span>}
-              {carrier.contactPhone && (
-                <span dir="ltr" className="num">{carrier.contactPhone}</span>
+              {provider.city && <span>· {provider.city}</span>}
+              {provider.contactPhone && (
+                <span dir="ltr" className="num">{provider.contactPhone}</span>
               )}
             </div>
           </div>
           <div className="flex flex-col items-end gap-1.5 shrink-0">
-            {carrier.contactPhone && (
+            {provider.contactPhone && (
               <Button size="sm" variant="outline" asChild>
-                <a href={`tel:${carrier.contactPhone}`}>
+                <a href={`tel:${provider.contactPhone}`}>
                   <Phone className="h-3.5 w-3.5" /> اتصال
                 </a>
               </Button>
             )}
-            {carrier.contactEmail && (
+            {provider.contactEmail && (
               <Button size="sm" variant="ghost" asChild>
-                <a href={`mailto:${carrier.contactEmail}`}>
+                <a href={`mailto:${provider.contactEmail}`}>
                   <MessageSquare className="h-3.5 w-3.5" /> إيميل
                 </a>
               </Button>
@@ -1020,15 +1020,15 @@ function CarrierInfoCard({ order }: { order: Order }) {
           </div>
         </div>
 
-        {/* Truck + Driver split */}
+        {/* Service + Employee split */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Truck */}
+          {/* Service */}
           <div className="rounded-lg border bg-card p-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase mb-3">
               <Truck className="h-3.5 w-3.5" />
               الشاحنة المخصّصة
             </div>
-            {assignedTruck && plate ? (
+            {assignedService && plate ? (
               <>
                 <SaudiPlate
                   letters={plate.letters}
@@ -1039,17 +1039,17 @@ function CarrierInfoCard({ order }: { order: Order }) {
                 <dl className="mt-3 space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">النوع</dt>
-                    <dd className="font-medium">{TRUCK_LABELS[assignedTruck.truckType]}</dd>
+                    <dd className="font-medium">{TRUCK_LABELS[assignedService.truckType]}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">الحمولة</dt>
                     <dd className="font-medium num">
-                      {(assignedTruck.capacityKg / 1000).toFixed(0)} طن
+                      {(assignedService.capacityKg / 1000).toFixed(0)} طن
                     </dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">الموديل</dt>
-                    <dd className="font-medium num">{assignedTruck.modelYear}</dd>
+                    <dd className="font-medium num">{assignedService.modelYear}</dd>
                   </div>
                 </dl>
               </>
@@ -1058,31 +1058,31 @@ function CarrierInfoCard({ order }: { order: Order }) {
             )}
           </div>
 
-          {/* Driver */}
+          {/* Employee */}
           <div className="rounded-lg border bg-card p-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase mb-3">
               <User className="h-3.5 w-3.5" />
               السائق
             </div>
-            {driver ? (
+            {employee ? (
               <>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-11 w-11">
-                    <AvatarFallback>{driverInitials}</AvatarFallback>
+                    <AvatarFallback>{employeeInitials}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <div className="font-semibold text-sm truncate">{driver.fullName}</div>
-                    <div className="text-xs text-muted-foreground">{driver.licenseClass}</div>
+                    <div className="font-semibold text-sm truncate">{employee.fullName}</div>
+                    <div className="text-xs text-muted-foreground">{employee.licenseClass}</div>
                   </div>
                 </div>
                 <dl className="mt-3 space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">الجوال</dt>
-                    <dd className="font-medium num" dir="ltr">{driver.phone}</dd>
+                    <dd className="font-medium num" dir="ltr">{employee.phone}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">الرحلات المنجزة</dt>
-                    <dd className="font-medium num">{driver.totalTrips.toLocaleString('en-US')}</dd>
+                    <dd className="font-medium num">{employee.totalTrips.toLocaleString('en-US')}</dd>
                   </div>
                 </dl>
               </>
@@ -1163,7 +1163,7 @@ function RouteStat({ icon, label, value }: { icon: string; label: string; value:
 
 function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () => void }) {
   const proposal = proposalForOrder(order.id);
-  const carrier = companyById(order.targetCarrierId);
+  const provider = companyById(order.targetCarrierId);
   const [action, setAction] = useState<null | 'ACCEPT' | 'COUNTER' | 'REJECT'>(null);
   const [counterPrice, setCounterPrice] = useState<number>(0);
   const [counterNote, setCounterNote] = useState('');
@@ -1183,7 +1183,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
           </div>
           <h3 className="font-semibold text-lg">بانتظار رد الناقل</h3>
           <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
-            أُرسل الطلب مباشرة إلى <strong>{carrier?.nameAr}</strong>. سيتم إخطارك فور الرد بالقبول أو السعر.
+            أُرسل الطلب مباشرة إلى <strong>{provider?.nameAr}</strong>. سيتم إخطارك فور الرد بالقبول أو السعر.
           </p>
         </CardContent>
       </Card>
@@ -1199,7 +1199,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
     try {
       if (action === 'ACCEPT' && activeBidId) {
         await api.post(`/orders/${order.id}/bids/${activeBidId}/accept`, {});
-        notify.success('تم قبول السعر', `الطلب أُسند لـ ${carrier?.nameAr ?? 'الناقل'}`);
+        notify.success('تم قبول السعر', `الطلب أُسند لـ ${provider?.nameAr ?? 'الناقل'}`);
         onRefetch();
       } else if (action === 'COUNTER') {
         await api.post(`/orders/${order.id}/bids`, {
@@ -1228,7 +1228,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
               <CardDescription className="mb-1">
-                {isClientTurn ? `🟡 سعر مقترَح من ${carrier?.nameAr}` : `بانتظار رد ${carrier?.nameAr}`}
+                {isClientTurn ? `🟡 سعر مقترَح من ${provider?.nameAr}` : `بانتظار رد ${provider?.nameAr}`}
               </CardDescription>
               {onTable && (
                 <>
@@ -1270,7 +1270,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
             <ProposalAction
               icon={CheckCircle2}
               title="قبول السعر"
-              subtitle={`الإسناد لـ ${carrier?.nameAr} مباشرة`}
+              subtitle={`الإسناد لـ ${provider?.nameAr} مباشرة`}
               tone="success"
               onClick={() => setAction('ACCEPT')}
             />
@@ -1314,7 +1314,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
             <div>
               <h3 className="font-semibold text-success">تم الاتفاق ✓</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                انتقل الطلب لـ ASSIGNED مع <strong>{carrier?.nameAr}</strong>. سيُجهَّز للاستلام في الموعد المتّفق.
+                انتقل الطلب لـ ASSIGNED مع <strong>{provider?.nameAr}</strong>. سيُجهَّز للاستلام في الموعد المتّفق.
               </p>
             </div>
           </CardContent>
@@ -1354,7 +1354,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
                   <div className="flex-1 min-w-0 rounded-md border bg-card p-3">
                     <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
                       <span className="text-sm font-semibold">
-                        {r.by === 'CLIENT' ? 'أنت' : carrier?.nameAr} — {r.kind === 'COUNTER' ? 'اقترح' : r.kind === 'ACCEPT' ? 'قبل' : 'رفض'}
+                        {r.by === 'CLIENT' ? 'أنت' : provider?.nameAr} — {r.kind === 'COUNTER' ? 'اقترح' : r.kind === 'ACCEPT' ? 'قبل' : 'رفض'}
                       </span>
                       <span className="text-xs text-muted-foreground">{formatRelative(r.at)}</span>
                     </div>
@@ -1377,7 +1377,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
           <DialogHeader>
             <DialogTitle>قبول العرض</DialogTitle>
             <DialogDescription>
-              سيُسند الطلب لـ <strong>{carrier?.nameAr}</strong> بسعر{' '}
+              سيُسند الطلب لـ <strong>{provider?.nameAr}</strong> بسعر{' '}
               <strong><Currency amount={onTable?.price ?? 0} /></strong> ويُحجَز المبلغ في Escrow.
             </DialogDescription>
           </DialogHeader>

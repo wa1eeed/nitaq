@@ -56,7 +56,7 @@ export default function TrackingPage() {
           <CardContent className="space-y-2 max-h-[600px] overflow-y-auto">
             {inTransit.map((o) => {
               const isSelected = selected?.id === o.id;
-              const carrier = companyById(o.carrierId);
+              const provider = companyById(o.carrierId);
               return (
                 <button
                   key={o.id}
@@ -71,7 +71,7 @@ export default function TrackingPage() {
                     <StatusBadge status={o.status} />
                   </div>
                   <div className="text-sm font-medium truncate">{o.originCity} ← {o.destinationCity}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5 truncate">{carrier?.nameAr ?? '—'}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5 truncate">{provider?.nameAr ?? '—'}</div>
                 </button>
               );
             })}
@@ -97,8 +97,8 @@ function TrackingDetail({ order }: { order: any }) {
   const road = primaryRoadFor(order.originCity, order.destinationCity);
   const progress = order.status === 'IN_TRANSIT' ? 0.55 : order.status === 'CONFIRMED' ? 0.1 : 0;
   const remaining = Math.round(km * (1 - progress));
-  const carrier = companyById(order.carrierId);
-  const initials = carrier?.nameAr.split(' ').slice(0, 2).map((w) => w[0]).join('') ?? '';
+  const provider = companyById(order.carrierId);
+  const initials = provider?.nameAr.split(' ').slice(0, 2).map((w) => w[0]).join('') ?? '';
 
   return (
     <>
@@ -131,8 +131,8 @@ function TrackingDetail({ order }: { order: any }) {
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <div className="font-semibold truncate">{carrier?.nameAr ?? '—'}</div>
-                <div className="text-xs text-muted-foreground">{carrier?.completedTrips} رحلة · ⭐ {carrier?.rating?.toFixed(1)}</div>
+                <div className="font-semibold truncate">{provider?.nameAr ?? '—'}</div>
+                <div className="text-xs text-muted-foreground">{provider?.completedTrips} رحلة · ⭐ {provider?.rating?.toFixed(1)}</div>
               </div>
               <Button size="sm" variant="outline"><Phone className="h-3.5 w-3.5" /></Button>
             </div>
