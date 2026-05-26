@@ -51,5 +51,4 @@ docker-data/
 .cache/
 tmp/
 temp/
-pnpm-lock.yaml
 apps/driver/package-lock.json
