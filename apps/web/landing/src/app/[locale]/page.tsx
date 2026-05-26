@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
-  ArrowLeft, CheckCircle2, MapPin, Menu, Package, Quote,
-  Radio, ShieldCheck, Star, Truck, UserSearch, Wallet, X, Zap,
+  ArrowLeft, Briefcase, CheckCircle2, MapPin, Menu, Package, Quote,
+  Radio, ShieldCheck, Star, UserSearch, Wallet, X, Zap,
   Lock, Clock, TrendingUp,
 } from 'lucide-react';
 
@@ -15,32 +15,32 @@ const CARRIER_URL = process.env.NEXT_PUBLIC_CARRIER_URL ?? 'http://localhost:300
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 const FEATURES = [
-  { icon: Radio,       title: 'سوق مفتوح للعروض',      desc: 'انشر طلبك وادع عشرات الناقلين المعتمدين للتقديم بأسعار تنافسية في دقائق.' },
-  { icon: UserSearch,  title: 'إرسال مباشر لناقل',      desc: 'لديك ناقل مفضّل؟ أرسل له الطلب مباشرة، يقبل أو يقترح سعراً بديلاً.' },
-  { icon: MapPin,      title: 'تتبّع لحظي على الخريطة', desc: 'تابع شحنتك على الخريطة من لحظة الاستلام حتى التسليم.' },
-  { icon: Wallet,      title: 'مدفوعات Escrow الآمنة',  desc: 'تُحتجَز أموالك في حساب وسيط ولا تُحوَّل للناقل إلا بعد تأكيد التسليم.' },
-  { icon: ShieldCheck, title: 'ناقلون موثّقون فقط',     desc: 'كل شركة نقل تخضع لتحقّق KYC: سجل تجاري، تأمين، ورخص نقل سارية.' },
-  { icon: Star,        title: 'نظام تقييم شفّاف',       desc: 'قيّم الناقلين بعد كل رحلة، واطّلع على تقييمات الآخرين قبل اختيار عرضك.' },
+  { icon: Radio,       title: 'سوق مفتوح للعروض',        desc: 'انشر طلبك وادع عشرات مقدّمي الخدمة المعتمدين للتقديم بأسعار تنافسية في دقائق.' },
+  { icon: UserSearch,  title: 'إسناد مباشر لمقدّم خدمة', desc: 'لديك مزوّد مفضّل؟ أرسل له الطلب مباشرة ويقبل أو يقترح سعراً بديلاً.' },
+  { icon: MapPin,      title: 'متابعة لحظية للتنفيذ',    desc: 'تابع تقدّم خدمتك لحظةً بلحظة من بدء التنفيذ حتى الإنجاز الكامل.' },
+  { icon: Wallet,      title: 'مدفوعات Escrow الآمنة',   desc: 'تُحتجَز أموالك في حساب وسيط ولا تُحوَّل لمقدّم الخدمة إلا بعد تأكيد الإنجاز.' },
+  { icon: ShieldCheck, title: 'مزوّدون موثّقون فقط',     desc: 'كل شركة خدمات تخضع لتحقّق KYC: سجل تجاري، وثائق الترخيص، وتقييمات حقيقية.' },
+  { icon: Star,        title: 'نظام تقييم شفّاف',        desc: 'قيّم مقدّمي الخدمة بعد كل طلب، واطّلع على تقييمات الآخرين قبل اختيارك.' },
 ];
 
 const STEPS = [
-  { num: '١', title: 'أنشئ طلبك',      desc: 'صف بضاعتك، حدّد المسار والميزانية في 5 خطوات بسيطة.' },
-  { num: '٢', title: 'استقبل العروض',  desc: 'يقدّم ناقلون معتمدون عروضهم — قارن السعر، التقييم، والمدة.' },
-  { num: '٣', title: 'اختر ودفع',      desc: 'يُحتجَز المبلغ في Escrow حتى التسليم. لا مفاجآت ولا رسوم خفيّة.' },
-  { num: '٤', title: 'تابع وسلّم',     desc: 'راقب الشاحنة لحظياً. عند الاستلام يُفرَج المبلغ للناقل تلقائياً.' },
+  { num: '١', title: 'أنشئ طلبك',        desc: 'صف الخدمة التي تحتاجها، حدّد الموقع والميزانية في 5 خطوات بسيطة.' },
+  { num: '٢', title: 'استقبل العروض',    desc: 'يقدّم مقدّمو خدمة معتمدون عروضهم — قارن السعر، التقييم، والمدة.' },
+  { num: '٣', title: 'اختر وادفع',       desc: 'يُحتجَز المبلغ في Escrow حتى الإنجاز. لا مفاجآت ولا رسوم خفيّة.' },
+  { num: '٤', title: 'تابع وأكّد الإنجاز', desc: 'راقب تقدّم الخدمة لحظياً. عند التأكيد يُفرَج المبلغ لمقدّم الخدمة تلقائياً.' },
 ];
 
 const TESTIMONIALS = [
-  { name: 'وليد الحربي',  role: 'مدير المشتريات · شركة الجزيرة للطاقة',  quote: 'وفّرنا ٢٢٪ من تكاليف النقل خلال شهرين، مع شفافية كاملة في كل رحلة.' },
-  { name: 'سارة العمري',  role: 'مدير عمليات · مؤسسة الواحة للأغذية',    quote: 'التتبّع اللحظي أنقذنا من تأخيرات كثيرة — نعرف الآن أين شحناتنا في كل لحظة.' },
-  { name: 'فهد الدوسري',  role: 'مدير شركة المسار السريع للنقل',          quote: 'منصّة سهلة تجلب لنا طلبات حقيقية يومياً، والتحصيل يصل لحسابنا أسبوعياً.' },
+  { name: 'وليد الحربي',  role: 'مدير المشتريات · شركة الجزيرة للطاقة',    quote: 'وفّرنا ٢٢٪ من تكاليف الخدمات خلال شهرين، مع شفافية كاملة في كل طلب.' },
+  { name: 'سارة العمري',  role: 'مدير عمليات · مؤسسة الواحة للأغذية',      quote: 'متابعة التنفيذ اللحظية أنقذتنا من تأخيرات كثيرة — نعرف حالة طلباتنا دائماً.' },
+  { name: 'فهد الدوسري',  role: 'مدير · شركة المسار للخدمات المتكاملة',    quote: 'منصّة سهلة تجلب لنا طلبات حقيقية يومياً، والتحصيل يصل لحسابنا أسبوعياً.' },
 ];
 
 const STATS = [
-  { raw: 1200,  suffix: '+', label: 'ناقل معتمد' },
+  { raw: 1200,  suffix: '+', label: 'مزوّد معتمد' },
   { raw: 25,    suffix: '+', label: 'مدينة مغطّاة' },
-  { raw: 98,    suffix: '%', label: 'نسبة الرضا' },
-  { raw: 15000, suffix: '+', label: 'شحنة منجزة' },
+  { raw: 98,    suffix: '%', label: 'معدّل إتمام الطلبات' },
+  { raw: 15000, suffix: '+', label: 'طلب منجز' },
 ];
 
 const NAV = [
@@ -243,11 +243,11 @@ export default function LandingPage() {
         <div className="max-w-[1280px] mx-auto h-16 px-4 sm:px-6 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-3 shrink-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <Truck className="h-5 w-5" />
+              <Briefcase className="h-5 w-5" />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-base font-bold tracking-tight">نقلة لوجيستك</span>
-              <span className="hidden sm:block text-[11px] text-muted-foreground -mt-0.5">منصة النقل الذكي</span>
+              <span className="text-base font-bold tracking-tight">نِطاق</span>
+              <span className="hidden sm:block text-[11px] text-muted-foreground -mt-0.5">منصة الخدمات الذكية</span>
             </div>
           </Link>
 
@@ -271,7 +271,7 @@ export default function LandingPage() {
               <motion.button whileHover={{ scale: 1.03, boxShadow: '0 0 16px rgba(0,201,167,0.3)' }}
                 whileTap={{ scale: 0.97 }}
                 className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground">
-                دخول الناقل
+                دخول مزوّد الخدمة
               </motion.button>
             </Link>
             <button
@@ -311,7 +311,7 @@ export default function LandingPage() {
                   </Link>
                   <Link href={`${CARRIER_URL}/login`}>
                     <button className="w-full py-2.5 text-sm font-semibold rounded-lg bg-primary text-primary-foreground">
-                      دخول الناقل
+                      دخول مزوّد الخدمة
                     </button>
                   </Link>
                 </div>
@@ -354,12 +354,12 @@ export default function LandingPage() {
             <motion.span variants={fadeUp}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-primary/25 bg-primary/8 text-primary mb-6">
               <Zap className="h-3 w-3" />
-              معتمدون لدى أكثر من 1,200 شركة نقل في المملكة
+              منصة الخدمات الذكية في المملكة العربية السعودية
             </motion.span>
 
             <motion.h1 variants={fadeUp}
               className="text-[44px] sm:text-[62px] md:text-[76px] leading-[1.06] font-extrabold tracking-tight">
-              انقل شحناتك{' '}
+              احصل على خدماتك{' '}
               <span className="relative inline-block">
                 <span className="text-transparent bg-clip-text"
                   style={{ backgroundImage: 'linear-gradient(135deg, #00C9A7 0%, #059669 100%)' }}>
@@ -377,8 +377,8 @@ export default function LandingPage() {
 
             <motion.p variants={fadeUp}
               className="mt-6 text-base sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-              منصة <strong className="text-foreground font-semibold">نقلة لوجيستك</strong> تربطك بأفضل ناقلي المملكة —
-              أسعار شفافة، تتبّع لحظي، ومدفوعات Escrow آمنة تماماً.
+              منصة <strong className="text-foreground font-semibold">نِطاق</strong> تربطك بأفضل مقدّمي الخدمات في المملكة —
+              أسعار شفافة، متابعة لحظية، ومدفوعات Escrow آمنة تماماً.
             </motion.p>
 
             <motion.div variants={fadeUp}
@@ -400,8 +400,8 @@ export default function LandingPage() {
                   whileTap={{ scale: 0.97 }}
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold border border-border hover:bg-muted/60 transition-colors"
                 >
-                  <Truck className="h-4 w-4" />
-                  انضم كناقل
+                  <Briefcase className="h-4 w-4" />
+                  انضم كمقدّم خدمة
                 </motion.button>
               </Link>
             </motion.div>
@@ -410,8 +410,8 @@ export default function LandingPage() {
               className="mt-10 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-muted-foreground">
               {[
                 { icon: Lock,       text: 'مدفوعات Escrow' },
-                { icon: ShieldCheck, text: 'ناقلون معتمدون' },
-                { icon: Clock,       text: 'تتبّع لحظي' },
+                { icon: ShieldCheck, text: 'مزوّدون معتمدون' },
+                { icon: Clock,       text: 'متابعة لحظية' },
                 { icon: TrendingUp,  text: 'دعم ٢٤/٧' },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} className="inline-flex items-center gap-1.5">
@@ -436,14 +436,14 @@ export default function LandingPage() {
                 <div className="h-3 w-3 rounded-full bg-red-400/70" />
                 <div className="h-3 w-3 rounded-full bg-amber-400/70" />
                 <div className="h-3 w-3 rounded-full bg-green-400/70" />
-                <span className="ms-3 text-[11px] text-muted-foreground font-mono">dashboard.naqla.sa</span>
+                <span className="ms-3 text-[11px] text-muted-foreground font-mono">dashboard.nitaq.sa</span>
               </div>
               {/* Mock content */}
               <div className="p-5 space-y-4">
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { label: 'طلبات نشطة',    val: '٢٤', color: '#00C9A7' },
-                    { label: 'شحنات مكتملة', val: '١٢٨', color: '#3B82F6' },
+                    { label: 'طلبات مكتملة', val: '١٢٨', color: '#3B82F6' },
                     { label: 'التوفير',       val: '٢٢٪', color: '#F59E0B' },
                   ].map(s => (
                     <div key={s.label} className="rounded-xl p-3 text-center"
@@ -455,8 +455,8 @@ export default function LandingPage() {
                 </div>
                 <div className="space-y-2.5">
                   {[
-                    { label: 'شحنة #١٠٢٤ · الرياض → جدة',   pct: 65, color: '#00C9A7' },
-                    { label: 'شحنة #١٠٢٣ · الدمام → الرياض', pct: 90, color: '#3B82F6' },
+                    { label: 'طلب #١٠٢٤ · صيانة تقنية',   pct: 65, color: '#00C9A7' },
+                    { label: 'طلب #١٠٢٣ · تركيب وتجميع', pct: 90, color: '#3B82F6' },
                   ].map(r => (
                     <div key={r.label}>
                       <div className="flex justify-between text-[11px] text-muted-foreground mb-1">
@@ -486,7 +486,7 @@ export default function LandingPage() {
               style={{ background: '#00C9A7', color: '#fff' }}
             >
               <CheckCircle2 className="h-4 w-4" />
-              تم التسليم · شحنة #١٠٢٢
+              اكتمل التنفيذ · طلب #١٠٢٢
             </motion.div>
 
             <motion.div
@@ -496,7 +496,7 @@ export default function LandingPage() {
               style={{ background: 'hsl(var(--background))' }}
             >
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              ١٢ ناقل يتنافسون الآن
+              ١٢ مقدّم خدمة يتنافسون الآن
             </motion.div>
           </motion.div>
         </div>
@@ -529,8 +529,8 @@ export default function LandingPage() {
             <motion.span variants={fadeUp} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-4">
               المميزات
             </motion.span>
-            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight">كل ما تحتاجه لإدارة شحناتك</motion.h2>
-            <motion.p variants={fadeUp} className="mt-4 text-base text-muted-foreground">من تقديم الطلب إلى التسليم — كل خطوة محسوبة.</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight">كل ما تحتاجه لإدارة طلبات الخدمة</motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-base text-muted-foreground">من تقديم الطلب إلى الإنجاز — كل خطوة محسوبة.</motion.p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -549,7 +549,7 @@ export default function LandingPage() {
             <motion.span variants={fadeUp} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-4">
               كيف نعمل
             </motion.span>
-            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight">٤ خطوات وشحنتك في الطريق</motion.h2>
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight">٤ خطوات وخدمتك في الطريق</motion.h2>
             <motion.p variants={fadeUp} className="mt-4 text-base text-muted-foreground">عملية مبسّطة — بدون مكالمات لا نهائية أو مفاجآت.</motion.p>
           </motion.div>
 
@@ -569,7 +569,7 @@ export default function LandingPage() {
             className="text-center mb-14 max-w-2xl mx-auto"
           >
             <motion.span variants={fadeUp} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-4">
-              لمن نقلة؟
+              لمن نِطاق؟
             </motion.span>
             <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight">منصة للطرفين</motion.h2>
           </motion.div>
@@ -589,7 +589,7 @@ export default function LandingPage() {
               <h3 className="text-2xl font-bold">للعملاء</h3>
               <p className="mt-3 text-base text-muted-foreground">شركات أو أفراد — وفّر وقتك ومالك مع أسعار تنافسية وضمانات قوية.</p>
               <ul className="mt-6 space-y-3">
-                {['انشر طلباً في دقائق واحصل على عروض متعددة', 'قارن السعر والتقييم والمدة قبل الاختيار', 'ادفع مرّة واحدة عبر Escrow الآمن', 'تتبّع شحنتك على الخريطة لحظياً'].map(t => (
+                {['انشر طلباً في دقائق واحصل على عروض متعددة', 'قارن السعر والتقييم والمدة قبل الاختيار', 'ادفع مرّة واحدة عبر Escrow الآمن', 'تابع تنفيذ طلبك لحظياً وأكّد الإنجاز'].map(t => (
                   <li key={t} className="flex items-start gap-2.5 text-sm">
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500 mt-0.5" />
                     <span>{t}</span>
@@ -603,7 +603,7 @@ export default function LandingPage() {
               </Link>
             </motion.div>
 
-            {/* Carrier card */}
+            {/* Provider card */}
             <motion.div
               initial={{ opacity: 0, x: 24 }}
               animate={audInView ? { opacity: 1, x: 0 } : {}}
@@ -618,12 +618,12 @@ export default function LandingPage() {
               }} />
               <div className="relative">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 text-white mb-5">
-                  <Truck className="h-6 w-6" />
+                  <Briefcase className="h-6 w-6" />
                 </div>
-                <h3 className="text-2xl font-bold">للناقلين</h3>
-                <p className="mt-3 text-base text-white/80">طلبات نقل حقيقية يومياً، إدارة كاملة لأسطولك، وتحصيل مضمون أسبوعياً.</p>
+                <h3 className="text-2xl font-bold">لمقدّمي الخدمة</h3>
+                <p className="mt-3 text-base text-white/80">طلبات خدمة حقيقية يومياً، إدارة كاملة لموظفيك وخدماتك، وتحصيل مضمون أسبوعياً.</p>
                 <ul className="mt-6 space-y-3">
-                  {['استكشف عشرات الفرص ضمن خطوط سيرك', 'قدّم عروضك بسرعة من الجوال أو الويب', 'أدِر سائقيك وشاحناتك من لوحة واحدة', 'استلم مدفوعاتك أسبوعياً عبر تحويل بنكي'].map(t => (
+                  {['استكشف عشرات الفرص المتاحة في منطقتك', 'قدّم عروضك بسرعة من الجوال أو الويب', 'أدِر موظفيك وخدماتك من لوحة واحدة', 'استلم مدفوعاتك أسبوعياً عبر تحويل بنكي'].map(t => (
                     <li key={t} className="flex items-start gap-2.5 text-sm text-white/90">
                       <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-300 mt-0.5" />
                       <span>{t}</span>
@@ -632,7 +632,7 @@ export default function LandingPage() {
                 </ul>
                 <Link href={`${CARRIER_URL}/login`}
                   className="inline-flex items-center gap-1.5 mt-8 text-sm font-semibold hover:underline">
-                  انضم كناقل
+                  انضم كمقدّم خدمة
                   <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                 </Link>
               </div>
@@ -661,7 +661,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-3xl mx-auto">
             {[
               { title: 'للعميل',  value: 'مجاناً', sub: 'لا تدفع شيئاً للمنصة', featured: false },
-              { title: 'للناقل',  value: '٨٪',     sub: 'من قيمة كل صفقة ناجحة', featured: true },
+              { title: 'للمزوّد', value: '٨٪',     sub: 'من قيمة كل صفقة ناجحة', featured: true },
               { title: 'ضريبة',   value: '١٥٪',    sub: 'على العمولة فقط (VAT)', featured: false },
             ].map((p, i) => (
               <motion.div
@@ -704,8 +704,8 @@ export default function LandingPage() {
               backgroundSize: '24px 24px',
             }} />
             <div className="relative">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">جاهز لشحن أول طلب لك؟</h2>
-              <p className="mt-3 text-base text-white/80 max-w-xl mx-auto">سجّل خلال دقيقتين وتلقَّ عروض ناقلين معتمدين قبل ما تكمّل قهوتك.</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">جاهز لطلب أول خدمة لك؟</h2>
+              <p className="mt-3 text-base text-white/80 max-w-xl mx-auto">سجّل خلال دقيقتين وتلقَّ عروض مقدّمي خدمة معتمدين قبل ما تكمّل قهوتك.</p>
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href={`${CLIENT_URL}/login`}>
                   <motion.button
@@ -722,7 +722,7 @@ export default function LandingPage() {
                     whileTap={{ scale: 0.97 }}
                     className="px-8 py-3.5 rounded-xl text-sm font-semibold border border-white/40 text-white hover:bg-white/10 transition-colors"
                   >
-                    انضم كناقل
+                    انضم كمقدّم خدمة
                   </motion.button>
                 </Link>
               </div>
@@ -737,12 +737,12 @@ export default function LandingPage() {
           <div className="col-span-2 sm:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Truck className="h-5 w-5" />
+                <Briefcase className="h-5 w-5" />
               </div>
-              <span className="text-base font-bold">نقلة لوجيستك</span>
+              <span className="text-base font-bold">نِطاق</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              منصة النقل اللوجستي الذكي في المملكة — نربطك بأفضل ناقلي المملكة بشفافية كاملة وأسعار تنافسية.
+              منصة الخدمات الذكية في المملكة — نربط الشركات والأفراد بأفضل مقدّمي الخدمات بشفافية كاملة وأسعار تنافسية.
             </p>
           </div>
           <div>
@@ -756,7 +756,7 @@ export default function LandingPage() {
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">الشركة</h4>
             <ul className="space-y-2.5 text-sm">
-              {[['/about', 'عن نقلة'], ['/contact', 'تواصل'], ['/privacy', 'الخصوصية'], ['/terms', 'الشروط'], ['/transport', 'شروط النقل']].map(([h, l]) => (
+              {[['/about', 'عن نِطاق'], ['/contact', 'تواصل'], ['/privacy', 'الخصوصية'], ['/terms', 'الشروط'], ['/transport', 'شروط الخدمة']].map(([h, l]) => (
                 <li key={l}><Link href={h} className="text-muted-foreground hover:text-foreground transition-colors">{l}</Link></li>
               ))}
             </ul>
@@ -764,7 +764,7 @@ export default function LandingPage() {
         </div>
         <div className="border-t">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-5 text-xs text-muted-foreground text-center">
-            © {new Date().getFullYear()} نقلة لوجيستك · جميع الحقوق محفوظة
+            © {new Date().getFullYear()} نِطاق · جميع الحقوق محفوظة
           </div>
         </div>
       </footer>
