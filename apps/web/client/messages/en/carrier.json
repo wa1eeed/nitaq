@@ -1,13 +1,13 @@
 {
-  "appName": "Naqla Logistics",
-  "appSubtitle": "Carrier Portal",
+  "appName": "Nitaq",
+  "appSubtitle": "Provider Portal",
   "nav": {
     "dashboard": "Dashboard",
     "opportunities": "Opportunities",
     "orders": "My Orders",
     "bids": "Bid History",
-    "trucks": "Trucks",
-    "drivers": "Drivers",
+    "trucks": "Services",
+    "drivers": "Employees",
     "earnings": "Earnings",
     "finance": "Finance",
     "reports": "Reports",
@@ -19,24 +19,24 @@
     "settings": "Company Settings"
   },
   "groups": {
-    "carrier": "Carrier",
-    "fleet": "Fleet",
+    "carrier": "Provider",
+    "fleet": "Services & Staff",
     "finance": "Finance",
     "complianceSupport": "Compliance & Support",
     "settings": "Settings"
   },
   "dashboard": {
     "welcome": "Welcome",
-    "activeTrips": "Active Trips",
+    "activeTrips": "Active Jobs",
     "earnings": "Earnings",
-    "fleetSize": "Fleet Size",
+    "fleetSize": "Active Services",
     "rating": "Rating",
     "openOpportunities": "Open Opportunities",
     "viewAll": "View All"
   },
   "opportunities": {
     "title": "Opportunities Market",
-    "subtitle": "All available transport requests",
+    "subtitle": "All available service requests",
     "openMarket": "Open Market",
     "direct": "Direct to me",
     "submitBid": "Submit Bid",

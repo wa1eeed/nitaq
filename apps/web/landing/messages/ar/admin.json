@@ -1,14 +1,14 @@
 {
-  "appName": "نقلة لوجيستك",
+  "appName": "نِطاق",
   "appSubtitle": "لوحة الإدارة",
   "nav": {
     "dashboard": "لوحة التحكم",
-    "companies": "الناقلون والعملاء",
+    "companies": "مقدّمو الخدمة والعملاء",
     "kyc": "اعتماد الشركات",
     "orders": "الطلبات",
     "disputes": "النزاعات",
-    "trucks": "كل الشاحنات",
-    "drivers": "كل السائقين",
+    "trucks": "كل الخدمات",
+    "drivers": "كل الموظفين",
     "payments": "المدفوعات",
     "wallets": "محافظ الشركات",
     "reports": "التقارير",
@@ -22,7 +22,7 @@
   },
   "groups": {
     "platform": "إدارة المنصة",
-    "fleet": "الأسطول",
+    "fleet": "الخدمات",
     "finance": "المالية",
     "system": "النظام",
     "legalSeo": "القانوني والـ SEO",
@@ -38,14 +38,120 @@
   },
   "settings": {
     "title": "إعدادات المنصة",
+    "subtitle": "تحكّم في العمولات، الامتثال، الإشعارات والإعدادات العامة",
     "tabs": {
       "financial": "المالية",
       "compliance": "الامتثال",
       "notifications": "الإشعارات",
-      "truckTypes": "أنواع الشاحنات",
+      "truckTypes": "أنواع الخدمات",
       "brands": "البراندات والموديلات",
+      "branding": "هوية المنصة",
+      "cities": "المدن",
+      "cargoTypes": "تصنيفات الخدمات",
+      "smsTemplates": "قوالب SMS",
       "general": "عامة"
     }
+  },
+  "branding": {
+    "title": "هوية المنصة",
+    "subtitle": "الشعار والاسم اللذان يظهران في كل واجهات المنصة",
+    "uploadFromDevice": "رفع من الجهاز",
+    "fromUrl": "من رابط URL",
+    "chooseImage": "اختر صورة الشعار",
+    "dropOrClick": "اضغط لاختيار صورة من جهازك",
+    "formats": "PNG, SVG, JPG, WebP — الحد الأقصى 2MB",
+    "imageUrl": "رابط الصورة",
+    "nameAr": "اسم المنصة بالعربية",
+    "nameEn": "اسم المنصة بالإنجليزية",
+    "saveNames": "حفظ الأسماء",
+    "removeLogo": "إزالة الشعار",
+    "resetDefaults": "استرجاع الافتراضي",
+    "confirmReset": "استرجاع الهوية الافتراضية؟ سيتم فقدان أي تعديلات.",
+    "errorFormat": "نوع الملف غير مدعوم. استخدم PNG أو SVG أو JPG أو WebP.",
+    "errorSize": "حجم الملف يتجاوز الحد المسموح (2MB)."
+  },
+  "cities": {
+    "title": "إدارة المدن",
+    "subtitle": "المدن المتاحة لاختيار مواقع طلبات الخدمة",
+    "addCity": "إضافة مدينة",
+    "editCity": "تعديل مدينة",
+    "deleteCity": "حذف مدينة",
+    "confirmDelete": "حذف المدينة \"{name}\"؟ لن يتم حذف الطلبات المرتبطة بها.",
+    "fields": {
+      "nameAr": "الاسم بالعربية",
+      "nameEn": "الاسم بالإنجليزية",
+      "region": "المنطقة",
+      "lat": "خط العرض",
+      "lng": "خط الطول",
+      "active": "نشطة"
+    },
+    "columns": {
+      "name": "المدينة",
+      "region": "المنطقة",
+      "coordinates": "الإحداثيات",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "statusActive": "نشطة",
+    "statusInactive": "موقوفة",
+    "empty": "لا توجد مدن — أضف واحدة للبدء",
+    "resetToDefaults": "استرجاع المدن الافتراضية",
+    "confirmReset": "استرجاع المدن الافتراضية الـ 15؟ سيتم فقدان أي تعديلات."
+  },
+  "cargoTypes": {
+    "title": "تصنيفات الخدمات",
+    "subtitle": "التصنيفات المتاحة للعميل لاختيارها عند إنشاء طلب خدمة",
+    "addType": "إضافة تصنيف",
+    "editType": "تعديل التصنيف",
+    "deleteType": "حذف التصنيف",
+    "confirmDelete": "حذف تصنيف الخدمة \"{name}\"؟",
+    "fields": {
+      "nameAr": "الاسم بالعربية",
+      "nameEn": "الاسم بالإنجليزية",
+      "icon": "الأيقونة (Emoji)",
+      "requiresRefrigeration": "يتطلب معدات متخصصة",
+      "hazardous": "عالي المخاطر / حساس",
+      "active": "نشط"
+    },
+    "columns": {
+      "name": "التصنيف",
+      "icon": "الأيقونة",
+      "flags": "الخصائص",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "flags": {
+      "refrigerated": "معدات متخصصة",
+      "hazardous": "عالي المخاطر"
+    },
+    "statusActive": "نشط",
+    "statusInactive": "موقوف",
+    "empty": "لا توجد تصنيفات — أضف واحداً للبدء",
+    "resetToDefaults": "استرجاع التصنيفات الافتراضية",
+    "confirmReset": "استرجاع التصنيفات العشرة الافتراضية؟"
+  },
+  "smsTemplates": {
+    "title": "قوالب الإشعارات (SMS)",
+    "subtitle": "النصوص المُستخدمة لرسائل SMS — يمكن استخدام متغيرات مثل {variable}",
+    "addTemplate": "إضافة قالب",
+    "editTemplate": "تعديل القالب",
+    "fields": {
+      "name": "اسم القالب",
+      "channel": "القناة",
+      "subject": "العنوان (للإيميل)",
+      "body": "النص",
+      "variables": "المتغيرات المتاحة",
+      "active": "نشط"
+    },
+    "columns": {
+      "name": "القالب",
+      "channel": "القناة",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "preview": "معاينة",
+    "variablesHint": "المتغيرات المتاحة (انقر للإدراج)",
+    "empty": "لا توجد قوالب — أضف واحداً للبدء"
   },
   "kyc": {
     "title": "اعتماد الشركات",

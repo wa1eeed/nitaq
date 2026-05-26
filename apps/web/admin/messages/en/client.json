@@ -1,5 +1,5 @@
 {
-  "appName": "Naqla Logistics",
+  "appName": "Nitaq",
   "appSubtitle": "Client Portal",
   "nav": {
     "dashboard": "Dashboard",
@@ -32,7 +32,7 @@
   },
   "addresses": {
     "title": "Saved Addresses",
-    "subtitle": "Frequently used pickup and delivery locations",
+    "subtitle": "Frequently used service locations",
     "addNew": "Add Address",
     "label": "Label",
     "city": "City",
@@ -45,11 +45,11 @@
   },
   "tracking": {
     "title": "Live Tracking",
-    "active": "Active Shipments",
+    "active": "Active Orders",
     "live": "Live",
-    "currentLocation": "Current Vehicle Location",
+    "currentLocation": "Field Team Location",
     "remaining": "Remaining",
-    "estimatedArrival": "Estimated Arrival",
+    "estimatedArrival": "Estimated Completion",
     "progress": "Progress"
   }
 }

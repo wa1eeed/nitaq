@@ -22,7 +22,7 @@
     "joinDate": "تاريخ الانضمام",
     "updateBtn": "تحديث البيانات",
     "activitySummary": "ملخّص النشاط",
-    "monthlyVolume": "حجم النقل الشهري",
+    "monthlyVolume": "حجم الخدمات الشهري",
     "kycStatus": "حالة التحقّق (KYC)"
   },
   "team": {
@@ -70,8 +70,8 @@
         "icon": "📦"
       },
       "DISPATCH": {
-        "label": "مشرف أسطول",
-        "icon": "🚚"
+        "label": "مشرف خدمات",
+        "icon": "🔧"
       },
       "FINANCE": {
         "label": "محاسب",

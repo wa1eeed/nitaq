@@ -1,14 +1,14 @@
 {
-  "appName": "نقلة لوجيستك",
+  "appName": "نِطاق",
   "appSubtitle": "لوحة الإدارة",
   "nav": {
     "dashboard": "لوحة التحكم",
-    "companies": "الناقلون والعملاء",
+    "companies": "مقدّمو الخدمة والعملاء",
     "kyc": "اعتماد الشركات",
     "orders": "الطلبات",
     "disputes": "النزاعات",
-    "trucks": "كل الشاحنات",
-    "drivers": "كل السائقين",
+    "trucks": "كل الخدمات",
+    "drivers": "كل الموظفين",
     "payments": "المدفوعات",
     "wallets": "محافظ الشركات",
     "reports": "التقارير",
@@ -22,7 +22,7 @@
   },
   "groups": {
     "platform": "إدارة المنصة",
-    "fleet": "الأسطول",
+    "fleet": "الخدمات",
     "finance": "المالية",
     "system": "النظام",
     "legalSeo": "القانوني والـ SEO",
@@ -43,11 +43,11 @@
       "financial": "المالية",
       "compliance": "الامتثال",
       "notifications": "الإشعارات",
-      "truckTypes": "أنواع الشاحنات",
+      "truckTypes": "أنواع الخدمات",
       "brands": "البراندات والموديلات",
       "branding": "هوية المنصة",
       "cities": "المدن",
-      "cargoTypes": "أنواع البضائع",
+      "cargoTypes": "تصنيفات الخدمات",
       "smsTemplates": "قوالب SMS",
       "general": "عامة"
     }
@@ -72,7 +72,7 @@
   },
   "cities": {
     "title": "إدارة المدن",
-    "subtitle": "المدن المتاحة لاختيار مواقع الاستلام والتسليم في طلبات النقل",
+    "subtitle": "المدن المتاحة لاختيار مواقع طلبات الخدمة",
     "addCity": "إضافة مدينة",
     "editCity": "تعديل مدينة",
     "deleteCity": "حذف مدينة",
@@ -99,36 +99,36 @@
     "confirmReset": "استرجاع المدن الافتراضية الـ 15؟ سيتم فقدان أي تعديلات."
   },
   "cargoTypes": {
-    "title": "أنواع البضائع",
-    "subtitle": "الأنواع المتاحة للعميل لاختيارها عند إنشاء طلب نقل",
-    "addType": "إضافة نوع",
-    "editType": "تعديل النوع",
-    "deleteType": "حذف النوع",
-    "confirmDelete": "حذف نوع البضاعة \"{name}\"؟",
+    "title": "تصنيفات الخدمات",
+    "subtitle": "التصنيفات المتاحة للعميل لاختيارها عند إنشاء طلب خدمة",
+    "addType": "إضافة تصنيف",
+    "editType": "تعديل التصنيف",
+    "deleteType": "حذف التصنيف",
+    "confirmDelete": "حذف تصنيف الخدمة \"{name}\"؟",
     "fields": {
       "nameAr": "الاسم بالعربية",
       "nameEn": "الاسم بالإنجليزية",
       "icon": "الأيقونة (Emoji)",
-      "requiresRefrigeration": "يتطلب تبريد",
-      "hazardous": "خطر/حساس",
+      "requiresRefrigeration": "يتطلب معدات متخصصة",
+      "hazardous": "عالي المخاطر / حساس",
       "active": "نشط"
     },
     "columns": {
-      "name": "النوع",
+      "name": "التصنيف",
       "icon": "الأيقونة",
       "flags": "الخصائص",
       "status": "الحالة",
       "actions": "الإجراءات"
     },
     "flags": {
-      "refrigerated": "تبريد",
-      "hazardous": "خطر"
+      "refrigerated": "معدات متخصصة",
+      "hazardous": "عالي المخاطر"
     },
     "statusActive": "نشط",
     "statusInactive": "موقوف",
-    "empty": "لا توجد أنواع — أضف واحداً للبدء",
-    "resetToDefaults": "استرجاع الأنواع الافتراضية",
-    "confirmReset": "استرجاع الأنواع العشرة الافتراضية؟"
+    "empty": "لا توجد تصنيفات — أضف واحداً للبدء",
+    "resetToDefaults": "استرجاع التصنيفات الافتراضية",
+    "confirmReset": "استرجاع التصنيفات العشرة الافتراضية؟"
   },
   "smsTemplates": {
     "title": "قوالب الإشعارات (SMS)",

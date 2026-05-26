@@ -1,14 +1,14 @@
 {
-  "appName": "Naqla Logistics",
+  "appName": "Nitaq",
   "appSubtitle": "Admin Dashboard",
   "nav": {
     "dashboard": "Dashboard",
-    "companies": "Carriers & Clients",
+    "companies": "Providers & Clients",
     "kyc": "KYC Approval",
     "orders": "Orders",
     "disputes": "Disputes",
-    "trucks": "All Trucks",
-    "drivers": "All Drivers",
+    "trucks": "All Services",
+    "drivers": "All Employees",
     "payments": "Payments",
     "wallets": "Company Wallets",
     "reports": "Reports",
@@ -22,7 +22,7 @@
   },
   "groups": {
     "platform": "Platform Management",
-    "fleet": "Fleet",
+    "fleet": "Services",
     "finance": "Finance",
     "system": "System",
     "legalSeo": "Legal & SEO",
@@ -43,11 +43,11 @@
       "financial": "Financial",
       "compliance": "Compliance",
       "notifications": "Notifications",
-      "truckTypes": "Truck Types",
+      "truckTypes": "Service Types",
       "brands": "Brands & Models",
       "branding": "Platform Branding",
       "cities": "Cities",
-      "cargoTypes": "Cargo Types",
+      "cargoTypes": "Service Categories",
       "smsTemplates": "SMS Templates",
       "general": "General"
     }
@@ -72,7 +72,7 @@
   },
   "cities": {
     "title": "Cities Management",
-    "subtitle": "Cities available for pickup and delivery locations in transport orders",
+    "subtitle": "Cities available for service request locations",
     "addCity": "Add City",
     "editCity": "Edit City",
     "deleteCity": "Delete City",
@@ -99,36 +99,36 @@
     "confirmReset": "Reset to the default 15 cities? Your changes will be lost."
   },
   "cargoTypes": {
-    "title": "Cargo Types",
-    "subtitle": "Types clients can pick when creating a transport order",
-    "addType": "Add Type",
-    "editType": "Edit Type",
-    "deleteType": "Delete Type",
-    "confirmDelete": "Delete cargo type \"{name}\"?",
+    "title": "Service Categories",
+    "subtitle": "Categories clients can pick when creating a service request",
+    "addType": "Add Category",
+    "editType": "Edit Category",
+    "deleteType": "Delete Category",
+    "confirmDelete": "Delete service category \"{name}\"?",
     "fields": {
       "nameAr": "Name (Arabic)",
       "nameEn": "Name (English)",
       "icon": "Icon (Emoji)",
-      "requiresRefrigeration": "Requires refrigeration",
-      "hazardous": "Hazardous/sensitive",
+      "requiresRefrigeration": "Requires special equipment",
+      "hazardous": "High-risk / sensitive",
       "active": "Active"
     },
     "columns": {
-      "name": "Type",
+      "name": "Category",
       "icon": "Icon",
       "flags": "Flags",
       "status": "Status",
       "actions": "Actions"
     },
     "flags": {
-      "refrigerated": "Refrigerated",
-      "hazardous": "Hazardous"
+      "refrigerated": "Special Equipment",
+      "hazardous": "High-Risk"
     },
     "statusActive": "Active",
     "statusInactive": "Inactive",
-    "empty": "No cargo types — add one to get started",
-    "resetToDefaults": "Reset to default types",
-    "confirmReset": "Reset to the default 10 cargo types?"
+    "empty": "No service categories — add one to get started",
+    "resetToDefaults": "Reset to default categories",
+    "confirmReset": "Reset to the default 10 service categories?"
   },
   "smsTemplates": {
     "title": "SMS Templates",

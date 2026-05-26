@@ -1,14 +1,14 @@
 {
-  "appName": "Naqla Logistics",
+  "appName": "Nitaq",
   "appSubtitle": "Admin Dashboard",
   "nav": {
     "dashboard": "Dashboard",
-    "companies": "Carriers & Clients",
+    "companies": "Providers & Clients",
     "kyc": "KYC Approval",
     "orders": "Orders",
     "disputes": "Disputes",
-    "trucks": "All Trucks",
-    "drivers": "All Drivers",
+    "trucks": "All Services",
+    "drivers": "All Employees",
     "payments": "Payments",
     "wallets": "Company Wallets",
     "reports": "Reports",
@@ -22,7 +22,7 @@
   },
   "groups": {
     "platform": "Platform Management",
-    "fleet": "Fleet",
+    "fleet": "Services",
     "finance": "Finance",
     "system": "System",
     "legalSeo": "Legal & SEO",
@@ -38,14 +38,120 @@
   },
   "settings": {
     "title": "Platform Settings",
+    "subtitle": "Control commissions, compliance, notifications and general settings",
     "tabs": {
       "financial": "Financial",
       "compliance": "Compliance",
       "notifications": "Notifications",
-      "truckTypes": "Truck Types",
+      "truckTypes": "Service Types",
       "brands": "Brands & Models",
+      "branding": "Platform Branding",
+      "cities": "Cities",
+      "cargoTypes": "Service Categories",
+      "smsTemplates": "SMS Templates",
       "general": "General"
     }
+  },
+  "branding": {
+    "title": "Platform Branding",
+    "subtitle": "Logo and display name shown across every interface",
+    "uploadFromDevice": "Upload from device",
+    "fromUrl": "From URL",
+    "chooseImage": "Choose logo image",
+    "dropOrClick": "Click to select an image from your device",
+    "formats": "PNG, SVG, JPG, WebP — max 2MB",
+    "imageUrl": "Image URL",
+    "nameAr": "Platform name in Arabic",
+    "nameEn": "Platform name in English",
+    "saveNames": "Save names",
+    "removeLogo": "Remove logo",
+    "resetDefaults": "Reset to default",
+    "confirmReset": "Reset to default branding? Your changes will be lost.",
+    "errorFormat": "Unsupported file type. Use PNG, SVG, JPG, or WebP.",
+    "errorSize": "File exceeds the maximum size (2MB)."
+  },
+  "cities": {
+    "title": "Cities Management",
+    "subtitle": "Cities available for service request locations",
+    "addCity": "Add City",
+    "editCity": "Edit City",
+    "deleteCity": "Delete City",
+    "confirmDelete": "Delete city \"{name}\"? Existing orders linked to it will be preserved.",
+    "fields": {
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "region": "Region",
+      "lat": "Latitude",
+      "lng": "Longitude",
+      "active": "Active"
+    },
+    "columns": {
+      "name": "City",
+      "region": "Region",
+      "coordinates": "Coordinates",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "empty": "No cities — add one to get started",
+    "resetToDefaults": "Reset to default cities",
+    "confirmReset": "Reset to the default 15 cities? Your changes will be lost."
+  },
+  "cargoTypes": {
+    "title": "Service Categories",
+    "subtitle": "Categories clients can pick when creating a service request",
+    "addType": "Add Category",
+    "editType": "Edit Category",
+    "deleteType": "Delete Category",
+    "confirmDelete": "Delete service category \"{name}\"?",
+    "fields": {
+      "nameAr": "Name (Arabic)",
+      "nameEn": "Name (English)",
+      "icon": "Icon (Emoji)",
+      "requiresRefrigeration": "Requires special equipment",
+      "hazardous": "High-risk / sensitive",
+      "active": "Active"
+    },
+    "columns": {
+      "name": "Category",
+      "icon": "Icon",
+      "flags": "Flags",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "flags": {
+      "refrigerated": "Special Equipment",
+      "hazardous": "High-Risk"
+    },
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "empty": "No service categories — add one to get started",
+    "resetToDefaults": "Reset to default categories",
+    "confirmReset": "Reset to the default 10 service categories?"
+  },
+  "smsTemplates": {
+    "title": "SMS Templates",
+    "subtitle": "Templates used for SMS notifications — supports variables like {variable}",
+    "addTemplate": "Add Template",
+    "editTemplate": "Edit Template",
+    "fields": {
+      "name": "Template name",
+      "channel": "Channel",
+      "subject": "Subject (email only)",
+      "body": "Body",
+      "variables": "Available variables",
+      "active": "Active"
+    },
+    "columns": {
+      "name": "Template",
+      "channel": "Channel",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "preview": "Preview",
+    "variablesHint": "Available variables (click to insert)",
+    "empty": "No templates — add one to get started"
   },
   "kyc": {
     "title": "KYC Approval",

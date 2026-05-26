@@ -1,5 +1,5 @@
 {
-  "appName": "نقلة لوجيستك",
+  "appName": "نِطاق",
   "appSubtitle": "منصة العميل",
   "nav": {
     "dashboard": "لوحة التحكم",
@@ -32,7 +32,7 @@
   },
   "addresses": {
     "title": "العناوين المحفوظة",
-    "subtitle": "مواقع الاستلام والتسليم المتكررة",
+    "subtitle": "مواقع الخدمة المتكررة",
     "addNew": "إضافة عنوان",
     "label": "الاسم المختصر",
     "city": "المدينة",
@@ -45,11 +45,11 @@
   },
   "tracking": {
     "title": "التتبع المباشر",
-    "active": "الشحنات النشطة",
+    "active": "الطلبات النشطة",
     "live": "مباشر",
-    "currentLocation": "الموقع الحالي للشاحنة",
+    "currentLocation": "الموقع الحالي للفريق",
     "remaining": "متبقّي",
-    "estimatedArrival": "الوصول المتوقّع",
+    "estimatedArrival": "الإنجاز المتوقّع",
     "progress": "التقدّم"
   }
 }

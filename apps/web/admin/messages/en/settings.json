@@ -22,7 +22,7 @@
     "joinDate": "Joined",
     "updateBtn": "Update Info",
     "activitySummary": "Activity Summary",
-    "monthlyVolume": "Monthly Shipping Volume",
+    "monthlyVolume": "Monthly Service Volume",
     "kycStatus": "KYC Status"
   },
   "team": {
@@ -70,8 +70,8 @@
         "icon": "📦"
       },
       "DISPATCH": {
-        "label": "Fleet Dispatcher",
-        "icon": "🚚"
+        "label": "Service Coordinator",
+        "icon": "🔧"
       },
       "FINANCE": {
         "label": "Finance",
