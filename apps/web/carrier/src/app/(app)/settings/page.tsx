@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/page-header';
-import { LanguageSelector } from '@/components/language-selector';
 import { TeamTab } from '@/components/settings/team-tab';
 import { useAuthStore } from '@/lib/auth-store';
 import { fetcher, api } from '@/lib/api';
@@ -212,17 +211,6 @@ export default function CarrierSettingsPage() {
 
         {/* ─── Preferences ─── */}
         <TabsContent value="settings">
-          <div className="max-w-2xl">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('preferences.title')}</CardTitle>
-                <CardDescription className="mt-1">{t('preferences.languageHint')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LanguageSelector />
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
 
         {/* ─── KYC Documents ─── */}

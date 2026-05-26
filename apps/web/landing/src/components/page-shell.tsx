@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Truck } from 'lucide-react';
-import { LocaleSwitcher } from './locale-switcher';
 
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
@@ -17,8 +16,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
           <nav className="flex items-center gap-2 text-sm">
             <Link href="/about" className="text-muted-foreground hover:text-foreground px-3 py-2">عن نقلة</Link>
             <Link href="/contact" className="text-muted-foreground hover:text-foreground px-3 py-2">تواصل</Link>
-            <LocaleSwitcher />
-            <Link href="/" className="px-3 py-2 text-primary hover:underline">الرئيسية ←</Link>
+<Link href="/" className="px-3 py-2 text-primary hover:underline">الرئيسية ←</Link>
           </nav>
         </div>
       </header>

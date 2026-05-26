@@ -1,7 +1,7 @@
 import { createSharedPathnamesNavigation } from 'next-intl/navigation';
 
 export const SUPPORTED_LOCALES = ['ar', 'en'] as const;
-export const DEFAULT_LOCALE = 'ar';
+export const DEFAULT_LOCALE = 'en';
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

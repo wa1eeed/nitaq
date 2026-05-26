@@ -2,7 +2,7 @@ import { cookies, headers } from 'next/headers';
 import { getRequestConfig } from 'next-intl/server';
 
 export const SUPPORTED_LOCALES = ['ar', 'en'] as const;
-export const DEFAULT_LOCALE = 'ar';
+export const DEFAULT_LOCALE = 'en';
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 // Cookies are scoped by hostname only, not port. On localhost all three
 // portals would share `naqla-locale` and flip each other's language. Use

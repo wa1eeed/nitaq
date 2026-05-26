@@ -19,7 +19,6 @@ import { Switch } from '@/components/ui/switch';
 import { DEV_USERS, DEV_BYPASS_TOKEN } from '@naqla/shared-utils';
 import { useTruckTypesStore } from '@/stores/truck-types-store';
 import { useAuthStore } from '@/lib/auth-store';
-import { OnboardingLanguagePicker } from '@/components/onboarding-language-picker';
 import { cn } from '@/lib/utils';
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -235,9 +234,6 @@ export default function CarrierRegisterPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
         <div className="space-y-6 order-2 lg:order-1">
-          {/* Language picker — first thing the user sees on this page */}
-          <OnboardingLanguagePicker />
-
           {/* Stepper */}
           <ol className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-thin pb-2">
             {STEPS_META.map((s, i) => {

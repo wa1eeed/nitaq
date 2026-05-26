@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/select';
 import { DEV_USERS, DEV_BYPASS_TOKEN } from '@naqla/shared-utils';
 import { useAuthStore } from '@/lib/auth-store';
-import { OnboardingLanguagePicker } from '@/components/onboarding-language-picker';
 import { cn } from '@/lib/utils';
 
 type Step = 0 | 1 | 2 | 3 | 4;
@@ -135,9 +134,6 @@ export default function ClientRegisterPage() {
       <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
         {/* Main form */}
         <div className="space-y-6 order-2 lg:order-1">
-          {/* Language picker — first thing users see */}
-          <OnboardingLanguagePicker />
-
           {/* Progress */}
           <div>
             <div className="flex items-center justify-between mb-2">

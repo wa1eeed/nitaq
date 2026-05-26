@@ -19,7 +19,6 @@ import {
   Tabs, TabsContent, TabsList, TabsTrigger,
 } from '@/components/ui/tabs';
 import { PageHeader } from '@/components/page-header';
-import { LanguageSelector } from '@/components/language-selector';
 import { BrandingPanel } from '@/components/settings/branding-panel';
 import { CitiesPanel } from '@/components/settings/cities-panel';
 import { CargoTypesPanel } from '@/components/settings/cargo-types-panel';
@@ -247,16 +246,6 @@ export default function AdminSettingsPage() {
 
         <TabsContent value="general">
           <div className="space-y-6 max-w-2xl">
-            <Card>
-              <CardHeader>
-                <CardTitle>تفضيلات العرض</CardTitle>
-                <CardDescription>اللغة المستخدمة في لوحة الإدارة</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LanguageSelector />
-              </CardContent>
-            </Card>
-
             <Card>
               <CardHeader><CardTitle>إعدادات عامة</CardTitle></CardHeader>
               <CardContent className="space-y-4">
