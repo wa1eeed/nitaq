@@ -46,7 +46,7 @@ export class OrdersService {
       if (mine) {
         where.carrierId = myId;
       } else {
-        // Carriers see three buckets simultaneously:
+        // Providers see three buckets simultaneously:
         //   1. OPEN marketplace orders (PUBLISHED/BIDDING + mode=OPEN)
         //   2. DIRECT orders targeted at them (any status pre-assignment)
         //   3. Orders already assigned to them (any status)
@@ -68,7 +68,7 @@ export class OrdersService {
           client: { select: { id: true, nameAr: true, logo: true } },
           carrier: { select: { id: true, nameAr: true, logo: true } },
           _count: { select: { bids: true } },
-          // Lean bid subset so the carrier list can answer "did I already bid
+          // Lean bid subset so the provider list can answer "did I already bid
           // on this order?" without a second round-trip. We only need the
           // carrierId + status to drive the row CTA (تفاصيل / إعادة تقديم /
           // قدّم عرضاً) — full bid bodies are still fetched in the detail page.
@@ -242,9 +242,9 @@ export class OrdersService {
   }
 
   /**
-   * Carrier marks the order as delivered. Transition is allowed from
+   * Provider marks the order as delivered. Transition is allowed from
    * CONFIRMED or IN_TRANSIT — the latter being the typical path after the
-   * carrier has been emitting tracking events. Sets `actualDeliveryAt` so the
+   * provider has been emitting tracking events. Sets `actualDeliveryAt` so the
    * 72-hour escrow auto-release clock starts ticking.
    */
   async deliver(id: string, actor: AuthUser) {
@@ -285,7 +285,7 @@ export class OrdersService {
         where: { orderId: id, status: 'HELD' },
         data: { status: 'RELEASED', releasedAt: new Date() },
       });
-      // Set assigned drivers back to AVAILABLE once order completes.
+      // Set assigned employees back to AVAILABLE once order completes.
       const assigned = await tx.orderDriver.findMany({ where: { orderId: id }, select: { driverId: true } });
       if (assigned.length > 0) {
         await tx.driverProfile.updateMany({
@@ -306,9 +306,9 @@ export class OrdersService {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'لا يمكن إسناد سائق في هذه المرحلة' });
     }
     const driver = await this.prisma.driverProfile.findUnique({ where: { id: dto.driverId } });
-    if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'السائق غير موجود' });
+    if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'الموظف غير موجود' });
     if (driver.companyId !== actor.companyId && !this.isAdmin(actor)) {
-      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'السائق لا ينتمي لشركتك' });
+      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'الموظف لا ينتمي لشركتك' });
     }
     return this.prisma.$transaction(async (tx) => {
       await tx.orderDriver.upsert({
@@ -342,12 +342,12 @@ export class OrdersService {
       throw new BadRequestException({ code: 'NOT_DIRECT', message: 'هذا الإجراء خاص بالطلبات المباشرة' });
     }
     if (order.targetCarrierId !== actor.companyId) {
-      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لست الناقل المستهدف' });
+      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لست مزود الخدمة المستهدف' });
     }
     if (!['PUBLISHED', 'BIDDING'].includes(order.status)) {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'الطلب لم يعد في مرحلة التفاوض' });
     }
-    // Move order back to PUBLISHED so client can reassign or open to market.
+    // Move order back to PUBLISHED so client can reassign or open to marketplace.
     return this.prisma.order.update({
       where: { id },
       data: { status: 'PUBLISHED', targetCarrierId: null },

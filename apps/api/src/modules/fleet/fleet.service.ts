@@ -31,7 +31,7 @@ export class FleetService {
 
   async getTruck(id: string, actor: AuthUser) {
     const truck = await this.prisma.truck.findUnique({ where: { id }, include: { currentDriver: true } });
-    if (!truck) throw new NotFoundException({ code: 'TRUCK_NOT_FOUND', message: 'الشاحنة غير موجودة' });
+    if (!truck) throw new NotFoundException({ code: 'TRUCK_NOT_FOUND', message: 'الخدمة غير موجودة' });
     if (truck.companyId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
@@ -112,7 +112,7 @@ export class FleetService {
 
   async getAvailableDrivers(actor: AuthUser) {
     if (!actor.companyId) throw new BadRequestException({ code: 'NO_COMPANY', message: 'لا توجد شركة' });
-    // Drivers currently assigned to an active order.
+    // Employees currently assigned to an active order.
     const busy = await this.prisma.orderDriver.findMany({
       where: { order: { status: { in: ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'] } } },
       select: { driverId: true },
@@ -134,7 +134,7 @@ export class FleetService {
     const driver = await this.prisma.driverProfile.findUnique({
       where: { id }, include: { user: true },
     });
-    if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'السائق غير موجود' });
+    if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'الموظف غير موجود' });
     if (driver.companyId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
@@ -142,9 +142,9 @@ export class FleetService {
   }
 
   async updateDriverLocation(id: string, dto: LocationDto, actor: AuthUser) {
-    // The driver can update their own location; carrier admin can too.
+    // The employee can update their own location; provider admin can too.
     const driver = await this.prisma.driverProfile.findUnique({ where: { id } });
-    if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'السائق غير موجود' });
+    if (!driver) throw new NotFoundException({ code: 'DRIVER_NOT_FOUND', message: 'الموظف غير موجود' });
     if (driver.userId !== actor.id && driver.companyId !== actor.companyId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }

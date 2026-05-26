@@ -18,7 +18,7 @@ export class PaymentsService {
         where, skip: (page - 1) * limit, take: limit,
         orderBy: { [sort]: order },
         include: {
-          // Include the parties' display names so the frontend doesn't have
+          // Include the parties' display names so the frontend doesn't need
           // to look them up by cuid (which the mock data doesn't have).
           order: {
             select: {
@@ -78,7 +78,7 @@ export class PaymentsService {
         data: { status: 'RELEASED', releasedAt: new Date() },
       });
       if (payment.order.carrierId) {
-        // Credit the carrier wallet
+        // Credit the provider wallet
         const carrier = await tx.company.update({
           where: { id: payment.order.carrierId },
           data: { walletBalance: { increment: payment.carrierAmount } },
@@ -95,7 +95,7 @@ export class PaymentsService {
           },
         });
       }
-      // Mark the order as completed
+      // Mark the order as completed after provider payment release
       await tx.order.update({
         where: { id: payment.orderId },
         data: { status: 'COMPLETED' },

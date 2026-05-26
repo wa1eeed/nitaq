@@ -17,7 +17,7 @@ export class BidsService {
 
   async create(orderId: string, dto: CreateBidDto, actor: AuthUser) {
     if (!actor.companyId) {
-      throw new BadRequestException({ code: 'NO_COMPANY', message: 'يجب أن تكون شركة ناقلة' });
+      throw new BadRequestException({ code: 'NO_COMPANY', message: 'يجب أن تكون شركة مزودة للخدمة' });
     }
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException({ code: 'ORDER_NOT_FOUND', message: 'الطلب غير موجود' });
@@ -28,7 +28,7 @@ export class BidsService {
     // Idempotent: upsert by (orderId, carrierId).
     // PENDING → editable (update in place).
     // REJECTED/WITHDRAWN/EXPIRED → allow re-bid: upsert flips status back to PENDING.
-    // ACCEPTED → terminal lock; do not allow further edits.
+    // ACCEPTED → terminal lock; further edits are not allowed.
     const existing = await this.prisma.bid.findUnique({
       where: { orderId_carrierId: { orderId, carrierId: actor.companyId } },
     });
@@ -87,12 +87,12 @@ export class BidsService {
     return this.prisma.$transaction(async (tx) => {
       // accept this bid
       const updated = await tx.bid.update({ where: { id }, data: { status: 'ACCEPTED' } });
-      // reject others
+      // reject remaining bids
       await tx.bid.updateMany({
         where: { orderId, NOT: { id }, status: 'PENDING' },
         data: { status: 'REJECTED' },
       });
-      // assign the order
+      // assign the order to the winning provider
       const commissionRate = 0.08;
       const commission = +(bid.amount * commissionRate).toFixed(2);
       const carrierAmount = +(bid.amount - commission).toFixed(2);
@@ -107,7 +107,7 @@ export class BidsService {
         },
       });
       // Escrow: create the Payment row in HELD state. Idempotent — only one
-      // payment per order (unique on orderId in schema). If a prior accept
+      // payment per order (unique on orderId in schema). If a prior acceptance
       // was rolled back externally, we upsert to keep state consistent.
       await tx.payment.upsert({
         where: { orderId },

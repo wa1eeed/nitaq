@@ -218,7 +218,7 @@ export class AdminService {
     return this.getSettings();
   }
 
-  // ─── Analytics helpers ──────────────────────────────────────────────
+  // ─── Analytics helpers ─────────────────────────────────────────────
 
   private periodDates(period: string): { from: Date; to: Date } {
     const to = new Date();

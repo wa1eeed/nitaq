@@ -1,7 +1,7 @@
 import { IsArray, IsBoolean, IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 
 // Must stay in sync with Prisma enum `TruckType` in apps/api/prisma/schema.prisma.
-// The carrier UI's truck-types catalog (DEFAULT_TRUCK_TYPES) is the source of
+// The provider UI's service-types catalog (DEFAULT_TRUCK_TYPES) is the source of
 // what the user actually sees — keep this enum a superset of those IDs.
 const TRUCKS = [
   'SMALL_VAN','SMALL_FLATBED','MEDIUM_FLATBED','LARGE_FLATBED','REFRIGERATED',
@@ -34,7 +34,7 @@ export class CreateDriverDto {
   @IsOptional() @IsString() photo?: string;
 }
 
-/** Invite a new driver in one shot — creates User + DriverProfile atomically. */
+/** Invite a new employee in one shot — creates User + DriverProfile atomically. */
 export class InviteDriverDto {
   @IsString() fullName!: string;
   @IsString() phone!: string;
