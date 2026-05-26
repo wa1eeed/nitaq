@@ -25,7 +25,7 @@ const ACCOUNTS = {
   carrier: {
     email: 'provider@nitaq.sa',
     phone: '+966500000003',
-    password: 'Provider@1234',
+    password: 'Carrier@1234',
     firstName: 'سلطان',
     lastName: 'القحطاني',
     role: 'PROVIDER_ADMIN' as const,
@@ -244,7 +244,7 @@ async function main() {
   console.log('');
   console.log(`   👑 Admin    → ${ACCOUNTS.admin.email}    |  ${ACCOUNTS.admin.phone}  |  ${ACCOUNTS.admin.password}`);
   console.log(`   🏢 Client   → ${ACCOUNTS.client.email}   |  ${ACCOUNTS.client.phone}  |  ${ACCOUNTS.client.password}`);
-  console.log(`   🤝 Provider → ${ACCOUNTS.carrier.email}  |  ${ACCOUNTS.carrier.phone}  |  ${ACCOUNTS.carrier.password}`);
+  console.log(`   🤝 Provider → ${ACCOUNTS.carrier.email}   |  ${ACCOUNTS.carrier.phone}  |  ${ACCOUNTS.carrier.password}`);
   console.log('');
 }
 
