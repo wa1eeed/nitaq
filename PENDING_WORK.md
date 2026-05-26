@@ -1,6 +1,6 @@
 # Pending Work — حالة الربط الحالية (Nitaq Platform)
 
-> آخر تحديث: 2026-05-26 (بعد v0.9.16 كامل — Prisma migration مُطبَّق)
+> آخر تحديث: 2026-05-26 (بعد v0.9.17 — B2B UI Cleanup مُطبَّق)
 >
 > الهدف من هذا الملف: نقطة استئناف واضحة. يلخّص ما تبقّى من الربط/الإصلاحات قبل
 > أن نعتبر النظام جاهزاً لـ release v1.0.
@@ -128,6 +128,9 @@
 
 - ابدأ بقراءة هذا الملف + `CHANGELOG.md` (v0.9.x entries).
 - المستخدم يفضّل: tasks منظّمة، type-check بعد كل تعديل جوهري، toasts بدل alerts، mutate بعد كل mutation.
+- **v0.9.17 مُطبَّق**: الخريطة محذوفة من order detail + new order wizard، بيانات الدخول صحيحة (provider@nitaq.sa / Carrier@1234)، تبويب البراندات محذوف من admin settings.
+- بورتال Provider يعمل الآن على `apps/web/provider` (بعد إعادة التسمية من carrier).
+- نوع الخدمة الافتراضي في New Order: `CONSULTING` (بدلاً من `LARGE_FLATBED`). يمكن تغييره إن احتجت.
 - لا تكسر الـ stability constraints أعلاه.
 - في حال شك حول backend endpoint: `grep -E "@(Get|Post|Put|Delete|Patch)\(" apps/api/src/modules/*/`.
 

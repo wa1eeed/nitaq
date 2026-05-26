@@ -6,6 +6,53 @@
 
 ## [Unreleased] — قيد التطوير
 
+### ✅ v0.9.17 — B2B UI Cleanup: Service Catalog + Portal Redesign (2026-05-26)
+
+**سياق:** استكمال التحويل البصري الكامل من منصة لوجستيات إلى منصة خدمات B2B. جميع التغييرات UI/UX فقط — لا تعديل على business logic أو API.
+
+**إعادة هيكلة المجلدات:**
+- `apps/web/carrier` → `apps/web/provider` (إعادة تسمية المجلد)
+- Dockerfile paths محدَّثة للمسار الجديد
+
+**صفحة الموظفين (Provider Portal):**
+- حذف صفحة السائقين، استبدالها بصفحة إدارة الموظفين (`/fleet/employees`)
+- قائمة الموظفين، تفاصيل، إسناد مهام
+
+**Landing Page — إعادة كتابة للـ B2B:**
+- نصوص Hero/Features/Testimonials/Pricing محوَّلة كلياً من لوجستيات → خدمات B2B
+- CTA: "ابدأ الشحن" → "ابدأ الآن"، "ناقل" → "مزوّد الخدمة"
+
+**إصلاح الهوية البصرية (naqla → nitaq):**
+- جميع ملفات الـ UI عبر البورتالات الأربعة: @naqla.sa → @nitaq.sa
+- DEV_USERS في shared-utils: emails + roles (CARRIER_ADMIN→PROVIDER_ADMIN)
+- seed.ts: شركات وبيانات تجريبية بهوية nitaq
+
+**كتالوج الخدمات B2B:**
+- `DEFAULT_SERVICE_TYPES` (10 أنواع): استشارات، تصميم، تركيب، صيانة، دعم تقني، تدريب، خدمات تقنية، لوجستيات، إدارة مشاريع، أخرى
+- `DEFAULT_TRUCK_TYPES` محتفظ بها كـ deprecated alias للتوافق
+
+**Provider Fleet Pages — إعادة كتابة كاملة:**
+- قائمة الخدمات: بطاقات بأيقونات B2B، حالة الخدمة (متاح/مشغول)
+- نموذج إضافة خدمة: name, serviceType, description, basePrice, coveredCities, maxConcurrentOrders, photos
+- تفاصيل الخدمة: نوع الخدمة، وصف، سعر، "سجل المهام"
+
+**Admin Settings — لوحة أنواع الخدمات:**
+- عنوان "أنواع الخدمات"، أيقونات B2B، حذف حقل capacityKg
+- حذف تبويب "البراندات والموديلات" بالكامل (BrandsPanel + BrandDetailPanel)
+
+**إصلاح بيانات الدخول:**
+- Admin: admin@nitaq.sa / Admin@1234
+- Client: client@nitaq.sa / Client@1234
+- Provider: provider@nitaq.sa / Carrier@1234
+
+**إزالة الخريطة والتتبع الجغرافي (Client & Provider):**
+- `orders/new/page.tsx` (client): حذف MapAddressPicker + RouteMapsBlock، استبدال حقلَي "من/إلى" بـ "موقع تنفيذ الخدمة" اختياري، حذف حقل الوزن، إعادة تسمية الخطوات (الشحنة→الخدمة / المسار→التوقيت)
+- `orders/[id]/page.tsx` (client): حذف MapSection/RouteMap، حذف بطاقة المسار، تغيير "تفاصيل الشحنة"→"تفاصيل الطلب"، حذف صفوف الوزن/التبريد، استبدال SaudiPlate بعرض نوع الخدمة، السائق→الموظف
+- `orders/page.tsx` (provider): تبويب "في الطريق"→"قيد التنفيذ"
+- `orders/[id]/page.tsx` (provider): حذف MapSection/RouteMap، حذف بطاقة المسار، تغيير نصوص حالة التنفيذ، تحديث dialogs الإجراءات
+
+---
+
 ### ✅ v0.9.16 — Platform Identity Transformation: Trucks → Services (2026-05-26)
 
 **سياق:** نِطاق مشروع مستقل منسوخ من nqlah. هذا الإصدار يُكمل التحويل الرسمي من منصة نقل بضائع إلى منصة خدمات B2B متعددة التخصصات عبر 9 مراحل.
