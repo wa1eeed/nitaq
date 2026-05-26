@@ -62,14 +62,14 @@ export default function AdminOrderDetail() {
   }
 
   const client = companyById(order.clientId);
-  const carrier = companyById(order.carrierId);
+  const provider = companyById(order.carrierId);
   type ApiOrderDriver = {
     id: string; assignedAt: string;
     driver: { id: string; status: string; user: { firstName: string; lastName: string; phone: string } };
   };
   const orderDrivers: ApiOrderDriver[] = (order as unknown as { orderDrivers?: ApiOrderDriver[] }).orderDrivers ?? [];
   // Prefer API bids (live data) — fall back to mock for offline demo.
-  type ApiBid = { id: string; carrierId: string; status: string; amount?: number; price?: number; estimatedDays?: number; truckType?: string; proposedPickupDate?: string; proposedDeliveryDate?: string };
+  type ApiBid = { id: string; carrierId: string; providerId?: string; status: string; amount?: number; price?: number; estimatedDays?: number; truckType?: string; proposedPickupDate?: string; proposedDeliveryDate?: string };
   const apiBids = (order as unknown as { bids?: ApiBid[] }).bids;
   const bids = (Array.isArray(apiBids) && apiBids.length > 0 ? apiBids : bidsForOrder(order.id)) as ApiBid[];
   const timeline = timelineFor(order.id);
@@ -111,7 +111,7 @@ export default function AdminOrderDetail() {
               order={order}
               effectivePickup={effectivePickup}
               effectiveDelivery={effectiveDelivery}
-              fromCarrierBid={!!(accepted?.proposedDeliveryDate || accepted?.proposedPickupDate)}
+              fromProviderBid={!!(accepted?.proposedDeliveryDate || accepted?.proposedPickupDate)}
             />
           )}
 
@@ -130,7 +130,7 @@ export default function AdminOrderDetail() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {bids.map((bid) => {
-                  const c = companyById(bid.carrierId);
+                  const c = companyById(bid.providerId ?? bid.carrierId);
                   if (!c) return null;
                   return (
                     <div key={bid.id} className="flex items-center gap-3 p-3 rounded-lg border">
@@ -186,7 +186,7 @@ export default function AdminOrderDetail() {
         {/* Sidebar col */}
         <div className="space-y-6">
           {client && <PartyCard kind="العميل" company={client} onClick={() => router.push(`/companies/${client.id}`)} />}
-          {carrier && <PartyCard kind="الناقل" company={carrier} onClick={() => router.push(`/companies/${carrier.id}`)} />}
+          {provider && <PartyCard kind="الناقل" company={provider} onClick={() => router.push(`/companies/${provider.id}`)} />}
 
           {/* Assigned driver */}
           <Card>
@@ -270,7 +270,7 @@ export default function AdminOrderDetail() {
                 <Row label="ميزانية العميل" value={<Currency amount={order.clientBudget} />} />
                 <Row label="السعر المتفق" value={<Currency amount={order.agreedPrice} />} />
                 <Row label="عمولة المنصة" value={<Currency amount={order.commission ?? 0} />} />
-                <Row label="صافي للناقل" value={<Currency amount={order.carrierAmount} />} />
+                <Row label="صافي للناقل" value={<Currency amount={order.providerAmount ?? order.carrierAmount} />} />
               </dl>
             </CardContent>
           </Card>
@@ -346,12 +346,12 @@ function MapSection({ order }: { order: any }) {
  * buttons — admins observe, not operate.
  */
 function AdminShipmentStatus({
-  order, effectivePickup, effectiveDelivery, fromCarrierBid,
+  order, effectivePickup, effectiveDelivery, fromProviderBid,
 }: {
   order: any;
   effectivePickup: string | undefined;
   effectiveDelivery: string | null;
-  fromCarrierBid: boolean;
+  fromProviderBid: boolean;
 }) {
   const meta: Record<string, { text: string; step: 1 | 2 | 3; tone: 'info' | 'warning' | 'success' }> = {
     ASSIGNED:   { text: 'الطلب مُسند للناقل — قبل الاستلام',           step: 1, tone: 'info' },
@@ -404,7 +404,7 @@ function AdminShipmentStatus({
             <div className="mt-0.5 font-medium">
               {effectiveDelivery ? formatDate(effectiveDelivery, 'EEEE d MMM') : 'سيُحدَّد لاحقاً'}
             </div>
-            {fromCarrierBid && (
+            {fromProviderBid && (
               <Badge variant="outline" className="mt-1 h-4 text-[10px]">من عرض الناقل</Badge>
             )}
           </div>
@@ -481,7 +481,7 @@ function AdminEscrowSummary({ deliveredAt, total }: { deliveredAt: Date | string
             </div>
             <div className="flex justify-between pt-2 mt-1 border-t font-bold">
               <dt>صافي للناقل</dt>
-              <dd className="text-success"><Currency amount={breakdown.carrierAmount} /></dd>
+              <dd className="text-success"><Currency amount={breakdown.providerAmount} /></dd>
             </div>
           </dl>
         </div>

@@ -160,7 +160,7 @@ export default function AdminCompanyDetail() {
         <div className="space-y-6">
           {company.kind === 'CARRIER' && (
             <Card>
-              <CardHeader><CardTitle>أداء الناقل</CardTitle></CardHeader>
+              <CardHeader><CardTitle>أداء مزود الخدمة</CardTitle></CardHeader>
               <CardContent>
                 <dl className="divide-y">
                   <Row label="التقييم" value={<span className="num font-medium">{company.rating?.toFixed(1)} ⭐</span>} />

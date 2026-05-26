@@ -15,7 +15,7 @@ import { PageHeader } from '@/components/page-header';
 import { SaudiPlate, parsePlateString } from '@/components/saudi-plate';
 import { StatusBadge } from '@/components/status-badge';
 import { StatsCard } from '@/components/stats-card';
-import { TRUCKS, carrierById, driverById, formatDate } from '@naqla/shared-utils';
+import { TRUCKS, carrierById as providerById, driverById, formatDate } from '@naqla/shared-utils';
 
 const TYPE_LABELS: Record<string, string> = {
   SMALL_VAN: 'فان صغير', BOX_TRUCK: 'صندوق', MEDIUM_FLATBED: 'مسطح متوسط',
@@ -33,7 +33,7 @@ export default function AdminTrucksPage() {
       if (status !== 'ALL' && t.status !== status) return false;
       if (type !== 'ALL' && t.truckType !== type) return false;
       if (q) {
-        const hay = `${t.plateNumber} ${t.id} ${carrierById(t.carrierId)?.nameAr ?? ''}`;
+        const hay = `${t.plateNumber} ${t.id} ${providerById(t.carrierId)?.nameAr ?? ''}`;
         if (!hay.toLowerCase().includes(q.toLowerCase())) return false;
       }
       return true;
@@ -116,7 +116,7 @@ export default function AdminTrucksPage() {
               ) : (
                 filtered.map((t) => {
                   const plate = parsePlateString(t.plateNumber);
-                  const carrier = carrierById(t.carrierId);
+                  const provider = providerById(t.carrierId);
                   const drv = driverById(t.assignedDriverId);
                   return (
                     <TableRow key={t.id}>
@@ -125,7 +125,7 @@ export default function AdminTrucksPage() {
                       </TableCell>
                       <TableCell>
                         <Link href={`/companies/${t.carrierId}`} className="font-medium hover:text-primary">
-                          {carrier?.nameAr ?? '—'}
+                          {provider?.nameAr ?? '—'}
                         </Link>
                       </TableCell>
                       <TableCell>{TYPE_LABELS[t.truckType] ?? t.truckType}</TableCell>

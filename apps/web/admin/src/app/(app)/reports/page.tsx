@@ -216,7 +216,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
   const onTimeRate     = Number(summary?.onTimeDeliveryRate ?? 0);
   const disputeRate    = Number(summary?.disputeRate ?? 0);
   const newClients     = Number(summary?.newClients ?? 0);
-  const newCarriers    = Number(summary?.newCarriers ?? 0);
+  const newProviders   = Number(summary?.newCarriers ?? 0);
   const gmvMoM         = Number(summary?.gmvMoM ?? 0);
   const takeRate       = Number(summary?.takeRate ?? 0);
 
@@ -230,7 +230,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
       ['التسليم في الوقت', fmtPct(onTimeRate), onTimeRate >= 95 ? '✓' : '⚠'],
       ['معدل النزاعات', fmtPct(disputeRate), disputeRate <= 2 ? '✓' : '⚠'],
       ['عملاء جدد', fmt(newClients), ''],
-      ['ناقلون جدد', fmt(newCarriers), ''],
+      ['ناقلون جدد', fmt(newProviders), ''],
     ],
     styles: { font: 'helvetica', fontSize: 10, halign: 'right' },
     headStyles: { fillColor: [10, 61, 58], textColor: [255, 255, 255] },
@@ -255,7 +255,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
   doc.text('مؤشرات السوق', pageW - 20, 35, { align: 'right' });
 
   const topRoutes  = Array.isArray(summary?.topRoutes)  ? (summary.topRoutes as Array<{ route: string }>)  : [];
-  const topCarriers = Array.isArray(summary?.topCarriers) ? (summary.topCarriers as Array<{ name: string }>) : [];
+  const topProviders = Array.isArray(summary?.topCarriers) ? (summary.topCarriers as Array<{ name: string }>) : [];
 
   autoTable(doc, {
     startY: 45,
@@ -263,7 +263,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
     body: [
       ['Take Rate', fmtPct(takeRate), '8%', Math.abs(takeRate - 8) <= 1 ? '✓' : '⚠'],
       ['أعلى مسار', topRoutes[0]?.route ?? '—', '—', ''],
-      ['أعلى ناقل', topCarriers[0]?.name ?? '—', '—', ''],
+      ['أعلى ناقل', topProviders[0]?.name ?? '—', '—', ''],
     ],
     styles: { halign: 'right', fontSize: 10 },
     headStyles: { fillColor: [10, 61, 58], textColor: [255, 255, 255] },
@@ -283,7 +283,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
       ['نمو الطلبات MoM', fmtPct(Number(summary?.ordersMoM ?? 0))],
       ['نمو GMV MoM',     fmtPct(gmvMoM)],
       ['عملاء جدد',       fmt(newClients)],
-      ['ناقلون جدد',      fmt(newCarriers)],
+      ['ناقلون جدد',      fmt(newProviders)],
     ],
     styles: { halign: 'right', fontSize: 10 },
     headStyles: { fillColor: [13, 92, 87], textColor: [255, 255, 255] },
@@ -560,9 +560,9 @@ function InvestorTab({ period, summary }: { period: Period; summary: Record<stri
     const ot        = Number(summary.onTimeDeliveryRate ?? 0);
     const gmv       = Number(summary.gmv ?? 0);
     const clients   = Number(summary.newClients ?? 0);
-    const carriers  = Number(summary.newCarriers ?? 0);
+    const providers = Number(summary.newCarriers ?? 0);
     return growth > 0
-      ? `حققت المنصة نمواً بنسبة ${growth.toFixed(1)}% في GMV مقارنة بالفترة السابقة. معدل الإكمال ${cr.toFixed(1)}% ومعدل التسليم في الوقت ${ot.toFixed(1)}%. تم استقطاب ${clients} عميل و${carriers} ناقل جديد خلال الفترة.`
+      ? `حققت المنصة نمواً بنسبة ${growth.toFixed(1)}% في GMV مقارنة بالفترة السابقة. معدل الإكمال ${cr.toFixed(1)}% ومعدل التسليم في الوقت ${ot.toFixed(1)}%. تم استقطاب ${clients} عميل و${providers} ناقل جديد خلال الفترة.`
       : `أداء المنصة مستقر خلال الفترة. GMV: ${fmtSAR(gmv)}. معدل إكمال الطلبات: ${cr.toFixed(1)}%. ${clients} عميل جديد.`;
   }, [summary]);
 

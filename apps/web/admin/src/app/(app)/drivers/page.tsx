@@ -19,7 +19,7 @@ import { StatsCard } from '@/components/stats-card';
 import { fetcher } from '@/lib/api';
 import { formatDate } from '@naqla/shared-utils';
 
-type ApiDriver = {
+type ApiEmployee = {
   id: string;
   status: 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY';
   licenseNumber: string;
@@ -40,14 +40,14 @@ export default function AdminDriversPage() {
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<string>('ALL');
 
-  const { data: raw } = useSWR<ApiDriver[] | { items?: ApiDriver[] }>('/admin/drivers?limit=200', fetcher);
-  const apiDrivers: ApiDriver[] = useMemo(() => {
+  const { data: raw } = useSWR<ApiEmployee[] | { items?: ApiEmployee[] }>('/admin/drivers?limit=200', fetcher);
+  const apiEmployees: ApiEmployee[] = useMemo(() => {
     if (!raw) return [];
-    return Array.isArray(raw) ? raw : (raw as { items?: ApiDriver[] }).items ?? [];
+    return Array.isArray(raw) ? raw : (raw as { items?: ApiEmployee[] }).items ?? [];
   }, [raw]);
 
   const filtered = useMemo(() => {
-    return apiDrivers.filter((d) => {
+    return apiEmployees.filter((d) => {
       if (status !== 'ALL' && d.status !== status) return false;
       if (q) {
         const hay = `${d.user.firstName} ${d.user.lastName} ${d.user.phone ?? ''} ${d.user.nationalId ?? ''} ${d.company.nameAr}`.toLowerCase();
@@ -55,12 +55,12 @@ export default function AdminDriversPage() {
       }
       return true;
     });
-  }, [apiDrivers, q, status]);
+  }, [apiEmployees, q, status]);
 
-  const total    = apiDrivers.length;
-  const onTrip   = apiDrivers.filter((d) => d.status === 'ON_TRIP').length;
-  const available = apiDrivers.filter((d) => d.status === 'AVAILABLE').length;
-  const offDuty  = apiDrivers.filter((d) => d.status === 'OFF_DUTY').length;
+  const total    = apiEmployees.length;
+  const onTrip   = apiEmployees.filter((d) => d.status === 'ON_TRIP').length;
+  const available = apiEmployees.filter((d) => d.status === 'AVAILABLE').length;
+  const offDuty  = apiEmployees.filter((d) => d.status === 'OFF_DUTY').length;
 
   return (
     <>

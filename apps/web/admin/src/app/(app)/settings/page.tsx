@@ -84,7 +84,7 @@ export default function AdminSettingsPage() {
     } catch (err) { notify.error(err, 'فشل حفظ أنواع البضائع'); }
   };
 
-  const persistTruckTypes = async (types: TruckTypeOption[]) => {
+  const persistServiceTypes = async (types: TruckTypeOption[]) => {
     try {
       await api.put('/admin/settings', { settings: [{ key: 'catalog.truck_types', value: JSON.stringify(types) }] });
       notify.success('تم حفظ أنواع الشاحنات');
@@ -221,7 +221,7 @@ export default function AdminSettingsPage() {
         </TabsContent>
 
         <TabsContent value="truck-types">
-          <TruckTypesPanel onPersist={persistTruckTypes} />
+          <TruckTypesPanel onPersist={persistServiceTypes} />
         </TabsContent>
 
         <TabsContent value="brands">
