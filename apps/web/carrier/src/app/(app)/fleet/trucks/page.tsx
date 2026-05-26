@@ -13,7 +13,7 @@ import { StatsCard } from '@/components/stats-card';
 import { StatusBadge } from '@/components/status-badge';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
-import { DRIVERS, TRUCKS, formatDate, normalizeTruckList } from '@naqla/shared-utils';
+import { DRIVERS, TRUCKS, formatDate, normalizeServiceList } from '@naqla/shared-utils';
 
 const TRUCK_LABELS: Record<string, string> = {
   SMALL_VAN: 'فان صغير', BOX_TRUCK: 'صندوق مغلق', MEDIUM_FLATBED: 'مسطح متوسط',
@@ -23,13 +23,13 @@ const TRUCK_LABELS: Record<string, string> = {
 
 export default function CarrierFleetTrucks() {
   const [tab, setTab] = useState('ALL');
-  // GET /fleet/trucks — `normalizeTruckList` aliases Prisma field names
+  // GET /fleet/trucks — `normalizeServiceList` aliases Prisma field names
   // (`type`, `capacity`, `year`) to the mock shape (`truckType`,
   // `capacityKg`, `modelYear`) the UI was written against. Falls back to
   // mock TRUCKS for offline demos.
   const { data } = useSWR<unknown>('/fleet/trucks', fetcher);
   const all = useMemo(() => {
-    const normalized = normalizeTruckList<typeof TRUCKS[number]>(data);
+    const normalized = normalizeServiceList<typeof TRUCKS[number]>(data);
     return normalized.length > 0 ? normalized : TRUCKS;
   }, [data]);
   const rows = useMemo(() => (tab === 'ALL' ? all : all.filter((t) => t.status === tab)), [tab, all]);

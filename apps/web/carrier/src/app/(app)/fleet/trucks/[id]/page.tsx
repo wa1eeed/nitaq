@@ -15,21 +15,21 @@ import { StatusBadge } from '@/components/status-badge';
 import { Currency } from '@/components/currency';
 import { useTruckTypesStore } from '@/stores/truck-types-store';
 import { fetcher } from '@/lib/api';
-import { DRIVERS, TRUCKS, formatDate, normalizeTruck, tripsForTruck } from '@naqla/shared-utils';
+import { DRIVERS, TRUCKS, formatDate, normalizeService, tripsForTruck } from '@naqla/shared-utils';
 
 export default function TruckDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   // ─── All hooks MUST be called unconditionally, BEFORE any early return.
-  // Putting `useTruckTypesStore` after the `if (!truck) return` branch causes
-  // "Rendered more hooks than during the previous render" once `truckData`
+  // Putting `useTruckTypesStore` after the `if (!service) return` branch causes
+  // "Rendered more hooks than during the previous render" once `serviceData`
   // resolves and the early-return branch flips. Keep all hooks at the top.
   const { data: truckData } = useSWR<unknown>(params?.id ? `/fleet/trucks/${params.id}` : null, fetcher);
   const truckTypes = useTruckTypesStore((s) => s.types);
 
   const truck = (() => {
     if (truckData && typeof truckData === 'object') {
-      const normalized = normalizeTruck(truckData as typeof TRUCKS[number]);
+      const normalized = normalizeService(truckData as typeof TRUCKS[number]);
       if (normalized) return normalized as typeof TRUCKS[number];
     }
     return TRUCKS.find((t) => t.id === params.id);

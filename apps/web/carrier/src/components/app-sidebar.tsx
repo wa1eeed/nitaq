@@ -80,18 +80,20 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const arr = normalizeOrderList(oppsData);
     const pool: Order[] = arr.length > 0 ? arr : openOpportunitiesForCarrier(CURRENT_CARRIER_ID);
     type O = Order & {
-      bids?: Array<{ carrierId: string; status: string }>;
+      bids?: Array<{ carrierId?: string; providerId?: string; status: string }>;
+      providerId?: string;
       carrierId?: string;
     };
     return pool.filter((o) => {
       const oo = o as O;
-      // Exclude orders already assigned to this carrier — they're not
+      // Exclude orders already assigned to this provider — they're not
       // opportunities, they're "my orders". Matches /opportunities filter.
-      if (oo.carrierId === myCompanyId && !['DRAFT', 'PUBLISHED', 'BIDDING'].includes(o.status)) {
+      const assignedId = oo.providerId ?? oo.carrierId;
+      if (assignedId === myCompanyId && !['DRAFT', 'PUBLISHED', 'BIDDING'].includes(o.status)) {
         return false;
       }
       const bids = oo.bids ?? [];
-      return !bids.some((b) => b.carrierId === myCompanyId && b.status === 'PENDING');
+      return !bids.some((b) => (b.providerId ?? b.carrierId) === myCompanyId && b.status === 'PENDING');
     }).length;
   })();
 

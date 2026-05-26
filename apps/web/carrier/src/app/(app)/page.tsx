@@ -240,7 +240,7 @@ export default function CarrierDashboard() {
                     <TableCell className="font-mono text-xs text-muted-foreground">{o.orderNumber}</TableCell>
                     <TableCell>{o.originCity} ← {o.destinationCity}</TableCell>
                     <TableCell><StatusBadge status={o.status} /></TableCell>
-                    <TableCell className="text-end"><Currency amount={o.carrierAmount ?? o.agreedPrice} /></TableCell>
+                    <TableCell className="text-end"><Currency amount={o.providerAmount ?? o.agreedPrice} /></TableCell>
                   </TableRow>
                 ))}
               </TableBody>

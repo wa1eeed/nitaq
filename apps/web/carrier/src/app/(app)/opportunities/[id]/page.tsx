@@ -56,7 +56,8 @@ export default function CarrierOpportunityDetail() {
   const myCompanyId = authedCompanyId ?? CURRENT_CARRIER_ID;
   type BidLike = {
     id: string;
-    carrierId: string;
+    carrierId?: string;
+    providerId?: string;
     amount?: number;
     price?: number;
     status: string;
@@ -70,7 +71,7 @@ export default function CarrierOpportunityDetail() {
     if (!order) return null;
     const bids = (order as unknown as { bids?: BidLike[] }).bids;
     if (!Array.isArray(bids)) return null;
-    return bids.find((b) => b.carrierId === myCompanyId) ?? null;
+    return bids.find((b) => (b.carrierId ?? b.providerId) === myCompanyId) ?? null;
   })();
 
   const [price, setPrice] = useState<number>(0);

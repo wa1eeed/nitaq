@@ -100,7 +100,12 @@ export interface Order {
    */
   clientBudget?: number;
   agreedPrice: number | null;
+  /** @deprecated use providerAmount */
   carrierAmount?: number | null;
+  /** Net amount received by the provider (carrier) after platform commission. */
+  providerAmount?: number | null;
+  /** Id of the provider (carrier) company assigned to this order. */
+  providerId?: string | null;
   commission?: number | null;
   requiresInsurance: boolean;
   requiresRefrigeration: boolean;

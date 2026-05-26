@@ -44,22 +44,24 @@ export default function CarrierOpportunitiesPage() {
     // opportunities page should NOT show the third bucket — those aren't
     // opportunities anymore, they belong in /orders. Filter them out here.
     return source.filter((o) => {
+      const oo = o as { carrierId?: string; providerId?: string };
+      const assignedId = oo.providerId ?? oo.carrierId;
       const assignedToMe =
-        (o as { carrierId?: string }).carrierId === myCompanyId &&
+        assignedId === myCompanyId &&
         !['DRAFT', 'PUBLISHED', 'BIDDING'].includes(o.status);
       return !assignedToMe;
     });
   }, [data, myCompanyId]);
-  // Per-order: which of THIS carrier's bids (if any) is on the order, used to
+  // Per-order: which of THIS provider's bids (if any) is on the order, used to
   // switch the row CTA between "قدّم عرضاً" / "تفاصيل" / "إعادة تقديم".
-  type OppWithBids = Order & { bids?: Array<{ carrierId: string; status: string }> };
+  type OppWithBids = Order & { bids?: Array<{ carrierId?: string; providerId?: string; status: string }> };
   const hasMyPendingBid = (o: Order) => {
     const bids = (o as OppWithBids).bids ?? [];
-    return bids.some((b) => b.carrierId === myCompanyId && b.status === 'PENDING');
+    return bids.some((b) => (b.providerId ?? b.carrierId) === myCompanyId && b.status === 'PENDING');
   };
   const myBidStatus = (o: Order): string | null => {
     const bids = (o as OppWithBids).bids ?? [];
-    const mine = bids.find((b) => b.carrierId === myCompanyId);
+    const mine = bids.find((b) => (b.providerId ?? b.carrierId) === myCompanyId);
     return mine?.status ?? null;
   };
 

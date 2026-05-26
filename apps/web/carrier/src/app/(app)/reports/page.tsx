@@ -22,7 +22,7 @@ export default function CarrierReportsPage() {
 
   const stats = useMemo(() => {
     const completed = orders.filter((o) => o.status === 'COMPLETED' || o.status === 'DELIVERED');
-    const totalRevenue = completed.reduce((s, o) => s + (o.carrierAmount ?? o.agreedPrice ?? 0), 0);
+    const totalRevenue = completed.reduce((s, o) => s + (o.providerAmount ?? o.agreedPrice ?? 0), 0);
     const inTransit = orders.filter((o) => o.status === 'IN_TRANSIT').length;
     const acceptedBids = bids.filter((b) => b.status === 'ACCEPTED').length;
     const totalBids = bids.length;
@@ -49,7 +49,7 @@ export default function CarrierReportsPage() {
       const key = `${o.originCity} ← ${o.destinationCity}`;
       const cur = map.get(key) ?? { count: 0, revenue: 0 };
       cur.count += 1;
-      cur.revenue += o.carrierAmount ?? o.agreedPrice ?? 0;
+      cur.revenue += o.providerAmount ?? o.agreedPrice ?? 0;
       map.set(key, cur);
     }
     return Array.from(map.entries())

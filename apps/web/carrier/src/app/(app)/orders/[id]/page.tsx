@@ -198,7 +198,7 @@ export default function CarrierOrderDetail() {
                     <div>
                       <p className="font-semibold">الرحلة مكتملة وتم تحويل المبلغ</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        صافي المستلم: <Currency amount={order.carrierAmount ?? 0} />
+                        صافي المستلم: <Currency amount={order.providerAmount ?? 0} />
                       </p>
                     </div>
                   </div>
@@ -234,7 +234,7 @@ export default function CarrierOrderDetail() {
                       </div>
                       <div className="flex justify-between pt-1 border-t font-semibold">
                         <dt>صافي مستحقّك</dt>
-                        <dd className="text-success"><Currency amount={order.carrierAmount ?? (order.agreedPrice * 0.92)} /></dd>
+                        <dd className="text-success"><Currency amount={order.providerAmount ?? (order.agreedPrice * 0.92)} /></dd>
                       </div>
                     </dl>
                   </div>
@@ -327,7 +327,7 @@ export default function CarrierOrderDetail() {
               <dl className="divide-y">
                 <Row label="السعر المتفق" value={<Currency amount={order.agreedPrice} />} />
                 <Row label="العمولة" value={<Currency amount={order.commission ?? 0} />} />
-                <Row label="صافي إلى حسابك" value={<Currency amount={order.carrierAmount} />} />
+                <Row label="صافي إلى حسابك" value={<Currency amount={order.providerAmount} />} />
               </dl>
             </CardContent>
           </Card>

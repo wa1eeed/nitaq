@@ -19,7 +19,7 @@ import {
 // over `companyById` lookups since DB cuids don't match mock IDs.
 type ApiPayment = ReturnType<typeof paymentsForCarrier>[number] & {
   order?: { orderNumber?: string; client?: { nameAr?: string } };
-  carrierAmount?: number;
+  providerAmount?: number;
   createdAt?: string;
 };
 
@@ -36,11 +36,11 @@ export default function CarrierEarningsPage() {
   const released = all.filter((p) => p.state === 'RELEASED');
   const held = all.filter((p) => p.state === 'HELD');
 
-  // Carrier-side net = whatever ends up in the carrier's wallet. Prefer the
-  // backend's pre-computed `carrierAmount` (Prisma field) when present,
+  // Provider-side net = whatever ends up in the provider's wallet. Prefer the
+  // backend's pre-computed `providerAmount` (Prisma field) when present,
   // otherwise compute from amount − commission − vat (mock data path).
   const carrierNetOf = (p: ApiPayment): number => {
-    if (typeof p.carrierAmount === 'number') return p.carrierAmount;
+    if (typeof p.providerAmount === 'number') return p.providerAmount;
     const amount = p.amount ?? 0;
     const commission = p.commission ?? 0;
     const vat = p.vat ?? 0;

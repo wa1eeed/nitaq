@@ -107,7 +107,7 @@ export default function CarrierOrdersPage() {
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">{formatDate(o.pickupDate)}</TableCell>
                           <TableCell><StatusBadge status={o.status} /></TableCell>
-                          <TableCell className="text-end"><Currency amount={o.carrierAmount} /></TableCell>
+                          <TableCell className="text-end"><Currency amount={o.providerAmount} /></TableCell>
                         </TableRow>
                       ))
                   }

@@ -93,7 +93,7 @@ export function EscrowCountdown({ deliveredAt, total }: EscrowCountdownProps) {
             </div>
             <div className="flex justify-between pt-2 mt-1 border-t font-bold text-lg">
               <dt>صافي محفظتك</dt>
-              <dd className="text-success"><Currency amount={breakdown.carrierAmount} /></dd>
+              <dd className="text-success"><Currency amount={breakdown.providerAmount} /></dd>
             </div>
           </dl>
         </div>
