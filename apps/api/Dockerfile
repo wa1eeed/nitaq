@@ -11,7 +11,7 @@ COPY packages/shared-utils/package.json packages/shared-utils/
 COPY apps/api/package.json apps/api/
 COPY apps/web/admin/package.json apps/web/admin/
 COPY apps/web/client/package.json apps/web/client/
-COPY apps/web/carrier/package.json apps/web/carrier/
+COPY apps/web/provider/package.json apps/web/provider/
 COPY apps/web/landing/package.json apps/web/landing/
 RUN pnpm install --frozen-lockfile=false
 

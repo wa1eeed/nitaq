@@ -46,11 +46,11 @@ services:
     networks:
       - naqla-network
 
-  carrier:
+  provider:
     build:
       context: .
-      dockerfile: apps/web/carrier/Dockerfile
-    container_name: naqla-carrier
+      dockerfile: apps/web/provider/Dockerfile
+    container_name: nitaq-provider
     restart: unless-stopped
     env_file: .env
     environment:

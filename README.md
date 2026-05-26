@@ -63,7 +63,7 @@ nitaq-platform/
 │       ├── landing/            # الصفحة التسويقية         → :3000
 │       ├── admin/              # لوحة الأدمن              → :3001
 │       ├── client/             # تطبيق العميل             → :3002
-│       └── carrier/            # تطبيق مقدّم الخدمة       → :3003
+│       └── provider/           # تطبيق مقدّم الخدمة       → :3003
 │
 ├── packages/
 │   ├── shared-types/           # TypeScript types مشتركة
@@ -118,7 +118,7 @@ docker build -f apps/api/Dockerfile          -t nitaq-api:latest      .
 docker build -f apps/web/landing/Dockerfile  -t nitaq-landing:latest  .
 docker build -f apps/web/admin/Dockerfile    -t nitaq-admin:latest    .
 docker build -f apps/web/client/Dockerfile   -t nitaq-client:latest   .
-docker build -f apps/web/carrier/Dockerfile  -t nitaq-provider:latest .
+docker build -f apps/web/provider/Dockerfile  -t nitaq-provider:latest .
 ```
 
 > لتطبيقات Next.js، يجب تمرير `NEXT_PUBLIC_*` كـ `--build-arg` لأنها تُضمَّن وقت البناء:

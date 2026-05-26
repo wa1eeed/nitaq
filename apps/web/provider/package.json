@@ -1,5 +1,5 @@
 {
-  "name": "@naqla/carrier",
+  "name": "@naqla/provider",
   "version": "0.1.0",
   "private": true,
   "scripts": {
