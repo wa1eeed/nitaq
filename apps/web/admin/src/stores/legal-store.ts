@@ -72,6 +72,6 @@ export const useLegalStore = create<LegalState>()(
       updateSeo: (patch) => set((s) => ({ seo: { ...s.seo, ...patch } })),
       resetSeo: () => set({ seo: DEFAULT_SEO_CONFIG }),
     }),
-    { name: 'naqla:legal-config' },
+    { name: 'nitaq:legal-config' },
   ),
 );

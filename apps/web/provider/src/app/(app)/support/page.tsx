@@ -125,7 +125,7 @@ export default function CarrierSupportPage() {
           icon={Mail}
           title="بريد إلكتروني"
           subtitle="رد خلال 12 ساعة عمل"
-          cta="support@naqla.sa"
+          cta="support@nitaq.sa"
           tone="bg-success/15 text-success"
         />
       </div>

@@ -10,7 +10,7 @@ const tajawal = Tajawal({ subsets: ['arabic'], weight: ['400', '500', '700'], va
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'نقلة لوجيستك — منصة العميل',
+  title: 'نِطاق — منصة العميل',
   description: 'إدارة طلبات النقل بسهولة',
 };
 
@@ -29,7 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('naqla-theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('nitaq-theme');var d=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d)document.documentElement.classList.add('dark');}catch(e){}})();`,
           }}
         />
       </head>

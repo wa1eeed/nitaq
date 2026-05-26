@@ -7,7 +7,7 @@ export const api = axios.create({ baseURL: `${API_URL}/api`, withCredentials: tr
 
 api.interceptors.request.use((c) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('naqla_carrier_token');
+    const token = localStorage.getItem('nitaq_carrier_token');
     // Don't attach DEV_BYPASS_TOKEN — it's a literal string, not a real JWT;
     // letting it go unauthenticated lets the API return a proper 401 that
     // our response interceptor handles by clearing the bad token + redirect.
@@ -21,9 +21,9 @@ api.interceptors.request.use((c) => {
 function clearAuthAndRedirect() {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.removeItem('naqla_carrier_token');
-    localStorage.removeItem('naqla_carrier_refresh');
-    localStorage.removeItem('naqla-carrier-auth');
+    localStorage.removeItem('nitaq_carrier_token');
+    localStorage.removeItem('nitaq_carrier_refresh');
+    localStorage.removeItem('nitaq-carrier-auth');
   } catch { /* ignore */ }
   if (!window.location.pathname.startsWith('/login')) {
     window.location.href = '/login';
@@ -44,7 +44,7 @@ api.interceptors.response.use(
     // 401 on a non-auth endpoint — try refresh before giving up.
     if (err.response?.status === 401 && !isAuthEndpoint) {
       const refreshToken = typeof window !== 'undefined'
-        ? localStorage.getItem('naqla_carrier_refresh')
+        ? localStorage.getItem('nitaq_carrier_refresh')
         : null;
       if (refreshToken && refreshToken !== DEV_BYPASS_TOKEN && !config._retry) {
         config._retry = true;
@@ -52,8 +52,8 @@ api.interceptors.response.use(
           const r = await axios.post(`${API_URL}/api/auth/refresh`, { refreshToken });
           const data = r.data?.data;
           if (data?.accessToken) {
-            localStorage.setItem('naqla_carrier_token', data.accessToken);
-            localStorage.setItem('naqla_carrier_refresh', data.refreshToken);
+            localStorage.setItem('nitaq_carrier_token', data.accessToken);
+            localStorage.setItem('nitaq_carrier_refresh', data.refreshToken);
             config.headers.Authorization = `Bearer ${data.accessToken}`;
             return api(config);
           }

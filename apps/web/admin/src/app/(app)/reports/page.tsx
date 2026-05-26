@@ -175,7 +175,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
     doc.rect(0, 0, pageW, 18, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(9);
-    doc.text('نقلة لوجيستك — سري للاستخدام الداخلي', pageW - 10, 12, { align: 'right' });
+    doc.text('نِطاق — سري للاستخدام الداخلي', pageW - 10, 12, { align: 'right' });
     doc.text(`صفحة ${page} من ${total}`, 10, 12);
   };
   const addFooter = () => {
@@ -191,7 +191,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
   doc.rect(0, pageH / 2 - 2, pageW, 4, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(28);
-  doc.text('نقلة لوجيستك', pageW / 2, 80, { align: 'center' });
+  doc.text('نِطاق', pageW / 2, 80, { align: 'center' });
   doc.setFontSize(18);
   doc.text('التقرير التنفيذي للأداء', pageW / 2, 100, { align: 'center' });
   doc.setFontSize(13);
@@ -290,7 +290,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
   });
   addFooter();
 
-  doc.save(`naqla-report-${period}-${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`nitaq-report-${period}-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 // ─── Tab components ───────────────────────────────────────────────────────────

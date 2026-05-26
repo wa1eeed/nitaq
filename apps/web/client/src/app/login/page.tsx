@@ -13,7 +13,7 @@ import { useAuthStore } from '@/lib/auth-store';
 
 export default function ClientLoginPage() {
   const router = useRouter();
-  const [identifier, setIdentifier] = useState('client@naqla.sa');
+  const [identifier, setIdentifier] = useState('client@nitaq.sa');
   const [password, setPassword] = useState('Client@1234');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +33,8 @@ export default function ClientLoginPage() {
       // If the API is unreachable, fall back to dev-bypass mode so the demo
       // UI still works (no real persistence, but routes render).
       if (!e.response) {
-        localStorage.setItem('naqla_client_token', DEV_BYPASS_TOKEN);
-        localStorage.setItem('naqla_client_refresh', DEV_BYPASS_TOKEN);
+        localStorage.setItem('nitaq_client_token', DEV_BYPASS_TOKEN);
+        localStorage.setItem('nitaq_client_refresh', DEV_BYPASS_TOKEN);
         useAuthStore.setState({ user: { ...DEV_USERS.client, avatar: null } as never });
         router.push('/');
         return;
@@ -58,7 +58,7 @@ export default function ClientLoginPage() {
             <Truck className="h-6 w-6 text-white" />
           </div>
           <div>
-            <div className="text-lg font-bold text-white">نقلة لوجيستك</div>
+            <div className="text-lg font-bold text-white">نِطاق</div>
             <div className="text-xs text-white/60">منصة العميل</div>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function ClientLoginPage() {
         </div>
 
         {/* Bottom note */}
-        <div className="text-xs text-white/40">© 2026 نقلة لوجيستك · جميع الحقوق محفوظة</div>
+        <div className="text-xs text-white/40">© 2026 نِطاق · جميع الحقوق محفوظة</div>
       </div>
 
       {/* ── Right form panel ────────────────────────────────────────────── */}
@@ -111,7 +111,7 @@ export default function ClientLoginPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
               <Truck className="h-7 w-7" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">نقلة لوجيستك</h1>
+            <h1 className="text-2xl font-bold tracking-tight">نِطاق</h1>
             <p className="text-sm text-muted-foreground">منصة العميل · للشركات والأفراد</p>
           </div>
 
@@ -131,7 +131,7 @@ export default function ClientLoginPage() {
                     className="text-end"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="client@naqla.sa"
+                    placeholder="client@nitaq.sa"
                     required
                   />
                 </div>

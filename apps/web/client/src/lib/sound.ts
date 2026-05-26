@@ -104,12 +104,12 @@ export function playSound(kind: SoundKind): void {
 /** Returns true when the user has muted sounds in localStorage. */
 export function isMuted(): boolean {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem('naqla-sounds-muted') === '1';
+  return localStorage.getItem('nitaq-sounds-muted') === '1';
 }
 
 export function setMuted(muted: boolean): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('naqla-sounds-muted', muted ? '1' : '0');
+  localStorage.setItem('nitaq-sounds-muted', muted ? '1' : '0');
 }
 
 /** Convenience wrapper that respects the mute preference. */

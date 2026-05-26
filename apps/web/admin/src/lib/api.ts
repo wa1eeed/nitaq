@@ -10,7 +10,7 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('naqla_access_token');
+    const token = localStorage.getItem('nitaq_access_token');
     // Don't attach DEV_BYPASS_TOKEN as Authorization — it's not a real JWT
     // and the API rejects it with "session invalid", trapping the user. The
     // response interceptor handles the 401 by clearing + redirecting.
@@ -24,9 +24,9 @@ api.interceptors.request.use((config) => {
 function clearAuthAndRedirect() {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.removeItem('naqla_access_token');
-    localStorage.removeItem('naqla_refresh_token');
-    localStorage.removeItem('naqla-admin-auth');
+    localStorage.removeItem('nitaq_access_token');
+    localStorage.removeItem('nitaq_refresh_token');
+    localStorage.removeItem('nitaq-admin-auth');
   } catch { /* ignore */ }
   if (!window.location.pathname.startsWith('/login')) {
     window.location.href = '/login';
@@ -42,20 +42,20 @@ api.interceptors.response.use(
     const config = err.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const url = config?.url ?? '';
     const token =
-      typeof window !== 'undefined' ? localStorage.getItem('naqla_access_token') : null;
+      typeof window !== 'undefined' ? localStorage.getItem('nitaq_access_token') : null;
     const isDevToken = token === DEV_BYPASS_TOKEN;
 
     // Normal 401 → try refresh (skip for dev-bypass tokens to avoid loops)
     if (!isDevToken && err.response?.status === 401 && typeof window !== 'undefined') {
-      const refreshToken = localStorage.getItem('naqla_refresh_token');
+      const refreshToken = localStorage.getItem('nitaq_refresh_token');
       if (refreshToken && refreshToken !== DEV_BYPASS_TOKEN && !config._retry) {
         config._retry = true;
         try {
           const r = await axios.post(`${API_URL}/api/auth/refresh`, { refreshToken });
           const data = r.data?.data;
           if (data?.accessToken) {
-            localStorage.setItem('naqla_access_token', data.accessToken);
-            localStorage.setItem('naqla_refresh_token', data.refreshToken);
+            localStorage.setItem('nitaq_access_token', data.accessToken);
+            localStorage.setItem('nitaq_refresh_token', data.refreshToken);
             config.headers.Authorization = `Bearer ${data.accessToken}`;
             return api(config);
           }

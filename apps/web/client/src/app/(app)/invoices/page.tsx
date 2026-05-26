@@ -36,7 +36,7 @@ export default function ClientInvoicesPage() {
   return (
     <PageTransition>
       <FadeItem>
-        <PageHeader title="الفواتير" subtitle="جميع فواتير شركتك على منصة نقلة" />
+        <PageHeader title="الفواتير" subtitle="جميع فواتير شركتك على منصة نِطاق" />
       </FadeItem>
 
       <FadeItem>

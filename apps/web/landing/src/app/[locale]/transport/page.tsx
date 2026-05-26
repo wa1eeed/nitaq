@@ -3,8 +3,8 @@ import { PageShell } from '@/components/page-shell';
 import { Markdown } from '@/components/markdown';
 
 export const metadata = {
-  title: 'شروط وأحكام النقل — نقلة لوجيستك',
-  description: 'شروط وأحكام النقل لمنصة نقلة لوجيستك',
+  title: 'شروط وأحكام النقل — نِطاق',
+  description: 'شروط وأحكام النقل لمنصة نِطاق',
 };
 
 export default function TransportTermsPage() {

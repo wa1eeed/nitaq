@@ -102,8 +102,8 @@ export default function ClientRegisterPage() {
   const submit = async () => {
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 800));
-    localStorage.setItem('naqla_client_token', DEV_BYPASS_TOKEN);
-    localStorage.setItem('naqla_client_refresh', DEV_BYPASS_TOKEN);
+    localStorage.setItem('nitaq_client_token', DEV_BYPASS_TOKEN);
+    localStorage.setItem('nitaq_client_refresh', DEV_BYPASS_TOKEN);
     useAuthStore.setState({ user: { ...DEV_USERS.client, avatar: null } as never });
     router.push('/');
   };
@@ -123,7 +123,7 @@ export default function ClientRegisterPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Truck className="h-5 w-5" />
             </div>
-            <span className="font-bold tracking-tight">نقلة لوجيستك</span>
+            <span className="font-bold tracking-tight">نِطاق</span>
           </Link>
           <Link href="/login" className="text-sm text-muted-foreground hover:text-primary">
             لديك حساب؟ <span className="text-primary font-semibold">تسجيل الدخول</span>
@@ -192,7 +192,7 @@ export default function ClientRegisterPage() {
               <CardContent className="pt-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5" />
-                  <h3 className="font-bold">لماذا نقلة لوجيستك؟</h3>
+                  <h3 className="font-bold">لماذا نِطاق؟</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <Benefit text="أسعار تنافسية من عشرات الناقلين المعتمدين" />

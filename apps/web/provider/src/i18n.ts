@@ -5,9 +5,9 @@ export const SUPPORTED_LOCALES = ['ar', 'en'] as const;
 export const DEFAULT_LOCALE = 'en';
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 // Cookies are scoped by hostname only, not port. On localhost all three
-// portals would share `naqla-locale` and flip each other's language. Use
+// portals would share `nitaq-locale` and flip each other's language. Use
 // a portal-specific cookie name so each app keeps its own locale.
-export const LOCALE_COOKIE = 'naqla-locale-carrier';
+export const LOCALE_COOKIE = 'nitaq-locale-carrier';
 
 /**
  * Cookie-based locale resolution for the internal apps (admin/client/carrier).

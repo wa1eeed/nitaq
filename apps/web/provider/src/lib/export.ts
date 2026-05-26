@@ -10,7 +10,7 @@ export interface ExportColumn<T> {
 }
 
 export interface ExportHeaderInfo {
-  /** Brand title at top of the PDF, e.g. "نقلة لوجيستك". */
+  /** Brand title at top of the PDF, e.g. "نِطاق". */
   brand: string;
   /** Sub-title — usually the company name. */
   subtitle?: string;

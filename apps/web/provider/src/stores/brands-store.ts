@@ -72,6 +72,6 @@ export const useBrandsStore = create<BrandsState>()(
 
       resetToDefaults: () => set({ brands: DEFAULT_BRANDS }),
     }),
-    { name: 'naqla:truck-brands' },
+    { name: 'nitaq:truck-brands' },
   ),
 );

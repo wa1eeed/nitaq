@@ -56,7 +56,7 @@ export default function ClientFinancePage() {
 
   const handlePDF = () => exportPDF({
     filename: `statement-${Date.now()}.pdf`,
-    header: { brand: 'Naqla Logistics', subtitle: 'Client Statement', reportTitle: 'Statement of Account' },
+    header: { brand: 'Nitaq', subtitle: 'Client Statement', reportTitle: 'Statement of Account' },
     footer: { closingBalance: wallet?.balance ?? 0, totalCredit, totalDebit },
     columns: exportColumns as any,
     rows: filteredTxs,

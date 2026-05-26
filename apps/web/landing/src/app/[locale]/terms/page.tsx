@@ -3,8 +3,8 @@ import { PageShell } from '@/components/page-shell';
 import { Markdown } from '@/components/markdown';
 
 export const metadata = {
-  title: 'شروط الاستخدام — نقلة لوجيستك',
-  description: 'شروط الاستخدام لمنصة نقلة لوجيستك',
+  title: 'شروط الاستخدام — نِطاق',
+  description: 'شروط الاستخدام لمنصة نِطاق',
 };
 
 export default function TermsPage() {

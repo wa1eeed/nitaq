@@ -75,6 +75,6 @@ export const useNotificationsStore = create<NotificationsState>()(
         }),
       resetAllTemplates: () => set({ templates: DEFAULT_NOTIFICATION_TEMPLATES }),
     }),
-    { name: 'naqla:notifications-config' },
+    { name: 'nitaq:notifications-config' },
   ),
 );

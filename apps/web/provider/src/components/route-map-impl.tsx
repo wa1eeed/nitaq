@@ -31,14 +31,14 @@ const pinSvg = (color: string, letter: string) => `
 
 const ORIGIN_ICON = L.divIcon({
   html: pinSvg('#0A3D3A', 'A'),
-  className: 'naqla-pin',
+  className: 'nitaq-pin',
   iconSize: [34, 46],
   iconAnchor: [17, 46],
   popupAnchor: [0, -40],
 });
 const DEST_ICON = L.divIcon({
   html: pinSvg('#00C9A7', 'B'),
-  className: 'naqla-pin',
+  className: 'nitaq-pin',
   iconSize: [34, 46],
   iconAnchor: [17, 46],
   popupAnchor: [0, -40],
@@ -52,7 +52,7 @@ const TRUCK_ICON = L.divIcon({
         <circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>
       </svg>
     </div>`,
-  className: 'naqla-truck',
+  className: 'nitaq-truck',
   iconSize: [30, 30],
   iconAnchor: [15, 15],
 });

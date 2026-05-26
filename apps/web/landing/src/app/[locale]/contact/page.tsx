@@ -7,7 +7,7 @@ import { PageShell } from '@/components/page-shell';
 
 const CHANNELS = [
   { icon: Phone,         title: 'اتصال هاتفي',     value: '+966 920 000 000',  desc: 'السبت – الخميس، 8 ص – 8 م',  tone: 'bg-primary/10 text-primary' },
-  { icon: Mail,          title: 'بريد إلكتروني',    value: 'support@naqla.sa',  desc: 'رد خلال 12 ساعة عمل',          tone: 'bg-info/15 text-info' },
+  { icon: Mail,          title: 'بريد إلكتروني',    value: 'support@nitaq.sa',  desc: 'رد خلال 12 ساعة عمل',          tone: 'bg-info/15 text-info' },
   { icon: MessageSquare, title: 'محادثة فورية',     value: 'متاحة 24/7',         desc: 'رد فوري خلال دقائق',           tone: 'bg-success/15 text-success' },
 ];
 

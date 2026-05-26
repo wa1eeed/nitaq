@@ -19,18 +19,18 @@ export const useAuthStore = create<AuthState>()(
       login: async (phoneOrEmail, password) => {
         const r = await api.post('/auth/login', { phoneOrEmail, password });
         const d = r.data?.data;
-        localStorage.setItem('naqla_carrier_token', d.accessToken);
-        localStorage.setItem('naqla_carrier_refresh', d.refreshToken);
+        localStorage.setItem('nitaq_carrier_token', d.accessToken);
+        localStorage.setItem('nitaq_carrier_refresh', d.refreshToken);
         set({ user: d.user });
       },
       logout: async () => {
-        const rt = localStorage.getItem('naqla_carrier_refresh');
+        const rt = localStorage.getItem('nitaq_carrier_refresh');
         if (rt) { try { await api.post('/auth/logout', { refreshToken: rt }); } catch {} }
-        localStorage.removeItem('naqla_carrier_token');
-        localStorage.removeItem('naqla_carrier_refresh');
+        localStorage.removeItem('nitaq_carrier_token');
+        localStorage.removeItem('nitaq_carrier_refresh');
         set({ user: null });
       },
     }),
-    { name: 'naqla-carrier-auth' },
+    { name: 'nitaq-carrier-auth' },
   ),
 );

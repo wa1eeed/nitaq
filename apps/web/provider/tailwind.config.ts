@@ -58,7 +58,7 @@ const config: Config = {
           DEFAULT:    'hsl(var(--warning))',
           foreground: 'hsl(var(--warning-foreground))',
         },
-        // Naqla brand accents
+        // Nitaq brand accents
         mint: 'hsl(var(--mint))',
         gold: 'hsl(var(--gold))',
       },

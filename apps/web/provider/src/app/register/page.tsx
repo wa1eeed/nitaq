@@ -207,8 +207,8 @@ export default function CarrierRegisterPage() {
   const submit = async () => {
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 800));
-    localStorage.setItem('naqla_carrier_token', DEV_BYPASS_TOKEN);
-    localStorage.setItem('naqla_carrier_refresh', DEV_BYPASS_TOKEN);
+    localStorage.setItem('nitaq_carrier_token', DEV_BYPASS_TOKEN);
+    localStorage.setItem('nitaq_carrier_refresh', DEV_BYPASS_TOKEN);
     useAuthStore.setState({ user: { ...DEV_USERS.carrier, avatar: null } as never });
     router.push('/');
   };
@@ -224,7 +224,7 @@ export default function CarrierRegisterPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <Truck className="h-5 w-5" />
             </div>
-            <span className="font-bold tracking-tight">نقلة لوجيستك · الناقل</span>
+            <span className="font-bold tracking-tight">نِطاق · الناقل</span>
           </Link>
           <Link href="/login" className="text-sm text-muted-foreground hover:text-primary">
             لديك حساب؟ <span className="text-primary font-semibold">تسجيل الدخول</span>
@@ -295,7 +295,7 @@ export default function CarrierRegisterPage() {
               <CardContent className="pt-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5" />
-                  <h3 className="font-bold">انضم كناقل على نقلة</h3>
+                  <h3 className="font-bold">انضم كناقل على نِطاق</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <Benefit text="آلاف الطلبات شهرياً عبر المنصة" />

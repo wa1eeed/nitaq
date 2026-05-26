@@ -36,6 +36,6 @@ export const useCargoTypesStore = create<CargoTypesState>()(
 
       resetToDefaults: () => set({ cargoTypes: DEFAULT_CARGO_TYPES }),
     }),
-    { name: 'naqla-admin-cargo-types' },
+    { name: 'nitaq-admin-cargo-types' },
   ),
 );

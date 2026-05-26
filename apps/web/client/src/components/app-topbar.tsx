@@ -15,7 +15,7 @@ import {
 import { SidebarContent } from './app-sidebar';
 import { useAuthStore } from '@/lib/auth-store';
 
-const STORAGE_KEY = 'naqla-theme';
+const STORAGE_KEY = 'nitaq-theme';
 
 function useTheme() {
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light');

@@ -74,7 +74,7 @@ export default function AdminSeoPage() {
 
               <div className="space-y-2">
                 <Label>قالب العنوان (Template)</Label>
-                <Input value={seo.titleTemplate} onChange={(e) => update({ titleTemplate: e.target.value })} placeholder="%s | نقلة" />
+                <Input value={seo.titleTemplate} onChange={(e) => update({ titleTemplate: e.target.value })} placeholder="%s | نِطاق" />
                 <p className="text-xs text-muted-foreground">استخدم %s لاسم الصفحة</p>
               </div>
 
@@ -107,7 +107,7 @@ export default function AdminSeoPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>الرابط الكنسي (Canonical)</Label>
-                  <Input dir="ltr" value={seo.canonicalUrl} onChange={(e) => update({ canonicalUrl: e.target.value })} placeholder="https://naqla.sa" />
+                  <Input dir="ltr" value={seo.canonicalUrl} onChange={(e) => update({ canonicalUrl: e.target.value })} placeholder="https://nitaq.sa" />
                 </div>
                 <div className="space-y-2">
                   <Label>اللغة والمنطقة (Locale)</Label>
@@ -138,13 +138,13 @@ export default function AdminSeoPage() {
             <CardContent className="space-y-4 max-w-3xl">
               <div className="space-y-2">
                 <Label className="flex items-center gap-1"><ImageIcon className="h-3.5 w-3.5" /> صورة المشاركة (Open Graph Image)</Label>
-                <Input dir="ltr" value={seo.ogImage} onChange={(e) => update({ ogImage: e.target.value })} placeholder="https://naqla.sa/og-image.png" />
+                <Input dir="ltr" value={seo.ogImage} onChange={(e) => update({ ogImage: e.target.value })} placeholder="https://nitaq.sa/og-image.png" />
                 <p className="text-xs text-muted-foreground">المقاس الموصى به: 1200×630 بكسل</p>
               </div>
 
               <div className="space-y-2">
                 <Label className="flex items-center gap-1"><Twitter className="h-3.5 w-3.5" /> Twitter Handle</Label>
-                <Input dir="ltr" value={seo.twitterHandle} onChange={(e) => update({ twitterHandle: e.target.value })} placeholder="@naqla_sa" />
+                <Input dir="ltr" value={seo.twitterHandle} onChange={(e) => update({ twitterHandle: e.target.value })} placeholder="@nitaq_sa" />
               </div>
 
               <div className="space-y-2">

@@ -46,8 +46,8 @@ export default function AdminSettingsPage() {
   const [savingFinancial, setSavingFinancial] = useState(false);
 
   // General settings
-  const [brandName, setBrandName] = useState('نقلة لوجيستك');
-  const [supportEmail, setSupportEmail] = useState('support@naqla.sa');
+  const [brandName, setBrandName] = useState('نِطاق');
+  const [supportEmail, setSupportEmail] = useState('support@nitaq.sa');
   const [supportPhone, setSupportPhone] = useState('+966 920 000 000');
   const [savingGeneral, setSavingGeneral] = useState(false);
 

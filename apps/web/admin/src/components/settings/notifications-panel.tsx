@@ -128,7 +128,7 @@ function ProvidersTab() {
                 dir="ltr"
                 value={providers.email.fromEmail}
                 onChange={(e) => updateEmail({ fromEmail: e.target.value })}
-                placeholder="noreply@naqla.sa"
+                placeholder="noreply@nitaq.sa"
               />
             </div>
             <div className="space-y-2">
@@ -136,7 +136,7 @@ function ProvidersTab() {
               <Input
                 value={providers.email.fromName}
                 onChange={(e) => updateEmail({ fromName: e.target.value })}
-                placeholder="نقلة لوجيستك"
+                placeholder="نِطاق"
               />
             </div>
           </div>
@@ -147,7 +147,7 @@ function ProvidersTab() {
               dir="ltr"
               value={providers.email.replyTo}
               onChange={(e) => updateEmail({ replyTo: e.target.value })}
-              placeholder="support@naqla.sa"
+              placeholder="support@nitaq.sa"
             />
           </div>
 

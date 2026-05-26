@@ -36,6 +36,6 @@ export const useCitiesStore = create<CitiesState>()(
 
       resetToDefaults: () => set({ cities: DEFAULT_CITIES }),
     }),
-    { name: 'naqla-admin-cities' },
+    { name: 'nitaq-admin-cities' },
   ),
 );

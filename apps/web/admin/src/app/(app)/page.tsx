@@ -74,7 +74,7 @@ export default function AdminDashboard() {
     <>
       <PageHeader
         title="لوحة التحكم 👋"
-        subtitle="نظرة شاملة على نشاط منصة نقلة"
+        subtitle="نظرة شاملة على نشاط منصة نِطاق"
         actions={
           <Button variant="outline">
             <ArrowUpRight className="h-4 w-4" /> تصدير

@@ -47,7 +47,7 @@ export const useTruckTypesStore = create<TruckTypesState>()(
       resetToDefaults: () => set({ types: DEFAULT_TRUCK_TYPES }),
     }),
     {
-      name: 'naqla:truck-types',
+      name: 'nitaq:truck-types',
       // Bump version when default seed changes so users get fresh images
       version: 2,
       migrate: (_persisted, _v) => ({ types: DEFAULT_TRUCK_TYPES }),

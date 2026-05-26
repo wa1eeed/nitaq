@@ -13,7 +13,7 @@ import { useAuthStore } from '@/lib/auth-store';
 
 export default function CarrierLoginPage() {
   const router = useRouter();
-  const [identifier, setIdentifier] = useState('carrier@naqla.sa');
+  const [identifier, setIdentifier] = useState('carrier@nitaq.sa');
   const [password, setPassword] = useState('Carrier@1234');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +31,8 @@ export default function CarrierLoginPage() {
       const e = err as { response?: { data?: { error?: { message?: string }, message?: string } }, message?: string };
       // API unreachable → dev-bypass fallback (UI demo only, no persistence).
       if (!e.response) {
-        localStorage.setItem('naqla_carrier_token', DEV_BYPASS_TOKEN);
-        localStorage.setItem('naqla_carrier_refresh', DEV_BYPASS_TOKEN);
+        localStorage.setItem('nitaq_carrier_token', DEV_BYPASS_TOKEN);
+        localStorage.setItem('nitaq_carrier_refresh', DEV_BYPASS_TOKEN);
         useAuthStore.setState({ user: { ...DEV_USERS.carrier, avatar: null } as never });
         router.push('/');
         return;
@@ -56,7 +56,7 @@ export default function CarrierLoginPage() {
             <Truck className="h-6 w-6 text-white" />
           </div>
           <div>
-            <div className="text-lg font-bold text-white">نقلة لوجيستك</div>
+            <div className="text-lg font-bold text-white">نِطاق</div>
             <div className="text-xs text-white/60">منصة الناقل</div>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function CarrierLoginPage() {
         <div className="space-y-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <h2 className="text-3xl font-bold text-white leading-snug">
-              وسّع نطاق أعمالك<br />مع نقلة
+              وسّع نطاق أعمالك<br />مع نِطاق
             </h2>
             <p className="mt-3 text-white/70 text-sm leading-relaxed">
               منصة رقمية لشركات النقل في المملكة
@@ -93,7 +93,7 @@ export default function CarrierLoginPage() {
         </div>
 
         {/* Bottom note */}
-        <div className="text-xs text-white/40">© 2026 نقلة لوجيستك · جميع الحقوق محفوظة</div>
+        <div className="text-xs text-white/40">© 2026 نِطاق · جميع الحقوق محفوظة</div>
       </div>
 
       {/* ── Right form panel ────────────────────────────────────────────── */}
@@ -109,7 +109,7 @@ export default function CarrierLoginPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
               <Truck className="h-7 w-7" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">نقلة لوجيستك</h1>
+            <h1 className="text-2xl font-bold tracking-tight">نِطاق</h1>
             <p className="text-sm text-muted-foreground">منصة الناقل · فرص نقل + إدارة أسطول</p>
           </div>
 
@@ -129,7 +129,7 @@ export default function CarrierLoginPage() {
                     className="text-end"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="carrier@naqla.sa"
+                    placeholder="carrier@nitaq.sa"
                     required
                   />
                 </div>

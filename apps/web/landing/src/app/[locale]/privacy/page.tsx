@@ -3,8 +3,8 @@ import { PageShell } from '@/components/page-shell';
 import { Markdown } from '@/components/markdown';
 
 export const metadata = {
-  title: 'سياسة الخصوصية — نقلة لوجيستك',
-  description: 'سياسة الخصوصية لمنصة نقلة لوجيستك',
+  title: 'سياسة الخصوصية — نِطاق',
+  description: 'سياسة الخصوصية لمنصة نِطاق',
 };
 
 export default function PrivacyPage() {

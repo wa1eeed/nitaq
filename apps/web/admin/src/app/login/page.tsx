@@ -11,7 +11,7 @@ import { useAuthStore } from '@/lib/auth-store';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [identifier, setIdentifier] = useState('admin@naqla.sa');
+  const [identifier, setIdentifier] = useState('admin@nitaq.sa');
   const [password, setPassword] = useState('Admin@1234');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +29,8 @@ export default function AdminLoginPage() {
       const e = err as { response?: { data?: { error?: { message?: string }, message?: string } }, message?: string };
       // API unreachable → dev-bypass fallback (UI demo only, no persistence).
       if (!e.response) {
-        localStorage.setItem('naqla_access_token', DEV_BYPASS_TOKEN);
-        localStorage.setItem('naqla_refresh_token', DEV_BYPASS_TOKEN);
+        localStorage.setItem('nitaq_access_token', DEV_BYPASS_TOKEN);
+        localStorage.setItem('nitaq_refresh_token', DEV_BYPASS_TOKEN);
         useAuthStore.setState({ user: { ...DEV_USERS.admin, avatar: null } as never });
         router.push('/');
         return;
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
             <Truck className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">نقلة لوجيستك</h1>
+          <h1 className="text-2xl font-bold tracking-tight">نِطاق</h1>
           <p className="text-sm text-muted-foreground">لوحة إدارة المنصة</p>
         </div>
 
@@ -68,7 +68,7 @@ export default function AdminLoginPage() {
                   className="text-end"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="admin@naqla.sa"
+                  placeholder="admin@nitaq.sa"
                   autoComplete="username"
                   required
                 />
@@ -120,7 +120,7 @@ export default function AdminLoginPage() {
         </Card>
 
         <p className="text-xs text-muted-foreground text-center">
-          © {new Date().getFullYear()} نقلة لوجيستك · جميع الحقوق محفوظة
+          © {new Date().getFullYear()} نِطاق · جميع الحقوق محفوظة
         </p>
       </div>
     </div>

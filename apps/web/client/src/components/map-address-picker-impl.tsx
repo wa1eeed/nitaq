@@ -40,7 +40,7 @@ const PIN_ICON = L.divIcon({
             fill="#0A3D3A" stroke="white" stroke-width="2" filter="url(#ds)"/>
       <circle cx="17" cy="16" r="6" fill="white"/>
     </svg>`,
-  className: 'naqla-pin-picker',
+  className: 'nitaq-pin-picker',
   iconSize: [34, 46],
   iconAnchor: [17, 46],
 });

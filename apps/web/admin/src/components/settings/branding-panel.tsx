@@ -175,7 +175,7 @@ export function BrandingPanel() {
               id="brand-name-ar"
               value={arDraft}
               onChange={(e) => setArDraft(e.target.value)}
-              placeholder="نقلة لوجيستك"
+              placeholder="نِطاق"
             />
           </div>
           <div className="space-y-2">
@@ -185,7 +185,7 @@ export function BrandingPanel() {
               dir="ltr"
               value={enDraft}
               onChange={(e) => setEnDraft(e.target.value)}
-              placeholder="Naqla Logistics"
+              placeholder="Nitaq"
             />
           </div>
           <div className="flex items-center gap-2 pt-2">
@@ -212,8 +212,8 @@ export function BrandingPanel() {
               onClick={() => {
                 if (confirm(t('branding.confirmReset'))) {
                   reset();
-                  setArDraft('نقلة لوجيستك');
-                  setEnDraft('Naqla Logistics');
+                  setArDraft('نِطاق');
+                  setEnDraft('Nitaq');
                   setUrlDraft('');
                 }
               }}

@@ -28,8 +28,8 @@ interface PlatformState extends PlatformBranding {
 
 const DEFAULTS: PlatformBranding = {
   logoUrl: '',
-  nameAr: 'نقلة لوجيستك',
-  nameEn: 'Naqla Logistics',
+  nameAr: 'نِطاق',
+  nameEn: 'Nitaq',
 };
 
 export const usePlatformStore = create<PlatformState>()(
@@ -40,6 +40,6 @@ export const usePlatformStore = create<PlatformState>()(
       setName: (patch) => set((s) => ({ ...s, ...patch })),
       reset: () => set({ ...DEFAULTS }),
     }),
-    { name: 'naqla-platform-branding' },
+    { name: 'nitaq-platform-branding' },
   ),
 );

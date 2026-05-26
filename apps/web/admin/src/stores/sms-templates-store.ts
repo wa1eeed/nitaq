@@ -36,6 +36,6 @@ export const useSmsTemplatesStore = create<SmsTemplatesState>()(
 
       resetToDefaults: () => set({ templates: DEFAULT_SMS_TEMPLATES }),
     }),
-    { name: 'naqla-admin-sms-templates' },
+    { name: 'nitaq-admin-sms-templates' },
   ),
 );

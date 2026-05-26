@@ -11,7 +11,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const token = localStorage.getItem('naqla_access_token');
+    const token = localStorage.getItem('nitaq_access_token');
     if (!token) {
       router.replace('/login');
       setAuthed(false);

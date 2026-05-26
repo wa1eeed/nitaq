@@ -92,7 +92,7 @@ export default function AdminWalletDetailPage() {
   const handleExportPDF = () => {
     exportPDF({
       filename: `wallet-${company.id}-${Date.now()}.pdf`,
-      header: { brand: 'Naqla Logistics', subtitle: company.nameEn, reportTitle: 'Statement of Account' },
+      header: { brand: 'Nitaq', subtitle: company.nameEn, reportTitle: 'Statement of Account' },
       footer: {
         openingBalance: txs[txs.length - 1]?.balanceAfter ?? 0,
         closingBalance: wallet.balance,

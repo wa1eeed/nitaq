@@ -9,7 +9,7 @@ const tajawal = Tajawal({ subsets: ['arabic'], weight: ['400', '500', '700'], va
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'نقلة لوجيستك — Naqla Logistics',
+  title: 'نِطاق — Nitaq',
   description: 'منصة النقل اللوجستي الذكي في المملكة',
 };
 

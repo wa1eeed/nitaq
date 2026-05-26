@@ -12,13 +12,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const token = localStorage.getItem('naqla_carrier_token');
+    const token = localStorage.getItem('nitaq_carrier_token');
     // DEV_BYPASS_TOKEN is treated as "not logged in" — API rejects it anyway.
     if (!token || token === DEV_BYPASS_TOKEN) {
       try {
-        localStorage.removeItem('naqla_carrier_token');
-        localStorage.removeItem('naqla_carrier_refresh');
-        localStorage.removeItem('naqla-carrier-auth');
+        localStorage.removeItem('nitaq_carrier_token');
+        localStorage.removeItem('nitaq_carrier_refresh');
+        localStorage.removeItem('nitaq-carrier-auth');
       } catch { /* ignore */ }
       router.replace('/login');
       setAuthed(false);
