@@ -1,4 +1,4 @@
-# 🌐 API Reference — نقلة لوجيستك
+# 🌐 API Reference — Nitaq Platform
 
 REST API مبني على **NestJS 10** يعمل على `http://localhost:4000` محلياً.
 
@@ -61,8 +61,8 @@ Content-Type: application/json
   "email": "user@example.sa",
   "phone": "+966551234567",
   "password": "StrongPass@1234",
-  "role": "CLIENT",                    // CLIENT | CARRIER
-  "companyNameAr": "شركة الجزيرة",     // إذا role=CARRIER أو كان حساب شركة
+  "role": "CLIENT",                    // CLIENT | PROVIDER
+  "companyNameAr": "شركة الجزيرة",     // إذا role=PROVIDER أو كان حساب شركة
   "crNumber": "1010000000",            // للشركات
   "acceptedTerms": true,
   "acceptedPrivacy": true,
@@ -194,7 +194,7 @@ Authorization: Bearer <accessToken>
   "phone": "+9665...",
   "email": "sara@example.sa",
   "companyRole": "ADMIN",
-  "activationLink": "https://app.naqla.sa/activate?token=...",
+  "activationLink": "https://app.nitaq.sa/activate?token=...",
   "smsSent": true
 }
 ```
@@ -253,7 +253,7 @@ POST /api/orders
   "cargoType": "GENERAL",
   "cargoDescription": "أثاث منزلي",
   "weightKg": 2500,
-  "truckType": "MEDIUM_FLATBED",
+  "serviceType": "CONSULTING",
   "originCity": "الرياض",
   "originAddress": "حي السلي، مستودع 14",
   "originPin": { "lat": 24.7136, "lng": 46.6753 },   // optional precise location (v0.6.0)
@@ -276,7 +276,7 @@ POST /api/orders/:orderId/bids
   "amount": 7800,
   "proposedPickupDate": "2026-06-02",          // optional, counter on pickup timing
   "proposedDeliveryDate": "2026-06-05",        // optional, concrete delivery date
-  "notes": "شاحنة موديل 2024 مع تأمين شامل"
+  "notes": "فريق متخصص، خبرة +5 سنوات، تأمين شامل"
 }
 // Legacy fields `estimatedDays` / `estimatedHours` are still accepted for
 // back-compat but no longer emitted by the carrier form. New clients should
@@ -288,7 +288,7 @@ POST /api/orders/:orderId/bids
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/bids` 🔒 | عروض الناقل |
+| `GET` | `/bids` 🔒 | عروض مقدّم الخدمة |
 | `POST` | `/bids` 🔒 | تقديم عرض على طلب |
 | `POST` | `/bids/:id/accept` 🔒 | قبول العرض (من العميل) |
 | `POST` | `/bids/:id/reject` 🔒 | رفض العرض |
@@ -298,26 +298,26 @@ POST /api/orders/:orderId/bids
 POST /api/bids
 {
   "orderId": "ord_...",
-  "truckId": "trk_...",
+  "serviceId": "svc_...",
   "price": 8200,
   "estimatedDays": 1,
-  "notes": "شاحنة 2024، تأمين شامل"
+  "notes": "خدمة احترافية، تأمين شامل"
 }
 ```
 
-### 3.6 Fleet — `/api/fleet`
+### 3.6 Services — `/api/services`
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/fleet/trucks` 🔒 | شاحنات الناقل |
-| `POST` | `/fleet/trucks` 🔒 | إضافة شاحنة |
-| `GET` | `/fleet/trucks/:id` 🔒 | تفاصيل شاحنة |
-| `PUT` | `/fleet/trucks/:id` 🔒 | تحديث شاحنة |
-| `GET` | `/fleet/drivers` 🔒 | سائقو الناقل |
-| `POST` | `/fleet/drivers` 🔒 | إضافة سائق |
-| `GET` | `/fleet/drivers/:id` 🔒 | تفاصيل سائق |
-| `GET` | `/fleet/drivers/:id/history` 🔒 | سجل رحلات السائق |
-| `POST` | `/fleet/drivers/:id/location` 🔒 | تحديث موقع السائق |
+| `GET` | `/services` 🔒 | خدمات مقدّم الخدمة |
+| `POST` | `/services` 🔒 | إضافة خدمة |
+| `GET` | `/services/:id` 🔒 | تفاصيل خدمة |
+| `PUT` | `/services/:id` 🔒 | تحديث خدمة |
+| `GET` | `/employees` 🔒 | موظفو مقدّم الخدمة |
+| `POST` | `/employees` 🔒 | إضافة موظف |
+| `GET` | `/employees/:id` 🔒 | تفاصيل موظف |
+| `GET` | `/employees/:id/history` 🔒 | سجل مهام الموظف |
+| `POST` | `/employees/:id/location` 🔒 | تحديث موقع الموظف |
 
 ### 3.7 Payments — `/api/payments`
 
@@ -363,7 +363,7 @@ POST /api/uploads/presign
 {
   "fileName": "kyc-cr.pdf",
   "contentType": "application/pdf",
-  "category": "KYC"     // KYC | TRUCK_PHOTO | DRIVER_AVATAR | INVOICE
+  "category": "KYC"     // KYC | SERVICE_PHOTO | EMPLOYEE_AVATAR | INVOICE
 }
 ```
 
@@ -392,7 +392,7 @@ POST /api/uploads/presign
 
 ---
 
-### 3.13 Disputes (Client/Carrier) — `/api/disputes` (v0.9.0)
+### 3.13 Disputes (Client/Provider) — `/api/disputes` (v0.9.0)
 
 | Method | Path | Description |
 |---|---|---|
@@ -492,8 +492,8 @@ const socket = io('http://localhost:4000', {
 
 ### 4.2 Events (Client ← Server)
 - `order:status_changed` — `{ orderId, oldStatus, newStatus }`
-- `order:bid_received` — `{ orderId, bidId, carrierName, price }`
-- `order:assigned` — `{ orderId, carrierName }`
+- `order:bid_received` — `{ orderId, bidId, providerName, price }`
+- `order:assigned` — `{ orderId, providerName }`
 - `tracking:location_update` — `{ orderId, lat, lng, at }`
 - `notification:new` — `Notification`
 
@@ -515,8 +515,8 @@ const socket = io('http://localhost:4000', {
 | `KYC_NOT_APPROVED` | 403 | الشركة لم تُعتمد بعد |
 | `ORDER_NOT_FOUND` | 404 | الطلب غير موجود |
 | `ORDER_INVALID_STATUS` | 400 | الإجراء غير متاح في الحالة الحالية |
-| `BID_ALREADY_ACCEPTED` | 400 | الطلب أُسند لناقل بالفعل |
-| `CANCELLATION_NOT_ALLOWED` | 400 | الإلغاء غير مسموح (الشحنة في الطريق) |
+| `BID_ALREADY_ACCEPTED` | 400 | الطلب أُسند لمقدّم خدمة بالفعل |
+| `CANCELLATION_NOT_ALLOWED` | 400 | الإلغاء غير مسموح (الطلب قيد التنفيذ) |
 | `VALIDATION_ERROR` | 422 | فشل التحقق من المدخلات |
 | `RATE_LIMIT_EXCEEDED` | 429 | تجاوز حدّ الطلبات |
 | `INTERNAL_ERROR` | 500 | خطأ غير متوقّع |
@@ -577,17 +577,17 @@ GET /api/orders?page=1&limit=20&sort=createdAt:desc&status=BIDDING
 # Login
 curl -X POST http://localhost:4000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"identifier":"client@naqla.sa","password":"Client@1234"}'
+  -d '{"identifier":"client@nitaq.sa","password":"Client@1234"}'
 
 # Get my orders (replace TOKEN)
 curl http://localhost:4000/api/orders \
   -H "Authorization: Bearer TOKEN"
 
-# Submit bid (carrier)
+# Submit bid (provider)
 curl -X POST http://localhost:4000/api/bids \
   -H "Authorization: Bearer TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"orderId":"ord_xxx","truckId":"trk_xxx","price":8500,"estimatedDays":2}'
+  -d '{"orderId":"ord_xxx","serviceId":"svc_xxx","price":8500,"estimatedDays":2}'
 ```
 
 ### 8.3 Postman / Insomnia

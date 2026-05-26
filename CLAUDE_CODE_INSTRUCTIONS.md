@@ -1,30 +1,30 @@
-# نقلة لوجيستك — تعليمات Claude Code الشاملة
+# نيطاق — تعليمات Claude Code الشاملة
 
 ## نظرة عامة على المشروع
 
-**اسم المنصة:** نقلة لوجيستك (Naqla Logistics)
-**النوع:** Marketplace + TMS + Freight Management Platform
+**اسم المنصة:** نيطاق (Nitaq Platform)
+**النوع:** Marketplace + Services Management Platform
 **السوق المستهدف:** المملكة العربية السعودية (B2B)
-**الهدف:** منصة تقنية وسيطة تربط الشركات طالبة النقل بشركات النقل — "Uber for Trucks + Freight ERP"
+**الهدف:** منصة تقنية وسيطة تربط طالبي الخدمات بمقدّمي الخدمات (شركات وأفراد) — "Services Marketplace + Freelance ERP"
 
 ---
 
 ## السياق التجاري
 
 ### المشكلة
-- الشركات تعاني من صعوبة إيجاد ناقلين موثوقين
+- الشركات تعاني من صعوبة إيجاد مقدّمي خدمات موثوقين
 - تفاوت الأسعار وغياب الشفافية
 - إدارة عبر واتساب واتصالات بدون رقمنة
-- شركات النقل تعاني من شاحنات فارغة أثناء العودة وتأخر السداد
+- مقدّمو الخدمات يعانون من تأخر السداد وقلة الطلبات
 
 ### الحل
-منصة رقمية تحل: التشغيل، التعاقد، التحصيل، التنظيم، التتبع، إدارة الأسطول
+منصة رقمية تحل: التشغيل، التعاقد، التحصيل، التنظيم، التتبع، إدارة الخدمات
 
 ### نموذج الربح
 1. عمولة 5-12% على كل طلب
-2. اشتراكات شهرية لشركات النقل (Basic/Pro/Enterprise)
+2. اشتراكات شهرية لمقدّمي الخدمات (Basic/Pro/Enterprise)
 3. رسوم خدمات مالية (Escrow، دفع آجل)
-4. خدمات إضافية (GPS، مستندات، تكامل ERP)
+4. خدمات إضافية (مستندات، تكامل ERP)
 
 ---
 
@@ -45,13 +45,13 @@ Queue:       Bull (Redis-based)
 
 ### بنية المشروع (Monorepo)
 ```
-naqla/
+nitaq/
 ├── apps/
 │   ├── api/                    # NestJS Backend (Port 4000)
 │   └── web/
 │       ├── admin/              # لوحة الأدمن (Port 3001)
 │       ├── client/             # واجهة العميل (Port 3002)
-│       ├── carrier/            # واجهة الناقل (Port 3003)
+│       ├── provider/           # واجهة مقدّم الخدمة (Port 3003)
 │       └── landing/            # الصفحة التسويقية (Port 3000)
 ├── packages/
 │   ├── shared-types/           # TypeScript types مشتركة
@@ -87,14 +87,14 @@ enum UserRole {
   ADMIN
   CLIENT_ADMIN
   CLIENT_USER
-  CARRIER_ADMIN
-  CARRIER_USER
-  DRIVER
+  PROVIDER_ADMIN
+  PROVIDER_USER
+  EMPLOYEE
 }
 
 enum CompanyType {
-  CLIENT      // شركة طالبة النقل
-  CARRIER     // شركة ناقلة
+  CLIENT      // شركة طالبة الخدمة
+  PROVIDER    // شركة مقدّمة للخدمة
 }
 
 enum CompanyStatus {
@@ -124,17 +124,15 @@ enum OrderStatus {
   DISPUTED
 }
 
-enum TruckType {
-  SMALL_FLATBED      // مسطح صغير
-  MEDIUM_FLATBED     // مسطح متوسط
-  LARGE_FLATBED      // مسطح كبير
-  REFRIGERATED       // مبرد
-  CONTAINER_20       // حاوية 20 قدم
-  CONTAINER_40       // حاوية 40 قدم
-  TANKER             // صهريج
-  CURTAINSIDER       // ستائر
-  BOX_TRUCK          // صندوقي
-  LOWBED             // لوبيد للمعدات الثقيلة
+enum ServiceType {
+  CONSULTING         // استشارات
+  DESIGN             // تصميم
+  DEVELOPMENT        // تطوير
+  MAINTENANCE        // صيانة
+  CLEANING           // تنظيف
+  SECURITY           // أمن وحراسة
+  CATERING           // تقديم طعام
+  OTHER              // أخرى
 }
 
 enum CargoType {
@@ -199,9 +197,9 @@ enum DisputeStatus {
   CLOSED
 }
 
-enum DriverStatus {
+enum EmployeeStatus {
   AVAILABLE
-  ON_TRIP
+  ON_ASSIGNMENT
   OFF_DUTY
 }
 
@@ -271,11 +269,11 @@ model Company {
   updatedAt         DateTime        @updatedAt
   
   users             User[]
-  trucks            Truck[]
-  drivers           DriverProfile[]
+  services          Service[]
+  employees         EmployeeProfile[]
   
   ordersAsClient    Order[]         @relation("ClientOrders")
-  ordersAsCarrier   Order[]         @relation("CarrierOrders")
+  ordersAsProvider  Order[]         @relation("ProviderOrders")
   
   bids              Bid[]
   invoicesIssued    Invoice[]       @relation("IssuerInvoices")
@@ -305,69 +303,64 @@ model KYCDocument {
   updatedAt   DateTime    @updatedAt
 }
 
-model Truck {
+model Service {
   id              String      @id @default(cuid())
   companyId       String
   company         Company     @relation(fields: [companyId], references: [id])
   
-  plateNumber     String      @unique
-  type            TruckType
-  capacity        Float       // طن
-  length          Float?      // متر
-  width           Float?      // متر
-  height          Float?      // متر
+  serviceCode     String      @unique
+  type            ServiceType
+  capacity        Float       // الطاقة الاستيعابية
   
-  make            String?     // الصانع
+  make            String?     // الصانع/المورّد
   model           String?
   year            Int?
   
-  hasRefrigeration Boolean    @default(false)
-  hasGPS          Boolean     @default(false)
   isActive        Boolean     @default(true)
   
   photos          String[]
   documents       String[]    // رخصة، تأمين، etc.
   
-  currentDriverId String?
-  currentDriver   DriverProfile? @relation(fields: [currentDriverId], references: [id])
+  currentEmployeeId String?
+  currentEmployee   EmployeeProfile? @relation(fields: [currentEmployeeId], references: [id])
   
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   
-  orderTrucks     OrderTruck[]
+  orderServices   OrderService[]
 
   @@index([companyId])
   @@index([type])
 }
 
-model DriverProfile {
-  id              String        @id @default(cuid())
-  userId          String        @unique
-  user            User          @relation(fields: [userId], references: [id])
+model EmployeeProfile {
+  id              String          @id @default(cuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id])
   companyId       String
-  company         Company       @relation(fields: [companyId], references: [id])
+  company         Company         @relation(fields: [companyId], references: [id])
   
-  licenseNumber   String        @unique
-  licenseExpiry   DateTime
-  licenseType     String        // مثل: ثقيل، خفيف
+  idNumber        String          @unique
+  idExpiry        DateTime
+  specialty       String          // مثل: تطوير، تصميم، صيانة
   
-  status          DriverStatus  @default(OFF_DUTY)
+  status          EmployeeStatus  @default(OFF_DUTY)
   currentLat      Float?
   currentLng      Float?
   lastLocationAt  DateTime?
   
-  rating          Float         @default(0)
-  totalTrips      Int           @default(0)
+  rating          Float           @default(0)
+  totalAssignments Int            @default(0)
   
   photo           String?
-  isActive        Boolean       @default(true)
+  isActive        Boolean         @default(true)
   
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   
-  assignedTrucks  Truck[]
-  orderDrivers    OrderDriver[]
-  locationHistory LocationHistory[]
+  assignedServices  Service[]
+  orderEmployees    OrderEmployee[]
+  locationHistory   LocationHistory[]
 }
 
 model Order {
@@ -378,15 +371,14 @@ model Order {
   // الأطراف
   clientId            String
   client              Company       @relation("ClientOrders", fields: [clientId], references: [id])
-  carrierId           String?
-  carrier             Company?      @relation("CarrierOrders", fields: [carrierId], references: [id])
+  providerId          String?
+  provider            Company?      @relation("ProviderOrders", fields: [providerId], references: [id])
   
-  // معلومات الشحنة
-  cargoType           CargoType
-  cargoDescription    String
-  weight              Float         // كيلوجرام
-  pallets             Int?
-  volume              Float?        // متر مكعب
+  // معلومات الطلب
+  serviceCategory     ServiceType
+  serviceDescription  String
+  quantity            Float?        // الكمية إن وُجدت
+  duration            Int?          // المدة بالأيام
   
   // المسار
   originCity          String
@@ -402,8 +394,7 @@ model Order {
   destinationLng      Float?
   
   // متطلبات خاصة
-  requiredTruckType   TruckType
-  requiresRefrigeration Boolean    @default(false)
+  requiredServiceType ServiceType
   requiresInsurance   Boolean      @default(false)
   specialInstructions String?
   
@@ -416,7 +407,7 @@ model Order {
   clientBudget        Float?        // ميزانية العميل الاسترشادية
   agreedPrice         Float?        // السعر المتفق عليه
   commissionAmount    Float?        // عمولة المنصة
-  carrierAmount       Float?        // المبلغ للناقل
+  providerAmount      Float?        // المبلغ لمقدّم الخدمة
   
   // التتبع
   actualPickupAt      DateTime?
@@ -429,7 +420,7 @@ model Order {
   
   // التقييم
   clientRating        Int?
-  carrierRating       Int?
+  providerRating      Int?
   
   notes               String?
   cancelReason        String?
@@ -457,8 +448,8 @@ model Bid {
   id            String      @id @default(cuid())
   orderId       String
   order         Order       @relation(fields: [orderId], references: [id])
-  carrierId     String
-  carrier       Company     @relation(fields: [carrierId], references: [id])
+  providerId    String
+  provider      Company     @relation(fields: [providerId], references: [id])
   
   amount        Float
   status        BidStatus   @default(PENDING)
@@ -470,32 +461,32 @@ model Bid {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  @@unique([orderId, carrierId])
+  @@unique([orderId, providerId])
   @@index([orderId, status])
 }
 
-model OrderTruck {
-  id        String    @id @default(cuid())
-  orderId   String
-  order     Order     @relation(fields: [orderId], references: [id])
-  truckId   String
-  truck     Truck     @relation(fields: [truckId], references: [id])
+model OrderService {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id])
+  serviceId  String
+  service    Service   @relation(fields: [serviceId], references: [id])
   
-  createdAt DateTime  @default(now())
+  createdAt  DateTime  @default(now())
   
-  @@unique([orderId, truckId])
+  @@unique([orderId, serviceId])
 }
 
-model OrderDriver {
-  id          String        @id @default(cuid())
-  orderId     String
-  order       Order         @relation(fields: [orderId], references: [id])
-  driverId    String
-  driver      DriverProfile @relation(fields: [driverId], references: [id])
+model OrderEmployee {
+  id           String          @id @default(cuid())
+  orderId      String
+  order        Order           @relation(fields: [orderId], references: [id])
+  employeeId   String
+  employee     EmployeeProfile @relation(fields: [employeeId], references: [id])
   
-  assignedAt  DateTime      @default(now())
+  assignedAt   DateTime        @default(now())
   
-  @@unique([orderId, driverId])
+  @@unique([orderId, employeeId])
 }
 
 model TrackingEvent {
@@ -521,9 +512,9 @@ model TrackingEvent {
 }
 
 model LocationHistory {
-  id          String        @id @default(cuid())
-  driverId    String
-  driver      DriverProfile @relation(fields: [driverId], references: [id])
+  id          String          @id @default(cuid())
+  employeeId  String
+  employee    EmployeeProfile @relation(fields: [employeeId], references: [id])
   
   lat         Float
   lng         Float
@@ -531,7 +522,7 @@ model LocationHistory {
   
   recordedAt  DateTime      @default(now())
 
-  @@index([driverId, recordedAt])
+  @@index([employeeId, recordedAt])
 }
 
 model Payment {
@@ -542,7 +533,7 @@ model Payment {
   status          PaymentStatus   @default(PENDING)
   totalAmount     Float
   commissionAmount Float
-  carrierAmount   Float
+  providerAmount  Float
   
   paymentMethod   String?
   transactionRef  String?
@@ -778,17 +769,17 @@ POST   /api/orders/:orderId/bids/:id/accept
 POST   /api/orders/:orderId/bids/:id/reject
 ```
 
-### Fleet
+### Services
 ```
-GET    /api/fleet/trucks
-POST   /api/fleet/trucks
-GET    /api/fleet/trucks/:id
-PUT    /api/fleet/trucks/:id
-GET    /api/fleet/drivers
-POST   /api/fleet/drivers
-GET    /api/fleet/drivers/:id
-PUT    /api/fleet/drivers/:id
-POST   /api/fleet/drivers/:id/location
+GET    /api/services
+POST   /api/services
+GET    /api/services/:id
+PUT    /api/services/:id
+GET    /api/employees
+POST   /api/employees
+GET    /api/employees/:id
+PUT    /api/employees/:id
+POST   /api/employees/:id/location
 ```
 
 ### Payments & Invoices
@@ -829,7 +820,7 @@ PUT    /api/notifications/:id/read
 ### 1. لوحة الأدمن (admin dashboard)
 صفحات مطلوبة:
 - `/` — لوحة التحكم الرئيسية (إحصائيات شاملة)
-- `/companies` — إدارة الشركات (عملاء + ناقلين)
+- `/companies` — إدارة الشركات (عملاء + مقدّمو الخدمات)
 - `/companies/:id` — تفاصيل شركة + KYC
 - `/orders` — إدارة جميع الطلبات
 - `/orders/:id` — تفاصيل طلب
@@ -845,7 +836,7 @@ PUT    /api/notifications/:id/read
 - طلبات قيد المعالجة
 - نزاعات مفتوحة
 - رسم بياني للطلبات والإيرادات
-- آخر الطلبات
+- آخر طلبات الخدمات
 
 ### 2. واجهة العميل (client portal)
 صفحات مطلوبة:
@@ -860,22 +851,22 @@ PUT    /api/notifications/:id/read
 
 تدفق إنشاء طلب (New Order Wizard):
 ```
-خطوة 1: معلومات الشحنة (نوع البضاعة، الوزن، الحجم)
-خطوة 2: مسار النقل (من/إلى، تاريخ الاستلام)
-خطوة 3: متطلبات خاصة (نوع الشاحنة، تبريد، تأمين)
+خطوة 1: معلومات الطلب (نوع الخدمة، الوصف، الكمية)
+خطوة 2: الموقع والتوقيت (مكان الخدمة، تاريخ البدء)
+خطوة 3: متطلبات خاصة (نوع الخدمة المطلوبة، تأمين)
 خطوة 4: الميزانية والملاحظات
 خطوة 5: مراجعة وتأكيد
 ```
 
-### 3. واجهة الناقل (carrier portal)
+### 3. واجهة مقدّم الخدمة (provider portal)
 صفحات مطلوبة:
 - `/` — Dashboard (فرص متاحة، طلباتي النشطة)
-- `/opportunities` — فرص النقل المتاحة (Marketplace)
+- `/opportunities` — فرص الخدمات المتاحة (Marketplace)
 - `/opportunities/:id` — تفاصيل فرصة + تقديم عرض
 - `/orders` — طلباتي المقبولة
 - `/orders/:id` — تفاصيل طلب + تحديث حالة
-- `/fleet/trucks` — أسطول الشاحنات
-- `/fleet/drivers` — السائقين
+- `/services` — قائمة الخدمات المقدّمة
+- `/employees` — الموظفون
 - `/earnings` — الأرباح والمدفوعات
 - `/company` — إعدادات الشركة + KYC
 - `/notifications` — الإشعارات
@@ -883,7 +874,7 @@ PUT    /api/notifications/:id/read
 ### 4. الصفحة التسويقية (landing page)
 - Hero Section
 - مميزات المنصة
-- كيف تعمل (للعميل / للناقل)
+- كيف تعمل (للعميل / لمقدّم الخدمة)
 - إحصائيات
 - شهادات
 - CTA للتسجيل
@@ -972,7 +963,7 @@ font-family: 'Inter', sans-serif;
 'order:status_changed'    // تغير حالة الطلب
 'order:new_bid'           // عرض جديد
 'order:bid_accepted'      // قبول عرض
-'tracking:location_update' // تحديث موقع السائق
+'tracking:location_update' // تحديث موقع الموظف
 'notification:new'         // إشعار جديد
 'dashboard:stats_update'   // تحديث إحصائيات الأدمن
 ```
@@ -988,9 +979,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: naqla
-      POSTGRES_PASSWORD: naqla_dev_pass
-      POSTGRES_DB: naqla_dev
+      POSTGRES_USER: nitaq
+      POSTGRES_PASSWORD: nitaq_dev_pass
+      POSTGRES_DB: nitaq_dev
     ports:
       - "5432:5432"
     volumes:
@@ -1046,7 +1037,7 @@ MINIO_PORT=9000
 MINIO_USE_SSL=false      # true في production
 MINIO_ROOT_USER=...
 MINIO_ROOT_PASSWORD=...
-MINIO_BUCKET=naqla-dev   # naqla-staging / naqla-prod
+MINIO_BUCKET=nitaq-dev   # nitaq-staging / nitaq-prod
 MINIO_PUBLIC_URL=http://localhost:9000
 
 # ─── App ─────────────────────────────────────────────
@@ -1155,13 +1146,13 @@ GET /api/orders?page=1&limit=20&sort=createdAt&order=desc&search=...&status=...
 ### المرحلة 2 — الواجهات
 1. Admin Dashboard
 2. Client Portal
-3. Carrier Portal
+3. Provider Portal
 4. Landing Page
 
 ### المرحلة 3 — المتقدم
 1. Realtime (Socket.io)
 2. GPS Tracking
-3. تتبع السائق
+3. تتبع الموظف
 4. تقارير متقدمة
 5. API للتطبيقات المستقبلية (Mobile)
 
@@ -1185,12 +1176,12 @@ GET /api/orders?page=1&limit=20&sort=createdAt&order=desc&search=...&status=...
 ## معلومات الاتصال والنشر
 
 ```
-اسم المنصة:   نقلة لوجيستك
+اسم المنصة:   نيطاق (Nitaq Platform)
 Domain:       nqlah.nx.sa
 API:          api.nqlah.nx.sa
 Admin:        admin.nqlah.nx.sa
 Client:       app.nqlah.nx.sa
-Carrier:      carrier.nqlah.nx.sa
+Provider:     provider.nqlah.nx.sa
 Storage:      storage.nqlah.nx.sa
 
 VPS:          187.124.218.110 (Ubuntu 24.04)
@@ -1210,11 +1201,11 @@ Storage:      MinIO on VPS
 
 | Resource | Domain | Port |
 |---|---|---|
-| `naqla-api-staging` | `api.nqlah.nx.sa` | 4000 |
-| `naqla-landing-staging` | `nqlah.nx.sa` | 3000 |
-| `naqla-admin-staging` | `admin.nqlah.nx.sa` | 3001 |
-| `naqla-client-staging` | `app.nqlah.nx.sa` | 3002 |
-| `naqla-carrier-staging` | `carrier.nqlah.nx.sa` | 3003 |
+| `nitaq-api-staging` | `api.nqlah.nx.sa` | 4000 |
+| `nitaq-landing-staging` | `nqlah.nx.sa` | 3000 |
+| `nitaq-admin-staging` | `admin.nqlah.nx.sa` | 3001 |
+| `nitaq-client-staging` | `app.nqlah.nx.sa` | 3002 |
+| `nitaq-provider-staging` | `provider.nqlah.nx.sa` | 3003 |
 
 **Build Variables (مشتركة لكل Next.js apps):**
 ```
@@ -1222,7 +1213,7 @@ NEXT_PUBLIC_API_URL=https://api.nqlah.nx.sa
 NEXT_PUBLIC_WS_URL=wss://api.nqlah.nx.sa
 NEXT_PUBLIC_LANDING_URL=https://nqlah.nx.sa
 NEXT_PUBLIC_CLIENT_URL=https://app.nqlah.nx.sa
-NEXT_PUBLIC_CARRIER_URL=https://carrier.nqlah.nx.sa
+NEXT_PUBLIC_PROVIDER_URL=https://provider.nqlah.nx.sa
 NEXT_PUBLIC_MINIO_URL=https://storage.nqlah.nx.sa
 ```
 
@@ -1244,7 +1235,7 @@ node dist/prisma/seed.js
 
 هذه العناصر مؤجَّلة لما بعد نجاح deploy كل الـ 5 تطبيقات:
 
-1. **حذف عبارة "وضع تجريبي"** من كل الواجهات (admin/client/carrier)
+1. **حذف عبارة "وضع تجريبي"** من كل الواجهات (admin/client/provider)
 2. **الشعار الديناميكي** — يُدار من لوحة الأدمن (`/admin/settings`) ويتغيّر في كل مكان تلقائياً
 3. **Resend للإيميلات** — تفعيل provider حقيقي لإرسال إشعارات / فواتير / دعوات الفريق
 4. **Tap للمدفوعات** — استبدال `PAYMENT_PROVIDER=mock` بـ Tap Payment Gateway الحقيقي
@@ -1256,7 +1247,7 @@ node dist/prisma/seed.js
    - في `create-order.dto.ts`: أضف `agreedPriceUpfront?: number`
    - في واجهة إنشاء الطلب (`orders/new`):
      عند اختيار DIRECT يظهر:
-     "هل عندك سعر متفق مسبقاً مع هذا الناقل؟"
+     "هل عندك سعر متفق مسبقاً مع هذا المزوّد؟"
      [نعم - أدخل السعر] [لا - تفاوض عادي]
    - في `orders.service.ts`:
      إذا DIRECT + `agreedPriceUpfront` موجود
@@ -1273,10 +1264,10 @@ node dist/prisma/seed.js
 8. **Smart Availability Engine:**
 
    **أ) Availability Card:**
-   - تظهر للناقل/السائق بعد تأكيد التسليم (بخيار، ليس تلقائي)
-   - نافذة بسيطة: "هل شاحنتك متاحة للعودة؟"
+   - تظهر لمقدّم الخدمة/الموظف بعد تأكيد الإنجاز (بخيار، ليس تلقائي)
+   - نافذة بسيطة: "هل أنت متاح لطلب جديد؟"
    - [نعم - انشر الآن] [لا]
-   - عند نعم: `fromCity` تلقائي، `suggestedPrice` مقترح
+   - عند نعم: `location` تلقائي، `suggestedPrice` مقترح
    - صلاحية 6 ساعات — Status: `ACTIVE → MATCHED → EXPIRED`
 
    **ب) Smart Matching Engine:**
@@ -1292,17 +1283,17 @@ node dist/prisma/seed.js
    **ج) Load Board:**
    - صفحة عامة في Landing Page
    - بدون login للمشاهدة، تحتاج login للحجز
-   - فلتر: مدينة + نوع شاحنة + وقت
+   - فلتر: مدينة + نوع الخدمة + وقت
 
-9. **PWA للناقل/السائق:**
+9. **PWA لمقدّم الخدمة/الموظف:**
    - استلام مهام
    - تتبع GPS
-   - إثبات التسليم (صورة + توقيع)
-   - Availability Card بضغطة واحدة بعد التسليم
+   - إثبات الإنجاز (صورة + توقيع)
+   - Availability Card بضغطة واحدة بعد الإنجاز
 
 10. **PWA للعميل الفرد:**
    - طلب سريع
-   - تتبع الشحنة
+   - تتبع طلب الخدمة
    - Load Board مدمج
    - دفع فوري
 
@@ -1310,62 +1301,62 @@ node dist/prisma/seed.js
 
 12. **تطبيق الموبايل الموحّد (React Native / Expo)**
 
-   التطبيق يخدم نوعين مختلفين من المزودين:
+   التطبيق يخدم نوعين مختلفين من مقدّمي الخدمات:
 
-   **أ) الناقل الشركة — موظّف سائق (Employed Driver):**
-   - يعمل لصالح شركة ناقلة مُسجَّلة في المنصة
-   - تمنحه الشركة invite عبر `/fleet/drivers/invite`
+   **أ) مقدّم الخدمة الشركة — موظّف (Employed Employee):**
+   - يعمل لصالح شركة مقدّمة للخدمة مُسجَّلة في المنصة
+   - تمنحه الشركة invite عبر `/employees/invite`
    - يرى فقط الطلبات المُسنَدة إليه من شركته
    - لا يرى السوق (Marketplace) ولا الأسعار
    - Flow: `إشعار بطلب جديد → قبول → تأكيد استلام → تحديث موقع → تأكيد تسليم + صورة + توقيع`
 
-   **ب) الناقل الفرد (Individual Carrier):**
-   - شركته هو — يملك شاحنة واحدة أو أكثر
+   **ب) مقدّم الخدمة الفرد (Individual Provider):**
+   - شركته هو — يقدّم خدمة واحدة أو أكثر
    - يُسجَّل مستقلاً بدون دعوة
    - يرى سوق الطلبات كاملاً (Marketplace + Direct)
-   - يتقدّم بعروض (Bids) مثل شركات الناقلين
-   - يُسند الطلب إليه مباشرة (هو = شركته = سائقه)
+   - يتقدّم بعروض (Bids) مثل شركات مقدّمي الخدمات
+   - يُسند الطلب إليه مباشرة (هو = شركته = موظّفه)
 
    **الـ API مشترك بين النوعين** — فارق الصلاحيات في roles:
-   - Employed Driver: role = `DRIVER` (يرى طلباته فقط)
-   - Individual Carrier: role = `CARRIER_ADMIN` (يرى السوق)
+   - Employed Employee: role = `EMPLOYEE` (يرى طلباته فقط)
+   - Individual Provider: role = `PROVIDER_ADMIN` (يرى السوق)
 
    **الشاشات المشتركة:**
    - تفاصيل الطلب + Timeline
    - تحديث الموقع GPS (real-time)
-   - إثبات التسليم: صورة + توقيع → `POST /orders/:id/tracking`
+   - إثبات الإنجاز: صورة + توقيع → `POST /orders/:id/tracking`
    - إشعارات Push
 
-   **شاشات فريدة للناقل الفرد:**
+   **شاشات فريدة لمقدّم الخدمة الفرد:**
    - قائمة فرص (Marketplace) + فلترة
    - تقديم عرض (Bid) + `proposedDeliveryDate`
-   - Availability Card بعد التسليم
+   - Availability Card بعد الإنجاز
    - محفظة + سجل المدفوعات
 
    **ملاحظات للتطوير:**
    - Endpoint المصادقة مشترك: `POST /auth/login`، role يُحدّد السلوك
-   - `POST /orders/:id/tracking` مفتوح للـ DRIVER role
-   - استخدم `GET /orders?mine=true` للسائق الموظف
-   - استخدم `GET /orders` (بدون mine) للناقل الفرد لرؤية السوق
+   - `POST /orders/:id/tracking` مفتوح للـ EMPLOYEE role
+   - استخدم `GET /orders?mine=true` للموظف المُسنَد
+   - استخدم `GET /orders` (بدون mine) لمقدّم الخدمة الفرد لرؤية السوق
 
 ---
 
 ### قرارات معتمدة (مرجعية ثابتة)
 
 - العميل الفرد = تطبيق موبايل فقط (ليس ويب)
-- Availability Card = بخيار بعد التسليم (ليس تلقائي)
+- Availability Card = بخيار بعد الإنجاز (ليس تلقائي)
 - نموذج موحد للعملاء (INDIVIDUAL/COMPANY) بدون نظامين منفصلين
 
 ---
 
 ## ملخص الأولوية القصوى
 
-ابنِ منصة لوجستية احترافية تماماً للسوق السعودي تجمع:
-- **Marketplace** لطلبات النقل
-- **TMS** لإدارة شركات النقل
-- **Tracking** لتتبع الشحنات
+ابنِ منصة خدمات احترافية تماماً للسوق السعودي تجمع:
+- **Marketplace** لطلبات الخدمات
+- **Services Management** لإدارة مقدّمي الخدمات
+- **Tracking** لتتبع تنفيذ الخدمات
 - **Escrow** للمدفوعات الآمنة
-- **3 واجهات** (Admin + Client + Carrier)
+- **3 واجهات** (Admin + Client + Provider)
 
 التصميم يكون: احترافي، أخضر بترولي، يدعم Dark Mode، خط Tajawal عربي، RTL كامل.
 
@@ -1420,7 +1411,7 @@ node dist/prisma/seed.js
       <SidebarItem icon={LayoutDashboard} label="لوحة التحكم" href="/dashboard" />
       <SidebarItem icon={Building2} label="العملاء" href="/clients" />
       <SidebarItem icon={FileText} label="الطلبات" href="/orders" />
-      <SidebarItem icon={Truck} label="الناقلين" href="/carriers" />
+      <SidebarItem icon={Briefcase} label="مقدّمو الخدمات" href="/providers" />
       <SidebarItem icon={MapPin} label="التتبع" href="/tracking" />
       <SidebarItem icon={DollarSign} label="المدفوعات" href="/payments" badge="coming-soon" />
       <SidebarItem icon={FileCheck} label="الفواتير" href="/invoices" badge="coming-soon" />
@@ -1489,7 +1480,7 @@ node dist/prisma/seed.js
 <Topbar>
   {/* Search - يأخذ معظم المساحة */}
   <SearchInput 
-    placeholder="ابحث عن عملاء، طلبات، شحنات..."
+    placeholder="ابحث عن عملاء، طلبات، خدمات..."
     className="w-[480px]"
   />
   
@@ -1596,7 +1587,7 @@ node dist/prisma/seed.js
         رقم الطلب
       </TableHead>
       <TableHead>العميل</TableHead>
-      <TableHead>الناقل</TableHead>
+      <TableHead>مقدّم الخدمة</TableHead>
       <TableHead>الحالة</TableHead>
       <TableHead>المبلغ</TableHead>
       <TableHead></TableHead>
@@ -1833,7 +1824,7 @@ low:       #10B981  /* أخضر */
       placeholder:text-gray-400
       focus:outline-none focus:ring-2 focus:ring-[#0A3D3A]/20 focus:border-[#0A3D3A]
     "
-    placeholder="ابحث عن طلبات، شركات، شحنات..."
+    placeholder="ابحث عن طلبات، شركات، خدمات..."
   />
 </div>
 ```

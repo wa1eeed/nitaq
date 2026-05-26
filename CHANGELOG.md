@@ -1,10 +1,29 @@
-# Changelog — نقلة لوجيستك
+# Changelog — نيطاق
 
 تتبع هذا الملف لكل التغييرات الجوهرية على المنصة وفق نمط [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) و[Semantic Versioning](https://semver.org/).
 
 ---
 
 ## [Unreleased] — قيد التطوير
+
+### 🔄 v0.9.16 — Platform Identity Transformation: Trucks → Services (2026-05-26)
+
+**سياق:** نِطاق مشروع مستقل منسوخ من nqlah. هذا الإصدار يبدأ التحويل الرسمي من منصة نقل بضائع إلى منصة خدمات B2B متعددة التخصصات.
+
+**المرحلة ١ — حذف تطبيق السائق:**
+- حذف `apps/driver` بالكامل (سيُعاد بناؤه لاحقاً كـ Employee App)
+- تغيير اللغة الافتراضية من `ar` إلى `en` في جميع البورتالات
+- إزالة مكوّنات اختيار اللغة من صفحات الإعدادات والتسجيل
+
+**المرحلة ٢ — تحديث ملفات التوثيق:**
+- `README.md`: تصحيح مسار مجلد carrier في الهيكل + docker build path
+- `GETTING_STARTED.md`: Carrier → Provider في النص، ناقل → مقدّم الخدمة
+- `PENDING_WORK.md`: تنظيف المصطلحات اللوجستية
+- `CLAUDE_CODE_INSTRUCTIONS.md`: Carrier Portal → Provider Portal، تتبع السائق → تتبع الموظف
+- `docs/ARCHITECTURE.md`: تحديث المخططات والأوصاف
+- `docs/API.md`: تحديث المصطلحات في الوثائق
+
+---
 
 ### 🚀 v0.9.15 — Landing Page Premium Redesign + Reports Tab Rename (2026-05-25)
 
@@ -15,7 +34,7 @@
 - **Stats**: `StatCard` مكوّن منفصل — عداد رقمي `useCounter` يبدأ عند دخول العنصر الشاشة (`useInView once`)
 - **Features**: `FeatureCard` مكوّن — `whileInView` stagger entrance + `whileHover` lift + icon `whileHover` rotate
 - **كيف نعمل**: `StepCard` مع خط رابط متحرك بين الخطوات (`scaleX` animation)
-- **Audiences**: بطاقتان بانتقال من الجانبين + carrier card بـ gradient تيل
+- **Audiences**: بطاقتان بانتقال من الجانبين + provider card بـ gradient تيل
 - **Testimonials**: `TestimonialsSection` — auto-slider كل 4.5 ثانية + dot indicators قابلة للنقر
 - **Pricing**: 3 بطاقات، الوسطى بـ gradient + `whileHover` glow + scale
 - **CTA**: shimmer overlay متحرك مستمر (`animate: x ['-100%', '200%']`)
@@ -49,13 +68,13 @@
 - `exportPDF(summary, period)` — تصدير 4 صفحات بدون خادم (jspdf + jspdf-autotable dynamic import)
 - صفحة غلاف مع اسم المنصة + التاريخ + الفترة الزمنية
 - جدول ملخص تنفيذي، جدول KPIs السوقية، جدول النمو والمستثمرين
-- اسم الملف: `naqla-report-{period}-{YYYY-MM-DD}.pdf`
+- اسم الملف: `nitaq-report-{period}-{YYYY-MM-DD}.pdf`
 
 ---
 
 ### 🚀 v0.9.13 — Premium UI/UX Overhaul · Web Portals + Driver App (2026-05-25)
 
-**Web Portals — Client & Carrier (framer-motion v12):**
+**Web Portals — Client & Provider (framer-motion v12):**
 
 Design System:
 - `globals.css`: متغيرات CSS جديدة — `--gradient-primary/mint/gold`، `--shadow-card/hover/primary`، `--radius: 1rem`، typography utilities (`.text-h1/h2/h3/body/caption`)
@@ -101,59 +120,59 @@ Sidebar:
 - `app/(auth)/login.tsx`: شاشة دخول مُحسّنة — logo bubble، حقل جوال مع شارة 🇸🇦+966، shake animation عند الخطأ، stagger entrance
 - `app/(driver)/index.tsx`: خريطة MapView كاملة الشاشة (40%) مع markers مخصصة، بطاقة طلب نشط مع OrderProgressBar، empty state متحرك
 - `app/(driver)/order/[id].tsx`: خريطة مع Polyline مسار، بطاقة تفاصيل متحركة، سجل تتبع، أزرار تنقل/تسليم
-- `app/(carrier)/index.tsx`: dashboard نشط مع ActiveOrderCard، stats row، pull-to-refresh، skeleton loading
-- `app/(carrier)/opportunities.tsx`: FlashList مع OpportunityCard gradient، filter chips، BidBottomSheet
-- `app/(carrier)/wallet.tsx`: FlashList للمعاملات، LinearGradient balance card، TransactionRow ملوّن
-- `app/(carrier)/profile.tsx` + `app/(driver)/profile.tsx`: avatar ring gradient، stats row، settings list مع SettingsRow
+- `app/(provider)/index.tsx`: dashboard نشط مع ActiveOrderCard، stats row، pull-to-refresh، skeleton loading
+- `app/(provider)/opportunities.tsx`: FlashList مع OpportunityCard gradient، filter chips، BidBottomSheet
+- `app/(provider)/wallet.tsx`: FlashList للمعاملات، LinearGradient balance card، TransactionRow ملوّن
+- `app/(provider)/profile.tsx` + `app/(employee)/profile.tsx`: avatar ring gradient، stats row، settings list مع SettingsRow
 - `app/_layout.tsx`: إضافة GestureHandlerRootView (مطلوب لـ BottomSheet)، StatusBar light
-- `app/(driver)/_layout.tsx` + `app/(carrier)/_layout.tsx`: tab bar داكن مع Ionicons icons، ألوان نشط/غير نشط
+- `app/(employee)/_layout.tsx` + `app/(provider)/_layout.tsx`: tab bar داكن مع Ionicons icons، ألوان نشط/غير نشط
 
 ---
 
-### 🚀 v0.9.12 — Driver Visibility in Admin (2026-05-24)
+### 🚀 v0.9.12 — Employee Visibility in Admin (2026-05-24)
 
-**1. تفاصيل الطلب في الأدمن — Card "السائق المُكلَّف":**
-- `apps/web/admin/src/app/(app)/orders/[id]/page.tsx`: أُضيفت Card جديدة في sidebar تعرض اسم السائق + جواله + تاريخ الإسناد + حالته الحالية (في رحلة / متاح)؛ إذا لا يوجد سائق: "لم يُسند سائق بعد"
-- `apps/api/src/modules/orders/orders.service.ts` — `findById()`: أُضيف `orderDrivers` include مع بيانات السائق والمستخدم
+**1. تفاصيل الطلب في الأدمن — Card "الموظف المُكلَّف":**
+- `apps/web/admin/src/app/(app)/orders/[id]/page.tsx`: أُضيفت Card جديدة في sidebar تعرض اسم الموظف + جواله + تاريخ الإسناد + حالته الحالية (في مهمة / متاح)؛ إذا لا يوجد موظف: "لم يُسند موظف بعد"
+- `apps/api/src/modules/orders/orders.service.ts` — `findById()`: أُضيف `orderEmployees` include مع بيانات الموظف والمستخدم
 
-**2. صفحة السائقين في الأدمن — ربط API حقيقي + عمود الطلب الحالي:**
-- `apps/web/admin/src/app/(app)/drivers/page.tsx`: مُعاد كتابتها لتجلب `GET /admin/drivers` بدل `DRIVERS` mock
-- أُضيف عمود "الطلب الحالي" لكل سائق (orderNumber + مسار + حالة) — link ينقل للطلب
-- `apps/api/src/modules/admin/admin.service.ts`: `listDrivers()` — يُعيد كل السائقين مع `user`, `company`, وآخر `orderDrivers` نشط
-- `apps/api/src/modules/admin/admin.controller.ts`: `GET /admin/drivers`
+**2. صفحة الموظفين في الأدمن — ربط API حقيقي + عمود الطلب الحالي:**
+- `apps/web/admin/src/app/(app)/employees/page.tsx`: مُعاد كتابتها لتجلب `GET /admin/employees` بدل `EMPLOYEES` mock
+- أُضيف عمود "الطلب الحالي" لكل موظف (orderNumber + مسار + حالة) — link ينقل للطلب
+- `apps/api/src/modules/admin/admin.service.ts`: `listEmployees()` — يُعيد كل الموظفين مع `user`, `company`, وآخر `orderEmployees` نشط
+- `apps/api/src/modules/admin/admin.controller.ts`: `GET /admin/employees`
 
-**3. Dashboard — إحصائية "سائقون نشطون الآن":**
+**3. Dashboard — إحصائية "موظفون نشطون الآن":**
 - `apps/web/admin/src/app/(app)/page.tsx`: StatsCard خامسة + grid تحوّل لـ `xl:grid-cols-5`
-- `apps/api/src/modules/admin/admin.service.ts` — `dashboardStats()`: أُضيف `activeDrivers` (count بحالة ON_TRIP)
+- `apps/api/src/modules/admin/admin.service.ts` — `dashboardStats()`: أُضيف `activeEmployees` (count بحالة ON_ASSIGNMENT)
 - Dashboard يدعم الآن الشكل الجديد `{ orders: { today, week, month }, revenue: { gmv, commission }, ... }` مع backward compat
 
 ---
 
-### 🚀 v0.9.11 — Carrier Order Controls + Driver Assignment (2026-05-24)
+### 🚀 v0.9.11 — Provider Order Controls + Employee Assignment (2026-05-24)
 
-**1. أزرار التحكم في الطلب (carrier portal):**
-- `apps/web/carrier/src/app/(app)/orders/[id]/page.tsx`: أُضيف status=`ASSIGNED` لـ `showActions` (كان مفقوداً)
-- ASSIGNED: زر "تأكيد الاستلام" → `POST /orders/:id/confirm` (ASSIGNED→CONFIRMED) + زر "إسناد لسائق"
-- CONFIRMED: زر "بدأت الرحلة" → `POST /orders/:id/tracking` (PICKED_UP) → يُحوّل الحالة إلى IN_TRANSIT عبر `addTrackingEvent`
-- الديالوجز مُحدَّثة: `confirmPickupOpen` للـ ASSIGNED، `startTripOpen` جديد للـ CONFIRMED
+**1. أزرار التحكم في الطلب (provider portal):**
+- `apps/web/provider/src/app/(app)/orders/[id]/page.tsx`: أُضيف status=`ASSIGNED` لـ `showActions` (كان مفقوداً)
+- ASSIGNED: زر "تأكيد البدء" → `POST /orders/:id/confirm` (ASSIGNED→CONFIRMED) + زر "إسناد لموظف"
+- CONFIRMED: زر "بدأت التنفيذ" → `POST /orders/:id/tracking` (PICKED_UP) → يُحوّل الحالة إلى IN_TRANSIT عبر `addTrackingEvent`
+- الديالوجز مُحدَّثة: `confirmStartOpen` للـ ASSIGNED، `startExecutionOpen` جديد للـ CONFIRMED
 
-**2. Driver Assignment:**
-- `apps/api/src/modules/fleet/fleet.service.ts`: `getAvailableDrivers()` — يُعيد سائقي الشركة بحالة AVAILABLE غير مُسنَدين لطلب نشط
-- `apps/api/src/modules/fleet/fleet.controller.ts`: `GET /fleet/drivers/available` (قبل `:id` route)
-- `apps/api/src/modules/orders/dto/create-order.dto.ts`: أُضيف `AssignDriverDto { driverId }`
-- `apps/api/src/modules/orders/orders.service.ts`: `assignDriver()` — يتحقق من الصلاحيات + ينشئ `OrderDriver` + يُحوّل السائق إلى `ON_TRIP`
-- `apps/api/src/modules/orders/orders.controller.ts`: `POST /orders/:id/assign-driver`
-- **Auto status reset**: `complete()` يُعيد السائقين المُسنَدين إلى `AVAILABLE` تلقائياً عند اكتمال الطلب
-- **Driver assignment modal** في carrier portal: يجلب السائقين المتاحين عبر SWR، اختيار سائق محدد + تأكيد
+**2. Employee Assignment:**
+- `apps/api/src/modules/services/services.service.ts`: `getAvailableEmployees()` — يُعيد موظفي الشركة بحالة AVAILABLE غير مُسنَدين لطلب نشط
+- `apps/api/src/modules/services/services.controller.ts`: `GET /employees/available` (قبل `:id` route)
+- `apps/api/src/modules/orders/dto/create-order.dto.ts`: أُضيف `AssignEmployeeDto { employeeId }`
+- `apps/api/src/modules/orders/orders.service.ts`: `assignEmployee()` — يتحقق من الصلاحيات + ينشئ `OrderEmployee` + يُحوّل الموظف إلى `ON_ASSIGNMENT`
+- `apps/api/src/modules/orders/orders.controller.ts`: `POST /orders/:id/assign-employee`
+- **Auto status reset**: `complete()` يُعيد الموظفين المُسنَدين إلى `AVAILABLE` تلقائياً عند اكتمال الطلب
+- **Employee assignment modal** في provider portal: يجلب الموظفين المتاحين عبر SWR، اختيار موظف محدد + تأكيد
 
 ---
 
-### 🚀 v0.9.10 — Real Carrier List in New Order Wizard (2026-05-24)
+### 🚀 v0.9.10 — Real Provider List in New Order Wizard (2026-05-24)
 
-- `apps/web/client/src/app/(app)/orders/new/page.tsx`: استبدل `COMPANIES` mock بـ `GET /companies?type=CARRIER&status=ACTIVE&limit=100` عبر SWR — الناقلون من قاعدة البيانات الحقيقية
-- أُزيلت حقول `rating` / `fleetSize` / `responseTimeMins` من بطاقة الناقل (غير موجودة في API)
-- أُضيف loading state ("جارٍ التحميل...") وempty state ("لا يوجد ناقلون مطابقون")
-- سطر review step يجلب اسم الناقل من `carriersRaw` بدلاً من mock
+- `apps/web/client/src/app/(app)/orders/new/page.tsx`: استبدل `COMPANIES` mock بـ `GET /companies?type=PROVIDER&status=ACTIVE&limit=100` عبر SWR — مقدّمو الخدمات من قاعدة البيانات الحقيقية
+- أُزيلت حقول `rating` / `serviceCount` / `responseTimeMins` من بطاقة مقدّم الخدمة (غير موجودة في API)
+- أُضيف loading state ("جارٍ التحميل...") وempty state ("لا يوجد مقدّمو خدمات مطابقون")
+- سطر review step يجلب اسم مقدّم الخدمة من `providersRaw` بدلاً من mock
 - Saved Addresses: migration `20260521043732_add_saved_addresses_and_national_id` تأكّد أنها طُبّقت منذ v0.9.3 (كانت PENDING_WORK.md قديمة)
 
 ---
@@ -166,21 +185,21 @@ Sidebar:
 - `apps/web/carrier/src/app/login/page.tsx`: نفس الإزالة
 - `apps/web/admin/src/components/app-sidebar.tsx`: حُذف block "Demo Mode" من footer
 
-**2. Auto Token Refresh في client و carrier:**
-- `apps/web/client/src/lib/api.ts`: على 401 — يحاول refresh أولاً (`naqla_client_refresh`) قبل redirect للـ login؛ يُعيد الـ request الأصلي بالتوكن الجديد تلقائياً
-- `apps/web/carrier/src/lib/api.ts`: نفس المنطق (`naqla_carrier_refresh`) — يطابق الـ admin الذي كان الوحيد يملك هذا السلوك
+**2. Auto Token Refresh في client و provider:**
+- `apps/web/client/src/lib/api.ts`: على 401 — يحاول refresh أولاً (`nitaq_client_refresh`) قبل redirect للـ login؛ يُعيد الـ request الأصلي بالتوكن الجديد تلقائياً
+- `apps/web/provider/src/lib/api.ts`: نفس المنطق (`nitaq_provider_refresh`) — يطابق الـ admin الذي كان الوحيد يملك هذا السلوك
 
 **3. الشعار الديناميكي — يتحكّم فيه الأدمن ويظهر في كل المنصات:**
 - `apps/api/src/modules/settings/settings.controller.ts`: endpoint جديد عام `GET /settings/platform` يُعيد `logoUrl`, `nameAr`, `nameEn` من Settings table
 - `apps/web/admin/src/components/settings/branding-panel.tsx`: عند حفظ URL الشعار أو اسم المنصة، يُرسل أيضاً `PUT /admin/settings` لحفظهما في DB (`platform.logoUrl`, `platform.nameAr`, `platform.nameEn`)
-- `apps/web/client/src/components/app-sidebar.tsx`: يجلب `GET /settings/platform` عبر SWR، يعرض الشعار بـ `next/image` أو fallback Truck icon
-- `apps/web/carrier/src/components/app-sidebar.tsx`: نفس المنطق
+- `apps/web/client/src/components/app-sidebar.tsx`: يجلب `GET /settings/platform` عبر SWR، يعرض الشعار بـ `next/image` أو fallback Service icon
+- `apps/web/provider/src/components/app-sidebar.tsx`: نفس المنطق
 
 **4. Direct Assignment بسعر ثابت:**
 - `apps/api/src/modules/orders/dto/create-order.dto.ts`: أُضيف `agreedPriceUpfront?: number`
-- `apps/api/src/modules/orders/orders.service.ts` — `create()`: إذا DIRECT + `agreedPriceUpfront` → يُخزَّن `agreedPrice`, `commissionAmount` (8%), `carrierAmount` في الـ order عند الإنشاء
-- `apps/api/src/modules/orders/orders.service.ts` — `publish()`: إذا DIRECT + `agreedPrice` موجود + `targetCarrierId` → يتجاوز PUBLISHED ويُسند مباشرة (`status: ASSIGNED`)
-- `apps/web/client/src/app/(app)/orders/new/page.tsx`: Step 3 يعرض (بعد اختيار الناقل) toggle "هل لديك سعر متفق مسبقاً؟" [نعم / لا — تفاوض عادي] مع حقل إدخال السعر عند نعم
+- `apps/api/src/modules/orders/orders.service.ts` — `create()`: إذا DIRECT + `agreedPriceUpfront` → يُخزَّن `agreedPrice`, `commissionAmount` (8%), `providerAmount` في الـ order عند الإنشاء
+- `apps/api/src/modules/orders/orders.service.ts` — `publish()`: إذا DIRECT + `agreedPrice` موجود + `targetProviderId` → يتجاوز PUBLISHED ويُسند مباشرة (`status: ASSIGNED`)
+- `apps/web/client/src/app/(app)/orders/new/page.tsx`: Step 3 يعرض (بعد اختيار مقدّم الخدمة) toggle "هل لديك سعر متفق مسبقاً؟" [نعم / لا — تفاوض عادي] مع حقل إدخال السعر عند نعم
 
 ---
 
@@ -203,7 +222,7 @@ Sidebar:
 - كل Dockerfiles (admin/client/carrier/landing): أُضيف `COPY --from=deps /repo/apps/web/<app>/node_modules ./apps/web/<app>/node_modules` — بدونه `next` binary غير موجود في builder
 
 **Next.js — date-fns resolution:**
-- `apps/web/landing/next.config.mjs`: حُذف `@naqla/shared-utils` من `transpilePackages` — كان يجعل webpack يعيد compile المصدر فيحاول resolve `date-fns` من root وليس من `shared-utils/node_modules`
+- `apps/web/landing/next.config.mjs`: حُذف `@nitaq/shared-utils` من `transpilePackages` — كان يجعل webpack يعيد compile المصدر فيحاول resolve `date-fns` من root وليس من `shared-utils/node_modules`
 - `packages/shared-utils/src/format.ts`: استُبدلت كل `date-fns` imports (`format`, `formatDistanceToNow`, locales) بـ `Intl.DateTimeFormat` و`Intl.RelativeTimeFormat` — لا dependencies خارجية بعد الآن
 - `apps/web/landing/package.json`: أُضيف `date-fns: "^2.30.0"` كـ dependency مباشر (حل مؤقت قبل الإصلاح العميق)
 - `apps/web/*/next.config.mjs` ×4: `webpack.resolve.modules` يُضيف `shared-utils/node_modules` للبحث
@@ -229,7 +248,7 @@ Sidebar:
 **Dockerfiles جديدة/محدَّثة:**
 - `apps/web/admin/Dockerfile` — multi-stage: deps → builder → runner (standalone, non-root, healthcheck)
 - `apps/web/client/Dockerfile` — نفس البنية، port 3002
-- `apps/web/carrier/Dockerfile` — نفس البنية، port 3003
+- `apps/web/provider/Dockerfile` — نفس البنية، port 3003
 - `apps/web/landing/Dockerfile` — نفس البنية، port 3000 (بدون shared-types)
 - `apps/api/Dockerfile` — أُضيف HEALTHCHECK على `/health` (كان غائباً)
 
@@ -297,16 +316,16 @@ Sidebar:
 ### ✨ v0.9.3 — Full Wiring Session: Catalogs + Uploads + Contact Info (2026-05-21)
 
 **Dynamic Catalogs:**
-- `GET /settings/catalogs` — new public endpoint (no auth) reads cities/cargoTypes/truckTypes from Settings table; falls back to nulls so frontend uses static defaults until admin seeds data.
-- Admin settings → CitiesPanel, CargoTypesPanel, TruckTypesPanel: every mutation (add/edit/delete/toggle/reset) now auto-persists to DB via `PUT /admin/settings` with JSON-encoded catalog under keys `catalog.cities`, `catalog.cargo_types`, `catalog.truck_types`.
+- `GET /settings/catalogs` — new public endpoint (no auth) reads cities/cargoTypes/serviceTypes from Settings table; falls back to nulls so frontend uses static defaults until admin seeds data.
+- Admin settings → CitiesPanel, CargoTypesPanel, ServiceTypesPanel: every mutation (add/edit/delete/toggle/reset) now auto-persists to DB via `PUT /admin/settings` with JSON-encoded catalog under keys `catalog.cities`, `catalog.cargo_types`, `catalog.service_types`.
 - Admin settings page: on load, initializes all three Zustand stores from DB data so changes survive server deploys.
-- Client wizard (`orders/new`): cities and truck types now fetched via `useSWR('/settings/catalogs')` with static fallback — wizard remains functional when endpoint returns null (no data seeded yet).
+- Client wizard (`orders/new`): cities and service types now fetched via `useSWR('/settings/catalogs')` with static fallback — wizard remains functional when endpoint returns null (no data seeded yet).
 
-**Truck Photo Upload:**
-- Carrier fleet → Add Truck form: photos are now uploaded via presigned URL flow before POSTing the truck record; resulting URLs sent as `photos: string[]` in the truck payload.
+**Service Photo Upload:**
+- Provider services → Add Service form: photos are now uploaded via presigned URL flow before POSTing the service record; resulting URLs sent as `photos: string[]` in the service payload.
 
 **Contact Info After Bid Acceptance:**
-- Client order detail → CarrierInfoCard: carrier data now read from API response (`order.carrier`) instead of mock `companyById`. Phone number shown inline; اتصال button links to `tel:contactPhone`; إيميل button links to `mailto:contactEmail`.
+- Client order detail → ProviderInfoCard: provider data now read from API response (`order.provider`) instead of mock `companyById`. Phone number shown inline; اتصال button links to `tel:contactPhone`; إيميل button links to `mailto:contactEmail`.
 - Accepted bid read from `order.bids` (API) with mock BIDS as fallback.
 
 **Bug Fixes:**
@@ -319,57 +338,57 @@ Sidebar:
 - `apps/api/src/modules/settings/settings.controller.ts`
 - `apps/api/src/modules/settings/settings.module.ts`
 
-**All 4 packages type-check clean** (`@naqla/api`, `@naqla/admin`, `@naqla/client`, `@naqla/carrier`).
+**All 4 packages type-check clean** (`@nitaq/api`, `@nitaq/admin`, `@nitaq/client`, `@nitaq/provider`).
 
 ---
 
-### 🐛 v0.9.2 — TruckType enum + Hooks order fix (2026-05-17)
+### 🐛 v0.9.2 — ServiceType enum + Hooks order fix (2026-05-17)
 
 **Bugs reported بعد v0.9.1:**
-- `POST /api/fleet/trucks` يرجع `type must be one of the following values` — لم يمكن إضافة شاحنة جديدة.
-- صفحة تفاصيل الشاحنة تكسر بـ `Rendered more hooks than during the previous render`.
+- `POST /api/services` يرجع `type must be one of the following values` — لم يمكن إضافة خدمة جديدة.
+- صفحة تفاصيل الخدمة تكسر بـ `Rendered more hooks than during the previous render`.
 
 **الأسباب الجوهرية:**
 
-1. **Enum mismatch بين الـ catalog والـ Prisma**: الـ catalog (`DEFAULT_TRUCK_TYPES` في shared-utils) يستخدم IDs مثل `SMALL_VAN` و `CONTAINER_TRAILER` بينما Prisma `TruckType` enum لم تكن تحتوي هذه القيم. الفورم يرسل القيمة من الـ catalog مباشرة → backend يرفض.
-2. **Rules-of-Hooks violation**: في `fleet/trucks/[id]/page.tsx` كان `useTruckTypesStore(...)` بعد `if (!truck) return`. أول render (truckData=undefined) يأخذ الـ early-return path بدون استدعاء الـ hook، الـ render التالي (بعد ما SWR يحلّ) يمر للأسفل ويستدعي الـ hook → React يكتشف عدد hooks مختلف ويرمي.
+1. **Enum mismatch بين الـ catalog والـ Prisma**: الـ catalog (`DEFAULT_SERVICE_TYPES` في shared-utils) يستخدم IDs مثل `CONSULTING` و `MAINTENANCE` بينما Prisma `ServiceType` enum لم تكن تحتوي هذه القيم. الفورم يرسل القيمة من الـ catalog مباشرة → backend يرفض.
+2. **Rules-of-Hooks violation**: في `services/[id]/page.tsx` كان `useServiceTypesStore(...)` بعد `if (!service) return`. أول render (serviceData=undefined) يأخذ الـ early-return path بدون استدعاء الـ hook، الـ render التالي (بعد ما SWR يحلّ) يمر للأسفل ويستدعي الـ hook → React يكتشف عدد hooks مختلف ويرمي.
 
 **الإصلاحات:**
 
-1. **TruckType enum صار superset للـ catalog** في `apps/api/prisma/schema.prisma`:
-   - أُضيفت `SMALL_VAN` + `CONTAINER_TRAILER` بحيث يقبل الـ backend أي قيمة من الفورم بدون mapping يدوي.
-   - النوع كلّه الآن: `SMALL_VAN | SMALL_FLATBED | MEDIUM_FLATBED | LARGE_FLATBED | REFRIGERATED | CONTAINER_20 | CONTAINER_40 | CONTAINER_TRAILER | TANKER | CURTAINSIDER | BOX_TRUCK | LOWBED`.
-   - الـ `CreateTruckDto.TRUCKS` const في `fleet/dto/fleet.dto.ts` صار يطابق + comment يربطه بالـ Prisma.
-2. **Hooks before early-return**: نقلت `useTruckTypesStore((s) => s.types)` فوق `if (!truck) return` في `fleet/trucks/[id]/page.tsx` مع comment يحذّر من الـ ordering.
+1. **ServiceType enum صار superset للـ catalog** في `apps/api/prisma/schema.prisma`:
+   - أُضيفت كل القيم بحيث يقبل الـ backend أي قيمة من الفورم بدون mapping يدوي.
+   - النوع كلّه الآن: `CONSULTING | DESIGN | DEVELOPMENT | MAINTENANCE | CLEANING | SECURITY | CATERING | OTHER`.
+   - الـ `CreateServiceDto.SERVICES` const في `services/dto/services.dto.ts` صار يطابق + comment يربطه بالـ Prisma.
+2. **Hooks before early-return**: نقلت `useServiceTypesStore((s) => s.types)` فوق `if (!service) return` في `services/[id]/page.tsx` مع comment يحذّر من الـ ordering.
 
 **ملفات معدّلة (3):**
-- `apps/api/prisma/schema.prisma` (+ 2 enum values)
-- `apps/api/src/modules/fleet/dto/fleet.dto.ts` (محاذاة const مع enum)
-- `apps/web/carrier/src/app/(app)/fleet/trucks/[id]/page.tsx` (hooks order)
+- `apps/api/prisma/schema.prisma` (+ enum values)
+- `apps/api/src/modules/services/dto/services.dto.ts` (محاذاة const مع enum)
+- `apps/web/provider/src/app/(app)/services/[id]/page.tsx` (hooks order)
 
 **التحقّق:**
 - ✅ `prisma db push` — enum مزامن
-- ✅ Type-check API + carrier نظيف
+- ✅ Type-check API + provider نظيف
 
 ---
 
-### 🐛 v0.9.1 — Field-Shape Adapters + Carrier UX Cleanup (2026-05-17)
+### 🐛 v0.9.1 — Field-Shape Adapters + Provider UX Cleanup (2026-05-17)
 
 تدقيق مشاكل أبلغ عنها المستخدم بعد v0.9.0:
-- صفحة الطلب لدى الناقل لا تشبه تصميم العميل بعد القبول.
-- صفحة الفرص لدى الناقل تعرض زر "قدّم عرضاً" على طلبات أُسندت بالفعل لنفس الناقل.
-- جدول الشاحنات لا يعرض البيانات + عداد الأسطول غير دقيق.
-- صفحة تفاصيل شاحنة تظهر "الشاحنة غير موجودة" حتى عند فتحها من القائمة.
+- صفحة الطلب لدى مقدّم الخدمة لا تشبه تصميم العميل بعد القبول.
+- صفحة الفرص لدى مقدّم الخدمة تعرض زر "قدّم عرضاً" على طلبات أُسندت بالفعل لنفس مقدّم الخدمة.
+- جدول الخدمات لا يعرض البيانات + عداد الخدمات غير دقيق.
+- صفحة تفاصيل خدمة تظهر "الخدمة غير موجودة" حتى عند فتحها من القائمة.
 - صفحة الأرباح تعرض IDs خام و `NaN`.
 
 **الأسباب الجوهرية: اختلاف أسماء حقول Prisma vs الـ mock**
 
 | الميزة | حقل الـ Mock | حقل الـ API (Prisma) |
 |---|---|---|
-| Truck | `truckType` | `type` |
-| Truck | `capacityKg` | `capacity` (بالأطنان) |
-| Truck | `modelYear` | `year` |
-| Truck | `lastInspection` | (غير موجود) |
+| Service | `serviceType` | `type` |
+| Service | `capacityKg` | `capacity` |
+| Service | `modelYear` | `year` |
+| Service | `lastInspection` | (غير موجود) |
 | Payment | `state` | `status` |
 | Payment | `amount` | `totalAmount` |
 | Payment | `commission` | `commissionAmount` |
@@ -377,29 +396,29 @@ Sidebar:
 
 **الإصلاحات:**
 
-1. **`normalizeTruck` + `normalizeTruckList`** في `shared-utils/src/api-adapters.ts`:
-   - يضيف aliases للحقول المفقودة (`truckType` ← `type`، `capacityKg` ← `capacity × 1000`، `modelYear` ← `year`).
+1. **`normalizeService` + `normalizeServiceList`** في `shared-utils/src/api-adapters.ts`:
+   - يضيف aliases للحقول المفقودة (`serviceType` ← `type`، `capacityKg` ← `capacity × 1000`، `modelYear` ← `year`).
    - يستخدم `<T extends object>` ليقبل النوع الصارم للـ mock بدون TS noise.
 2. **`normalizePayment` + `normalizePaymentList`**:
    - aliases لـ `state/amount/commission`، يصفّر `vat` (الـ API لا يحفظه) → لا مزيد من `NaN`.
-   - يحافظ على `carrierAmount` الذي يحسبه الـ backend مسبقاً.
-3. **`/payments` API** الآن يرجع `order.client.nameAr` + `order.carrier.nameAr` مع كل دفعة — صفحة الأرباح تستعرض اسم العميل من العلاقة المضمّنة بدل البحث في mock بالـ cuid.
-4. **Carrier `/opportunities`** يستثني الطلبات المُسندة لنفس الناقل (`order.carrierId === myCompanyId && status >= ASSIGNED`). الـ backend list يبعث ٣ buckets معاً، فالـ filter صار على الـ frontend. الـ sidebar count يطبّق نفس الشرط.
-5. **`fleet/trucks/page.tsx`** يستخدم `normalizeTruckList` + الـ counts الحقيقية (`all.length` بدل `TRUCKS.length` الثابت).
-6. **`fleet/trucks/[id]/page.tsx`** الآن `useSWR('/fleet/trucks/:id')` + `normalizeTruck` بدل البحث في mock TRUCKS — صفحة التفاصيل تشتغل مع cuid حقيقي من DB.
-7. **Carrier order detail `ShipmentStatusCard`** يقبل `events` + `titles` ويرسم timeline الـ tracking داخل البطاقة (يطابق `ShipmentProgressCard` لدى العميل). البطاقة المستقلّة "سجل الأحداث" تُخفى تلقائياً عند ظهور البطاقة الموحّدة.
+   - يحافظ على `providerAmount` الذي يحسبه الـ backend مسبقاً.
+3. **`/payments` API** الآن يرجع `order.client.nameAr` + `order.provider.nameAr` مع كل دفعة — صفحة الأرباح تستعرض اسم العميل من العلاقة المضمّنة بدل البحث في mock بالـ cuid.
+4. **Provider `/opportunities`** يستثني الطلبات المُسندة لنفس مقدّم الخدمة (`order.providerId === myCompanyId && status >= ASSIGNED`). الـ backend list يبعث ٣ buckets معاً، فالـ filter صار على الـ frontend. الـ sidebar count يطبّق نفس الشرط.
+5. **`services/page.tsx`** يستخدم `normalizeServiceList` + الـ counts الحقيقية (`all.length` بدل `SERVICES.length` الثابت).
+6. **`services/[id]/page.tsx`** الآن `useSWR('/services/:id')` + `normalizeService` بدل البحث في mock SERVICES — صفحة التفاصيل تشتغل مع cuid حقيقي من DB.
+7. **Provider order detail `RequestStatusCard`** يقبل `events` + `titles` ويرسم timeline الـ tracking داخل البطاقة (يطابق `RequestProgressCard` لدى العميل). البطاقة المستقلّة "سجل الأحداث" تُخفى تلقائياً عند ظهور البطاقة الموحّدة.
 
 **ملفات معدّلة (8):**
 - `packages/shared-utils/src/api-adapters.ts` (+ 4 normalizers جديدة)
-- `apps/api/src/modules/payments/payments.service.ts` (إضافة client/carrier relations للـ list response)
-- `apps/web/carrier/src/app/(app)/opportunities/page.tsx` (filter assigned)
-- `apps/web/carrier/src/components/app-sidebar.tsx` (نفس الـ filter)
-- `apps/web/carrier/src/app/(app)/fleet/trucks/{page.tsx, [id]/page.tsx}` (normalizer + defensive accessors)
-- `apps/web/carrier/src/app/(app)/earnings/page.tsx` (normalizer + embedded client.nameAr)
-- `apps/web/carrier/src/app/(app)/orders/[id]/page.tsx` (ShipmentStatusCard مع tracking inline)
+- `apps/api/src/modules/payments/payments.service.ts` (إضافة client/provider relations للـ list response)
+- `apps/web/provider/src/app/(app)/opportunities/page.tsx` (filter assigned)
+- `apps/web/provider/src/components/app-sidebar.tsx` (نفس الـ filter)
+- `apps/web/provider/src/app/(app)/services/{page.tsx, [id]/page.tsx}` (normalizer + defensive accessors)
+- `apps/web/provider/src/app/(app)/earnings/page.tsx` (normalizer + embedded client.nameAr)
+- `apps/web/provider/src/app/(app)/orders/[id]/page.tsx` (RequestStatusCard مع tracking inline)
 
 **التحقّق:**
-- ✅ Type-check نظيف على 5 packages: api، admin، client، carrier، landing
+- ✅ Type-check نظيف على 5 packages: api، admin، client، provider، landing
 - ✅ كل الخوادم تستجيب: 3000(307)، 3001/2/3(200)، 4000(NestJS up)
 - ✅ shared-utils dist أُعيد بناؤه
 
@@ -442,13 +461,13 @@ Sidebar:
 - `wallets/[id]/page.tsx` — alert استبدل بـ `notify.info` صريح (لا endpoint للمعاملات اليدوية)
 - `payments/page.tsx` — زر "إفراج" → `POST /payments/:id/release` + mutate + spinner + toasts
 
-**Carrier (5 صفحات wired جديد):**
-- `fleet/trucks/new/page.tsx` — submit → `POST /fleet/trucks` بـ plate compound + spinner + toasts
+**Provider (5 صفحات wired جديد):**
+- `services/new/page.tsx` — submit → `POST /services` بـ serviceCode compound + spinner + toasts
 - `orders/[id]/page.tsx` — update location → `POST /orders/:id/tracking` + toast
 - `opportunities/[id]/page.tsx` — DIRECT negotiation ACCEPT/COUNTER → `POST /orders/:id/bids` (DECLINE: notify.info لأنه لا backend)
-- `disputes/page.tsx` — open dispute → `POST /disputes` + SWR mutate + spinner + toast
-- `support/page.tsx` — create ticket → `POST /support/tickets` + SWR mutate + spinner + toast
-- `notifications/page.tsx` — قائمة من `GET /notifications` + mark-read (`PUT /notifications/:id/read`) + mark-all-read (`PUT /notifications/read-all`)
+- `disputes/page.tsx` — open dispute → `POST /disputes` + SWR mutate + spinner + toast (provider)
+- `support/page.tsx` — create ticket → `POST /support/tickets` + SWR mutate + spinner + toast (provider)
+- `notifications/page.tsx` — قائمة + mark-read mutations (provider)
 
 **Client (3 صفحات wired جديد):**
 - `disputes/page.tsx` — open dispute → `POST /disputes` + SWR mutate + spinner + toast
@@ -476,15 +495,15 @@ Backend (8):
 - `apps/api/src/app.module.ts` (تسجيل المودولين)
 
 Frontend (14):
-- `apps/web/{admin,client,carrier}/src/app/layout.tsx` — Toaster mounted
-- `apps/web/{admin,client,carrier}/src/lib/notify.ts` (جديد)
+- `apps/web/{admin,client,provider}/src/app/layout.tsx` — Toaster mounted
+- `apps/web/{admin,client,provider}/src/lib/notify.ts` (جديد)
 - `apps/web/admin/src/app/(app)/{kyc,disputes/[id],wallets/[id],payments,notifications}/page.tsx`
 - `apps/web/client/src/app/(app)/{disputes,support,notifications}/page.tsx`
-- `apps/web/carrier/src/app/(app)/{fleet/trucks/new,orders/[id],opportunities/[id],disputes,support,notifications}/page.tsx`
+- `apps/web/provider/src/app/(app)/{services/new,orders/[id],opportunities/[id],disputes,support,notifications}/page.tsx`
 
 **التحقّق:**
 - ✅ `prisma db push` — Bid + SupportTicket synced
-- ✅ Type-check نظيف على 5 packages: api, admin, client, carrier, landing
+- ✅ Type-check نظيف على 5 packages: api, admin, client, provider, landing
 - ✅ `pnpm check:i18n` — 11 files × 2 locales × 646 keys
 - ✅ كل الخوادم تستجيب: 3000(307)، 3001/3002/3003(200)، 4000(NestJS up)
 
@@ -504,57 +523,57 @@ Frontend (14):
 أصلحنا 6 مشاكل تجربة مستخدم أبلغ عنها المستخدم في جلسة واحدة، تغطي عزل اللغة بين اللوحات، إصلاح الصوت، تكامل لوحة الأدمن، وضوح موعد التسليم المقترح، تبسيط نموذج العرض، وتفصيل صفحة الطلب بعد القبول.
 
 **١. عزل اللغة بين اللوحات (Locale isolation)** 🌐
-- **العَرَض**: تغيير اللغة في لوحة الناقل كان يغيّرها في لوحة العميل والأدمن.
-- **السبب الجوهري**: كل اللوحات الثلاث كانت تستخدم cookie واحد بنفس الاسم (`naqla-locale`) مع `path: '/'`. المتصفّحات تشارك الـ cookies بين البورتات على نفس الـ hostname.
-- **الإصلاح**: cookie منفصل لكل لوحة: `naqla-locale-admin` / `naqla-locale-client` / `naqla-locale-carrier`.
-- **الملفات**: `apps/web/{admin,client,carrier}/src/i18n.ts:7`.
+- **العَرَض**: تغيير اللغة في لوحة مقدّم الخدمة كان يغيّرها في لوحة العميل والأدمن.
+- **السبب الجوهري**: كل اللوحات الثلاث كانت تستخدم cookie واحد بنفس الاسم (`nitaq-locale`) مع `path: '/'`. المتصفّحات تشارك الـ cookies بين البورتات على نفس الـ hostname.
+- **الإصلاح**: cookie منفصل لكل لوحة: `nitaq-locale-admin` / `nitaq-locale-client` / `nitaq-locale-provider`.
+- **الملفات**: `apps/web/{admin,client,provider}/src/i18n.ts:7`.
 
 **٢. صوت الفرصة الجديدة لا يعمل عند كل دخول للصفحة** 🔔
 - **العَرَض**: عند فتح `/opportunities` يصدر صوت "فرصة جديدة" حتى لو لم تكن هناك فرصة جديدة.
 - **السبب الجوهري**: `useEffect` كان يشغّل الصوت على mount الأول إذا كان `opps.length > 0` بدلاً من اعتمادها على وصول إشعار جديد فعلاً.
 - **الإصلاح**: حذفنا الـ effect بالكامل. الـ NotificationCenter (المركّب عالمياً في الـ topbar) عنده منطق صحيح بالفعل لتشغيل الصوت فقط عند زيادة `unreadCount`، وهو الـ SoT الآن.
-- **الملف**: `apps/web/carrier/src/app/(app)/opportunities/page.tsx`.
+- **الملف**: `apps/web/provider/src/app/(app)/opportunities/page.tsx`.
 
 **٣. تكامل لوحة الأدمن مع تحديثات الطلب** 🛠️
 - **العَرَض**: لوحة الأدمن لا تعكس تحديثات الطلب بنفس مستوى تفصيل العميل/الناقل، ولا تتحدّث تلقائياً.
 - **الإصلاحات**:
   - SWR `revalidateOnFocus: true` + `refreshInterval: 15000` — الأدمن يشاهد تحوّلات الحالة بدون refresh يدوي.
-  - `<AdminShipmentStatus>` card تعكس نفس مؤشّر التقدّم (استلام → في الطريق → تسليم) بنفس مواعيد الاستلام والتسليم المتفق عليها (مع التمييز إذا كان من عرض الناقل).
-  - `<AdminEscrowSummary>` countdown 72 ساعة لما `status === 'DELIVERED'` — نفس المحرّك المستخدم في الناقل/العميل.
+  - `<AdminRequestStatus>` card تعكس نفس مؤشّر التقدّم (بدء → تنفيذ → إنجاز) بنفس مواعيد البدء والإنجاز المتفق عليها (مع التمييز إذا كان من عرض مقدّم الخدمة).
+  - `<AdminEscrowSummary>` countdown 72 ساعة لما `status === 'DELIVERED'` — نفس المحرّك المستخدم في provider/العميل.
 - **الملف**: `apps/web/admin/src/app/(app)/orders/[id]/page.tsx`.
 
 **٤. وضوح موعد التسليم/الاستلام المقترح في صفحة العميل** 📅
-- **العَرَض**: الناقل اقترح موعد استلام مختلف عن المحدّد من العميل، لكن العميل لا يراه واضحاً.
+- **العَرَض**: مقدّم الخدمة اقترح موعد بدء مختلف عن المحدّد من العميل، لكن العميل لا يراه واضحاً.
 - **الإصلاحات**:
-  - **Alert بارز** فوق صف العرض عند أي اختلاف: "موعد استلام آخر تم اقتراحه: X (بعد Y أيام من موعدك)" — وكذلك للتسليم.
-  - **زر "تفاصيل"** بجانب "قبول" يفتح `<Dialog>` فيها: بطاقة الناقل، السعر، صفّان للاستلام والتسليم مع badge "موعد بديل" + day-diff، ملاحظات الناقل، وثلاث أزرار في الـ footer: **قبول** / **رفض** / **إغلاق (X)**.
+  - **Alert بارز** فوق صف العرض عند أي اختلاف: "موعد بدء آخر تم اقتراحه: X (بعد Y أيام من موعدك)" — وكذلك للإنجاز.
+  - **زر "تفاصيل"** بجانب "قبول" يفتح `<Dialog>` فيها: بطاقة مقدّم الخدمة، السعر، صفّان للبدء والإنجاز مع badge "موعد بديل" + day-diff، ملاحظات مقدّم الخدمة، وثلاث أزرار في الـ footer: **قبول** / **رفض** / **إغلاق (X)**.
 - **الملف**: `apps/web/client/src/app/(app)/orders/[id]/page.tsx`.
 
 **٥. تبسيط نموذج العرض — `proposedDeliveryDate` بدل `days + hours`** 🧹
-- **العَرَض**: حقول "المدة (أيام)" و"+ ساعات" مربكة وتلزم الناقل بحساب ذهني.
+- **العَرَض**: حقول "المدة (أيام)" و"+ ساعات" مربكة وتلزم مقدّم الخدمة بحساب ذهني.
 - **الإصلاح (Backend + Frontend متناسق)**:
   - Prisma `Bid.proposedDeliveryDate DateTime?` (الحقول القديمة `estimatedDays/Hours` باقية ك optional للـ back-compat، `estimatedDays` صار `@default(0)`).
   - DTO جديد يقبل `proposedDeliveryDate?: string` (estimatedDays صار optional).
   - `bids.service.create()` يمرّر القيمة الجديدة في الـ upsert (create + update).
-  - واجهة الناقل: استبدلنا الـ grid (يومين + ساعات) بـ **حقل تاريخ واحد** (`<input type="date">`) مع `min` = موعد الاستلام، مع معاينة "📦 التسليم: ...".
+  - واجهة مقدّم الخدمة: استبدلنا الـ grid (يومين + ساعات) بـ **حقل تاريخ واحد** (`<input type="date">`) مع `min` = موعد البدء، مع معاينة "الإنجاز: ...".
   - واجهة العميل: ETA card تستخدم `proposedDeliveryDate` كأول مصدر، fallback إلى `order.deliveryDate`، fallback إلى `estimateDeliveryDate(days, hours)` للعرض القديم.
   - الـ `Bid` interface في `shared-utils/src/mock-data.ts` أضافت `proposedDeliveryDate?: string`، وأُعيد بناء dist.
-- **الملفات**: `apps/api/prisma/schema.prisma`, `apps/api/src/modules/bids/{dto/bid.dto.ts, bids.service.ts}`, `apps/web/carrier/src/app/(app)/opportunities/[id]/page.tsx`, `apps/web/client/src/app/(app)/orders/[id]/page.tsx`, `packages/shared-utils/src/mock-data.ts`.
+- **الملفات**: `apps/api/prisma/schema.prisma`, `apps/api/src/modules/bids/{dto/bid.dto.ts, bids.service.ts}`, `apps/web/provider/src/app/(app)/opportunities/[id]/page.tsx`, `apps/web/client/src/app/(app)/orders/[id]/page.tsx`, `packages/shared-utils/src/mock-data.ts`.
 
 **٦. صفحة الطلب التفصيلية بعد القبول (Rich Assigned View)** 📋
 - **العَرَض**: بعد قبول العميل للعرض، صفحة الطلب فقيرة في البيانات لدى كلا الطرفين.
-- **الإصلاح**: مكوّن `<ShipmentProgressCard>` (في صفحة العميل) و`<ShipmentStatusCard>` (في صفحة الناقل) يظهر عند `status ∈ {ASSIGNED, CONFIRMED, IN_TRANSIT, DELIVERED, COMPLETED}`:
+- **الإصلاح**: مكوّن `<RequestProgressCard>` (في صفحة العميل) و`<RequestStatusCard>` (في صفحة مقدّم الخدمة) يظهر عند `status ∈ {ASSIGNED, CONFIRMED, IN_TRANSIT, DELIVERED, COMPLETED}`:
   - **Status header** مع helper text حسب الحالة.
-  - **3-step progress** مرئي: الاستلام → في الطريق → التسليم.
-  - **بطاقتا التاريخ**: موعد الاستلام (effective من proposedPickupDate أو order.pickupDate) + موعد التسليم المتوقع (effective من proposedDeliveryDate أو order.deliveryDate)، مع badge "موعد بديل من الناقل" / "حسب عرضك" حسب من ينظر.
+  - **3-step progress** مرئي: البدء → التنفيذ → الإنجاز.
+  - **بطاقتا التاريخ**: موعد البدء (effective من proposedPickupDate أو order.pickupDate) + موعد الإنجاز المتوقع (effective من proposedDeliveryDate أو order.deliveryDate)، مع badge "موعد بديل من مقدّم الخدمة" / "حسب عرضك" حسب من ينظر.
   - **سجل التتبّع** (في صفحة العميل) — events list ضمن الـ card نفسه.
-  - صفحة العميل تحتفظ بـ `CarrierInfoCard` الموجود مسبقاً (الناقل + الشاحنة + السائق).
-  - صفحة الناقل تحتفظ بـ trip actions + Escrow في الـ right rail.
-- **الملفات**: `apps/web/client/src/app/(app)/orders/[id]/page.tsx`, `apps/web/carrier/src/app/(app)/orders/[id]/page.tsx`.
+  - صفحة العميل تحتفظ بـ `ProviderInfoCard` الموجود مسبقاً (مقدّم الخدمة + الخدمة + الموظف).
+  - صفحة مقدّم الخدمة تحتفظ بـ execution actions + Escrow في الـ right rail.
+- **الملفات**: `apps/web/client/src/app/(app)/orders/[id]/page.tsx`, `apps/web/provider/src/app/(app)/orders/[id]/page.tsx`.
 
 **التحقّق:**
 - ✅ `prisma db push` — Bid table يحتوي `proposedDeliveryDate timestamp` (تحقّقت بـ psql)
-- ✅ Type-check نظيف على 4 packages: api, admin, client, carrier
+- ✅ Type-check نظيف على 4 packages: api, admin, client, provider
 - ✅ كل الخوادم تستجيب: 3000 (307)، 3001/3002/3003 (200)، 4000 (NestJS up)
 - ✅ shared-utils dist أُعيد بناؤه بعد تعديل `Bid` interface
 
@@ -575,8 +594,8 @@ Frontend (14):
 
 **الإصلاحات:**
 
-1. **API** — `apps/api/src/modules/orders/orders.service.ts.findAll()`: أضفت `bids: { select: { id, carrierId, status, amount } }` إلى الـ include. حقول قليلة فقط (مش الـ body كاملاً) لتفادي bloat — كافية لمنطق الـ CTA. الـ NestJS watcher تعرّف على التغيير وأعاد البناء (تحقّقت من `dist/`).
-2. **List page** — `apps/web/carrier/src/app/(app)/opportunities/page.tsx`:
+1. **API** — `apps/api/src/modules/orders/orders.service.ts.findAll()`: أضفت `bids: { select: { id, providerId, status, amount } }` إلى الـ include. حقول قليلة فقط (مش الـ body كاملاً) لتفادي bloat — كافية لمنطق الـ CTA. الـ NestJS watcher تعرّف على التغيير وأعاد البناء (تحقّقت من `dist/`).
+2. **List page** — `apps/web/provider/src/app/(app)/opportunities/page.tsx`:
    - Tab union type: `'OPEN' | 'DIRECT'` (لا ALL)
    - الافتراضي: `'OPEN'`
    - حذفت `<TabsTrigger value="ALL">` و `totalCount` غير المستخدم
@@ -584,20 +603,20 @@ Frontend (14):
    - `filtered` يفلتر بـ `o.mode === tab` مباشرة (لا حاجة لشرط ALL)
 
 **سلسلة بيانات الـ CTA — تحقّق كامل:**
-- ✅ API يرجع `bids: [{ id, carrierId, status, amount }]` لكل طلب (تحقّقت بـ `grep` على الـ JS المبنيّ)
-- ✅ `normalizeOrder` يحافظ على `bids[]` ويمرّر carrierId/status (api-adapters.ts:47-55)
-- ✅ `normalizeBid` يحافظ على `carrierId` و `status` عبر `...b` spread
+- ✅ API يرجع `bids: [{ id, providerId, status, amount }]` لكل طلب (تحقّقت بـ `grep` على الـ JS المبنيّ)
+- ✅ `normalizeOrder` يحافظ على `bids[]` ويمرّر providerId/status (api-adapters.ts:47-55)
+- ✅ `normalizeBid` يحافظ على `providerId` و `status` عبر `...b` spread
 - ✅ List page يقرأ `myBidStatus(o)` ويبدّل CTA بـ `isPending` / `isRejected`
 
 **ملفات معدّلة (2):**
 - `apps/api/src/modules/orders/orders.service.ts`
-- `apps/web/carrier/src/app/(app)/opportunities/page.tsx`
+- `apps/web/provider/src/app/(app)/opportunities/page.tsx`
 
 **التحقّق:**
-- ✅ `pnpm --filter @naqla/api exec tsc --noEmit` — clean
-- ✅ `pnpm --filter @naqla/carrier exec tsc --noEmit` — clean
+- ✅ `pnpm --filter @nitaq/api exec tsc --noEmit` — clean
+- ✅ `pnpm --filter @nitaq/provider exec tsc --noEmit` — clean
 - ✅ كل الخوادم تستجيب: 3000 (307 redirect)، 3001/3002/3003 (200)، 4000 (NestJS up)
-- ✅ `dist/src/modules/orders/orders.service.js` يحتوي `bids: { select: { id: true, carrierId: true, status: true, amount: true } }`
+- ✅ `dist/src/modules/orders/orders.service.js` يحتوي `bids: { select: { id: true, providerId: true, status: true, amount: true } }`
 
 ---
 
@@ -611,47 +630,47 @@ Frontend (14):
 
 **الإصلاحات:**
 
-1. **AWAITING tab removed** من `carrier/opportunities/page.tsx`:
+1. **AWAITING tab removed** من `provider/opportunities/page.tsx`:
    - Tab union type عاد لـ `'ALL' | 'OPEN' | 'DIRECT'` فقط
    - Counts عادت لـ openCount + directCount (لا awaitingCount)
-   - الطلبات التي قدّم عليها الناقل عرضاً تظهر داخل OPEN/DIRECT بزر "تفاصيل" بدل CTA الإرسال
+   - الطلبات التي قدّم عليها مقدّم الخدمة عرضاً تظهر داخل OPEN/DIRECT بزر "تفاصيل" بدل CTA الإرسال
 
 2. **CTA simplified**:
    - `PENDING` → "تفاصيل" (outline variant)
    - `REJECTED` → "إعادة تقديم"
    - بدون عرض → "قدّم عرضاً"
 
-3. **Client blank page — root cause**: السبب الحقيقي أن next-dev process على port 3002 كان قد مات (لم يكن يستجيب). الـ layout defensiveness السابق صحيح لكنه لا يحلّ المشكلة لأن الـ server نفسه لم يكن يردّ. الحل: إعادة تشغيل `pnpm --filter @naqla/client run dev`. تحقّقت أن `/` و `/login` يعيدان 200 OK مع HTML سليم (33KB+).
+3. **Client blank page — root cause**: السبب الحقيقي أن next-dev process على port 3002 كان قد مات (لم يكن يستجيب). الـ layout defensiveness السابق صحيح لكنه لا يحلّ المشكلة لأن الـ server نفسه لم يكن يردّ. الحل: إعادة تشغيل `pnpm --filter @nitaq/client run dev`. تحقّقت أن `/` و `/login` يعيدان 200 OK مع HTML سليم (33KB+).
 
 **ملفات معدّلة (2):**
-- `apps/web/carrier/src/app/(app)/opportunities/page.tsx` (tab removal + CTA labels)
-- `apps/web/carrier/src/app/(app)/opportunities/[id]/page.tsx` (button text "إعادة تقديم")
+- `apps/web/provider/src/app/(app)/opportunities/page.tsx` (tab removal + CTA labels)
+- `apps/web/provider/src/app/(app)/opportunities/[id]/page.tsx` (button text "إعادة تقديم")
 
 **التحقّق:**
-- ✅ `pnpm --filter @naqla/carrier exec tsc --noEmit` — clean
+- ✅ `pnpm --filter @nitaq/provider exec tsc --noEmit` — clean
 - ✅ Client app responding on 3002 (HTTP 200)
 
 ---
 
-### 🛠️ Carrier opportunities UX: status labels, tab renames, rejected-bid retry (2026-05-16)
+### 🛠️ Provider opportunities UX: status labels, tab renames, rejected-bid retry (2026-05-16)
 
 **ملاحظات المستخدم:**
 - لوحة العميل صفحة بيضاء على `http://localhost:3002`
-- في carrier/opportunities:
-  - إزالة تاق "بانتظار عروض الناقلين" (نظهره فقط في حالات معينة)
+- في provider/opportunities:
+  - إزالة تاق "بانتظار عروض مقدّمي الخدمات" (نظهره فقط في حالات معينة)
   - استبدال تاق "قيد العروض" بـ "بإنتظار موافقة العميل"
-  - إخفاء زر "قدم عرضاً" على الطلبات التي قدّم عليها الناقل عرضاً بالفعل
+  - إخفاء زر "قدم عرضاً" على الطلبات التي قدّم عليها مقدّم الخدمة عرضاً بالفعل
   - عند رفض العميل العرض: إضافة العرض المرفوض إلى سجل الطلب + زر "إعادة تقديم عرض سعر"
   - إعادة تسمية: "سوق مفتوح" → "طلبات السوق المفتوح"، "موجّه لشركتي" → "طلبات خاصة"
 
 **الإصلاحات:**
 
 1. **Client blank page**: `(app)/layout.tsx` يعالج `DEV_BYPASS_TOKEN` ك "غير مسجّل"، يمسح الـ tokens القديمة ويعيد التوجيه إلى `/login`
-2. **Status labels** في `carrier/status-badge.tsx`:
-   - `PUBLISHED → "جديد"` (من منظور الناقل، الطلب المنشور هو فرصة جديدة)
+2. **Status labels** في `provider/status-badge.tsx`:
+   - `PUBLISHED → "جديد"` (من منظور مقدّم الخدمة، الطلب المنشور هو فرصة جديدة)
    - `BIDDING → "بإنتظار موافقة العميل"`
-   - (تم إعادة `admin` و `client` إلى "منشور" — التاق المخصّص للناقل فقط)
-3. **List CTA branch**: في `opportunities/page.tsx`، الـ row يقرأ حالة عرض الناقل ويبدّل CTA:
+   - (تم إعادة `admin` و `client` إلى "منشور" — التاق المخصّص للمقدّم فقط)
+3. **List CTA branch**: في `opportunities/page.tsx`، الـ row يقرأ حالة عرض مقدّم الخدمة ويبدّل CTA:
    - `PENDING` → "عرض التفاصيل" (outline)
    - `REJECTED` → "إعادة تقديم عرض سعر"
    - لا يوجد عرض → "قدّم عرضاً"
@@ -662,15 +681,15 @@ Frontend (14):
 5. **Tab renames**: "سوق مفتوح" → "طلبات السوق المفتوح"، "موجّه لشركتي" → "طلبات خاصة"
 
 **ملفات معدّلة (5):**
-- `apps/web/client/src/app/(app)/layout.tsx` + `apps/web/carrier/src/app/(app)/layout.tsx`
-- `apps/web/carrier/src/components/status-badge.tsx`
-- `apps/web/carrier/src/app/(app)/opportunities/{page.tsx,[id]/page.tsx}`
+- `apps/web/client/src/app/(app)/layout.tsx` + `apps/web/provider/src/app/(app)/layout.tsx`
+- `apps/web/provider/src/components/status-badge.tsx`
+- `apps/web/provider/src/app/(app)/opportunities/{page.tsx,[id]/page.tsx}`
 - `apps/api/src/modules/bids/bids.service.ts`
 - (revert) `apps/web/{admin,client}/src/components/status-badge.tsx` + `messages/{ar,en}/orders.json`
 
 **التحقّق:**
-- ✅ `pnpm --filter @naqla/carrier exec tsc --noEmit` — clean
-- ✅ `pnpm --filter @naqla/api exec tsc --noEmit` — clean
+- ✅ `pnpm --filter @nitaq/provider exec tsc --noEmit` — clean
+- ✅ `pnpm --filter @nitaq/api exec tsc --noEmit` — clean
 
 ---
 
@@ -688,22 +707,22 @@ Frontend (14):
 
 **الإصلاحات:**
 
-1. **min=today** على حقل التاريخ في الـ wizard + carrier bid date input
+1. **min=today** على حقل التاريخ في الـ wizard + provider bid date input
 2. **Bid DTO + schema**: أضفت `estimatedHours` + `proposedPickupDate` للـ Prisma Bid + CreateBidDto + service + `prisma db push`
 3. **Admin order detail**: `useSWR + normalizeOrder` مع fallback إلى mock
 4. **Counts accurate**: عرّفت `pool` = opps بعد city+search filter؛ كل counts من `pool` بدل `opps` الخام؛ الـ filtered tab content يستخدم `pool` كذلك → counts تطابق الواقع
 5. **Sidebar count wired to SWR**: `useSWR('/orders')` + filter بـ JWT companyId — يطابق tabs الصفحة بالضبط
 6. **Price input UX**: محاط بـ `border-2 border-primary/40 bg-primary/[0.04]`, `h-14 text-3xl font-bold`, autoFocus, preview للصافي
 7. ⏳ مؤجَّل في TODO
-8. **PUBLISHED → "بانتظار عروض الناقلين"**: في 3 `status-badge.tsx` + `messages/{ar,en}/orders.json`. (en: "Awaiting carrier bids")
+8. **PUBLISHED → "بانتظار عروض مقدّمي الخدمات"**: في 3 `status-badge.tsx` + `messages/{ar,en}/orders.json`. (en: "Awaiting provider bids")
 
 **ملفات معدّلة (10):**
 - `apps/api/prisma/schema.prisma`, `apps/api/src/modules/bids/{dto/bid.dto.ts, bids.service.ts}`
 - `apps/web/client/src/app/(app)/orders/new/page.tsx`
-- `apps/web/carrier/src/app/(app)/opportunities/{page.tsx,[id]/page.tsx}`
-- `apps/web/carrier/src/components/app-sidebar.tsx`
+- `apps/web/provider/src/app/(app)/opportunities/{page.tsx,[id]/page.tsx}`
+- `apps/web/provider/src/components/app-sidebar.tsx`
 - `apps/web/admin/src/app/(app)/orders/[id]/page.tsx`
-- `apps/web/{admin,client,carrier}/src/components/status-badge.tsx`
+- `apps/web/{admin,client,provider}/src/components/status-badge.tsx`
 - `messages/{ar,en}/orders.json`
 
 **التحقّق:**
@@ -726,7 +745,7 @@ Frontend (14):
 - بعد ما الـ API صار شغّال، الـ axios interceptor كان يُرفِق هذا الـ token الوهمي → الـ API يرفضه (JWT verify يفشل) → 401
 - لم يكن في آلية تنظيف تلقائي → المستخدم عالق
 
-**الإصلاحات (3 ملفات: admin/client/carrier `api.ts`):**
+**الإصلاحات (3 ملفات: admin/client/provider `api.ts`):**
 
 1. **Request interceptor يتجاهل `DEV_BYPASS_TOKEN`**: لو الـ token الوهمي في localStorage، لا يُرفَق في Authorization header → الـ API يرجع 401 طبيعي
 2. **Response interceptor على 401 (لغير auth endpoints)** → `clearAuthAndRedirect()`: يمسح كل tokens + Zustand persist key، ثم `window.location.href = '/login'`
@@ -734,7 +753,7 @@ Frontend (14):
 
 **للمستخدم — يحلّ تلقائياً عند المحاولة التالية:**
 - أي عملية تطلب auth ستفعّل الـ flow الجديد: 401 → clear + redirect
-- سجّل دخول من جديد بـ credentials حقيقية: `client@naqla.sa` / `Client@1234`
+- سجّل دخول من جديد بـ credentials حقيقية: `client@nitaq.sa` / `Client@1234`
 
 **حلّ يدوي أسرع (لو ما اشتغل التلقائي):**
 1. DevTools → Console: `localStorage.clear(); location.reload()`
@@ -760,11 +779,11 @@ Frontend (14):
 - `/dashboard` → SWR على `/orders` + `/invoices`
 - `/invoices` → SWR على `/invoices`
 
-**Carrier Portal:**
-- `/dashboard` → SWR على `/orders` + `/orders?mine=true` + `/fleet/trucks` + `/payments`
+**Provider Portal:**
+- `/dashboard` → SWR على `/orders` + `/orders?mine=true` + `/services` + `/payments`
 - `/orders` → SWR على `/orders?mine=true`
-- `/fleet/trucks` → SWR على `/fleet/trucks`
-- `/fleet/drivers` → SWR على `/fleet/drivers`
+- `/services` → SWR على `/services`
+- `/employees` → SWR على `/employees`
 - `/earnings` → SWR على `/payments`
 
 **النمط الموحَّد:**
@@ -782,27 +801,27 @@ Mock fallback يبقى للـ GETs (offline demo)؛ المutations تطرح خط
 - `apps/web/admin/src/lib/auth-store.ts` (endpoint fix)
 - `apps/web/admin/src/app/(app)/page.tsx`, `/companies/page.tsx`, `/orders/page.tsx`, `/disputes/page.tsx`, `/payments/page.tsx`
 - `apps/web/client/src/app/(app)/page.tsx`, `/invoices/page.tsx`
-- `apps/web/carrier/src/app/(app)/page.tsx`, `/orders/page.tsx`, `/fleet/trucks/page.tsx`, `/fleet/drivers/page.tsx`, `/earnings/page.tsx`
+- `apps/web/provider/src/app/(app)/page.tsx`, `/orders/page.tsx`, `/services/page.tsx`, `/employees/page.tsx`, `/earnings/page.tsx`
 
 **التحقّق:**
 - ✅ Type-check على 6 packages — نظيف
 - ✅ i18n parity — 646 keys × 2 lang × 11 files
 
 **ما تبقى UI-only (للسلايس التالي):**
-- Settings tabs mutations (admin/client/carrier)
+- Settings tabs mutations (admin/client/provider)
 - صفحات الدعم
 - Tracking events (live location)
 - Disputes resolution actions
-- Add Truck mutation
+- Add Service mutation
 - Saved addresses dropdown في الـ Wizard
-- بيانات الناقل/السائق + العميل بعد قبول العرض
+- بيانات مقدّم الخدمة/الموظف + العميل بعد قبول العرض
 
 ---
 
 ### 🚨 CRITICAL: Mock fallback masked failed mutations + bid submit hang (2026-05-17)
 
 **أعراض المستخدم:**
-1. الطلب من العميل لا يظهر في لوحة الناقل (يبدو إنه أُرسل لكن في الحقيقة فشل ولم يُحفظ)
+1. الطلب من العميل لا يظهر في لوحة مقدّم الخدمة (يبدو إنه أُرسل لكن في الحقيقة فشل ولم يُحفظ)
 2. زر "إرسال العرض" يبقى عالقاً على "جاري الإرسال" بعد الضغط
 
 **السبب الجذري:**
@@ -810,7 +829,7 @@ Mock fallback يبقى للـ GETs (offline demo)؛ المutations تطرح خط
 **Bug 1 — Mock fallback يخفي الفشل الحقيقي:**
 - الـ axios interceptor كان يقبض **أي** خطأ (400 / 401 / 500 / network) ويرجع mock data بدل ما يرفض
 - النتيجة: لو الـ API رفض الطلب (validation error مثلاً)، الـ wizard يستلم "نجاح وهمي" مع mock data
-- الطلب ما يُنحفظ فعلياً في DB → الناقل ما يشوفه
+- الطلب ما يُنحفظ فعلياً في DB → مقدّم الخدمة ما يشوفه
 - الـ user "يظن" إن الطلب أُرسل، لكن في الواقع mock interceptor "نجح" بدلاً منه
 
 **Bug 2 — `setSubmitting(false)` في الـ catch فقط، مش في success أو finally:**
@@ -830,7 +849,7 @@ try {
 
 **الإصلاحات:**
 
-**1. Mock fallback مقصور على GET فقط** (في كل من admin/client/carrier `api.ts`):
+**1. Mock fallback مقصور على GET فقط** (في كل من admin/client/provider `api.ts`):
 - Mutations (POST/PUT/DELETE/PATCH) **تطرح خطأ حقيقي** عند الفشل
 - Network errors: رسالة واضحة "الـ API غير متاح على {URL}. تأكّد أن الـ backend شغّال."
 - Server errors (4xx/5xx): الـ message يستخرج من `response.data.error.message` أو `message` أو fallback `HTTP {status}`
@@ -844,20 +863,20 @@ finally { setSubmitting(false); }   // ← يُنادى دائماً
 ```
 
 **3. Order wizard publish error محرَّر من الـ silent swallow:**
-- كان: `try { publish() } catch { /* non-fatal */ }` → الطلب ينحفظ DRAFT بدون نشر، والناقل ما يشوفه
+- كان: `try { publish() } catch { /* non-fatal */ }` → الطلب ينحفظ DRAFT بدون نشر، ومقدّم الخدمة ما يشوفه
 - الآن: لو فشل publish، تظهر رسالة واضحة "الطلب أُنشئ X لكن فشل نشره: Y" + يُعاد التوجيه لصفحة الطلب علشان المستخدم يحاول publish يدوياً
 
 **ملفات معدّلة (5):**
-- `apps/web/{admin,client,carrier}/src/lib/api.ts` — GET-only mock fallback
+- `apps/web/{admin,client,provider}/src/lib/api.ts` — GET-only mock fallback
 - `apps/web/client/src/app/(app)/orders/new/page.tsx` — publish error visible
-- `apps/web/carrier/src/app/(app)/opportunities/[id]/page.tsx` — finally block
+- `apps/web/provider/src/app/(app)/opportunities/[id]/page.tsx` — finally block
 
 **التحقّق:**
 - ✅ Type-check على 3 web packages
 
 **للمستخدم:**
 
-بعد hard refresh (Cmd+Shift+R) في كل من العميل والناقل:
+بعد hard refresh (Cmd+Shift+R) في كل من العميل ومقدّم الخدمة:
 1. أعد المحاولة لإنشاء طلب
 2. **لو فشل**: راح تشوف رسالة خطأ واضحة بدل ما يبدو نجاح وهمي
 3. **لو نجح**: الطلب راح يُنشأ + يُنشر فعلياً → الناقل يشوفه
@@ -876,25 +895,25 @@ finally { setSubmitting(false); }   // ← يُنادى دائماً
 
 **إصلاحات (5):**
 
-**1. Client `/orders/[id]`** — يعرض عروض الناقلين فعلياً:
+**1. Client `/orders/[id]`** — يعرض عروض مقدّمي الخدمات فعلياً:
 - كان يستخدم `bidsForOrder()` (mock array) → غيّرته ليستخدم `order.bids` المضمَّن من API
-- API `findById()`: وسّعت الـ select على `bid.carrier` ليشمل `nameEn, city, region, contactPhone`
-- الصفحة تستخدم `bid.carrier` المضمَّن (live) مع fallback إلى `companyById(carrierId)` (mock)
+- API `findById()`: وسّعت الـ select على `bid.provider` ليشمل `nameEn, city, region, contactPhone`
+- الصفحة تستخدم `bid.provider` المضمَّن (live) مع fallback إلى `companyById(providerId)` (mock)
 
 **2. `shared-utils/api-adapters.ts`** — `normalizeBid()` جديدة:
 - تحوّل API Bid (`amount`) إلى mock shape (`price`)
 - `normalizeOrder` يطبّق `normalizeBid` على كل bid في `order.bids` تلقائياً
 
-**3. Carrier `/opportunities/[id]`** — يكتشف العرض الموجود ويعرض بطاقة بدل نموذج جديد:
-- `myCompanyId` من `useAuthStore` (live JWT) أو `CURRENT_CARRIER_ID` (mock)
-- بحث في `order.bids` عن bid حيث `carrierId === myCompanyId`
+**3. Provider `/opportunities/[id]`** — يكتشف العرض الموجود ويعرض بطاقة بدل نموذج جديد:
+- `myCompanyId` من `useAuthStore` (live JWT) أو `CURRENT_PROVIDER_ID` (mock)
+- بحث في `order.bids` عن bid حيث `providerId === myCompanyId`
 - بطاقة "عرضك على هذا الطلب" مع status badge (PENDING/ACCEPTED/REJECTED) + التفاصيل + ملاحظة "بانتظار قرار العميل"
 - بعد التقديم: `refetchOrder()` يحوّل UI مباشرة للبطاقة بدل redirect
 
-**4. Carrier `/opportunities` (list)** — Tab جديد "⏳ بانتظار موافقة العميل":
+**4. Provider `/opportunities` (list)** — Tab جديد "⏳ بانتظار موافقة العميل":
 - 4 tabs الآن: الكل / سوق مفتوح / موجّه لشركتي / **⏳ بانتظار موافقة العميل**
-- `awaitingOpps` = الطلبات التي للناقل bid بحالة `PENDING`
-- Tabs الأخرى تستثني الـ awaiting → يحلّ الـ "ازدواجية" التي يراها الناقل
+- `awaitingOpps` = الطلبات التي لمقدّم الخدمة bid بحالة `PENDING`
+- Tabs الأخرى تستثني الـ awaiting → يحلّ الـ "ازدواجية" التي يراها مقدّم الخدمة
 - PulsingBadge (amber) بعدد الـ awaiting
 
 **5. Wizard map** — البحث محصور بالمدينة:
@@ -907,10 +926,10 @@ finally { setSubmitting(false); }   // ← يُنادى دائماً
 - ✅ Type-check على 6 packages — نظيف
 
 **باقي من قائمة المستخدم (TODO):**
-- 🟡 **#7** بيانات الناقل/السائق + بيانات العميل بعد قبول العرض
-- 🟡 **#8** Filter الطلبات للناقلين بحسب القدرات (تأمين/تبريد)
+- 🟡 **#7** بيانات مقدّم الخدمة/الموظف + بيانات العميل بعد قبول العرض
+- 🟡 **#8** Filter الطلبات لمقدّمي الخدمات بحسب التخصص
 - 🟡 **#9** العناوين المحفوظة كـ dropdown في الـ Wizard
-- 🟢 **#1+#2** صفحات الدعم في admin/client/carrier
+- 🟢 **#1+#2** صفحات الدعم في admin/client/provider
 
 ---
 
@@ -984,7 +1003,7 @@ if (!order) {
 
 **التحقّق:**
 - ✅ Type-check على 6 packages
-- ✅ Build على 5 packages (admin/client/carrier/landing/api)
+- ✅ Build على 5 packages (admin/client/provider/landing/api)
 - ✅ `GET /orders/ord-1` → HTTP 200 (لا أخطاء SSR)
 - ✅ `GET /orders/ORD-2025-0142` → HTTP 200
 - ✅ `GET /orders` list → HTTP 200
@@ -1000,7 +1019,7 @@ if (!order) {
 **للمستخدم:**
 
 ```bash
-cd /Users/aa/naqla-platform
+cd /Users/aa/nitaq
 pkill -f "next dev"
 rm -rf apps/web/*/.next
 pnpm dev
@@ -1032,19 +1051,19 @@ pnpm dev
 - `CARGO_LABELS[order.cargoType]` → `(order.cargoType && CARGO_LABELS[order.cargoType]) || order.cargoType || '—'`
 - `TRUCK_LABELS[order.truckType]` → same pattern
 
-**`apps/web/carrier/src/app/(app)/orders/[id]/page.tsx`** (3 أماكن):
+**`apps/web/provider/src/app/(app)/orders/[id]/page.tsx`** (3 أماكن):
 - `client.nameAr.split` → defensive
 - `order.weightKg.toLocaleString` → defensive
 - `km.toLocaleString` → defensive
 
-**`apps/web/carrier/src/app/(app)/opportunities/[id]/page.tsx`** (3 أماكن):
+**`apps/web/provider/src/app/(app)/opportunities/[id]/page.tsx`** (3 أماكن):
 - `client.nameAr.split` × 2 (تكرّر في الـ DIRECT proposal section)
 - `order.weightKg.toLocaleString` × 2
-- `TRUCK_LABELS[order.truckType]` defensive
+- `SERVICE_LABELS[order.serviceType]` defensive
 
 **التحقّق:**
 - ✅ Type-check يمرّ على 6 packages
-- ✅ Build (client + carrier) نظيف
+- ✅ Build (client + provider) نظيف
 - ✅ كل الـ method calls على القيم المحتملة undefined صار محميّاً
 
 **ملاحظة:**
@@ -1079,24 +1098,24 @@ pnpm dev
 ### الـ Cleanup الكامل
 
 **ملفات محذوفة (28):**
-- `apps/web/{admin,client,carrier,landing}/public/manifest.webmanifest` (4)
-- `apps/web/{admin,client,carrier,landing}/public/icons/*` (12 SVG icons)
-- `apps/web/{admin,client,carrier,landing}/src/app/offline/` (4 page + 1 layout)
-- `apps/web/{admin,client,carrier,landing}/src/components/pwa-shell.tsx` (4)
+- `apps/web/{admin,client,provider,landing}/public/manifest.webmanifest` (4)
+- `apps/web/{admin,client,provider,landing}/public/icons/*` (12 SVG icons)
+- `apps/web/{admin,client,provider,landing}/src/app/offline/` (4 page + 1 layout)
+- `apps/web/{admin,client,provider,landing}/src/components/pwa-shell.tsx` (4)
 
 **ملفات جديدة/مستبدلة (5):**
-- `apps/web/{admin,client,carrier,landing}/src/components/online-status-bar.tsx` — نسخة مبسّطة من PwaShell، تحتفظ فقط بـ:
+- `apps/web/{admin,client,provider,landing}/src/components/online-status-bar.tsx` — نسخة مبسّطة من PwaShell، تحتفظ فقط بـ:
   - banner الـ online/offline (UX مفيد، لا علاقة له بـ SW)
   - one-shot rescue path: unregister أي SW قديم + clear caches في الـ useEffect
 - `apps/web/landing/src/app/not-found.tsx` — root 404 بـ `dynamic = 'force-dynamic'` (يحلّ مشكلة prerender + next-intl headers)
 
 **ملفات معدّلة (5):**
-- `apps/web/{admin,client,carrier,landing}/src/app/layout.tsx` — حذفت `manifest`, `appleWebApp`, `icons`, `Viewport.themeColor` من metadata + استبدلت `<PwaShell />` بـ `<OnlineStatusBar />`
+- `apps/web/{admin,client,provider,landing}/src/app/layout.tsx` — حذفت `manifest`, `appleWebApp`, `icons`, `Viewport.themeColor` من metadata + استبدلت `<PwaShell />` بـ `<OnlineStatusBar />`
 - `packages/shared-utils/src/format.ts` — رجعت إلى date-fns 2.x imports
 - `packages/shared-utils/package.json` — date-fns: `^2.30.0`، exports مبسّطة (main + types فقط على dist/)
 
 **ملفات محتفَظ بها كـ kill-switch:**
-- `apps/web/{admin,client,carrier,landing}/public/sw.js` — يُلغي تسجيل أي SW قديم + يمسح كل caches عند الـ activate (rescue path للمتصفّحات اللي ما زالت controlled من v0.7.0)
+- `apps/web/{admin,client,provider,landing}/public/sw.js` — يُلغي تسجيل أي SW قديم + يمسح كل caches عند الـ activate (rescue path للمتصفّحات اللي ما زالت controlled من v0.7.0)
 
 ### إصلاح date-fns ESM trap
 
@@ -1117,7 +1136,7 @@ import ar from 'date-fns/locale/ar';   // default export
 - ✅ Build على **5 packages**:
   - admin: ƒ Dynamic
   - client: ƒ Dynamic
-  - carrier: ƒ Dynamic
+  - provider: ƒ Dynamic
   - landing: ● SSG + ƒ Dynamic (يبنى الآن بدون أخطاء)
   - api: nest build success
 - ✅ `pnpm check:i18n` — 11 ملف × 646 مفتاح × 2 لغة
@@ -1127,7 +1146,7 @@ import ar from 'date-fns/locale/ar';   // default export
 
 في الـ terminal:
 ```bash
-cd /Users/aa/naqla-platform
+cd /Users/aa/nitaq
 pkill -f "next dev"     # أوقف dev القديم
 rm -rf apps/web/*/.next # امسح caches
 pnpm dev                # شغّل من جديد
@@ -1164,13 +1183,13 @@ pnpm dev                # شغّل من جديد
 **استُخدم في 4 ملفات:**
 - `apps/web/client/src/app/(app)/orders/page.tsx` — list
 - `apps/web/client/src/app/(app)/orders/[id]/page.tsx` — detail
-- `apps/web/carrier/src/app/(app)/opportunities/page.tsx` — list
-- `apps/web/carrier/src/app/(app)/opportunities/[id]/page.tsx` — detail
-- `apps/web/carrier/src/app/(app)/orders/[id]/page.tsx` — detail
+- `apps/web/provider/src/app/(app)/opportunities/page.tsx` — list
+- `apps/web/provider/src/app/(app)/opportunities/[id]/page.tsx` — detail
+- `apps/web/provider/src/app/(app)/orders/[id]/page.tsx` — detail
 
 **التحقّق:**
 - ✅ Type-check يمرّ على 6 packages
-- ✅ `pnpm build` على client و carrier — نظيف
+- ✅ `pnpm build` على client و provider — نظيف
 - ✅ shared-utils dist/api-adapters.{js,d.ts} مُولَّد
 
 **درس مستفاد:**
@@ -1185,7 +1204,7 @@ pnpm dev                # شغّل من جديد
 **أعراض المستخدم:** API يفشل ببدء التشغيل مع:
 ```
 Error [ERR_MODULE_NOT_FOUND]: Cannot find module
-'/Users/aa/naqla-platform/packages/shared-utils/src/format'
+'/Users/aa/nitaq/packages/shared-utils/src/format'
 ```
 
 **السبب الجذري:**
@@ -1201,7 +1220,7 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find module
    - `"types": "./dist/index.d.ts"`
    - `"exports"` field للـ subpath resolution
    - script `"dev": "tsc --watch --preserveWatchOutput"` للـ HMR في dev
-3. **`turbo.json`** — أضفت `"dependsOn": ["@naqla/shared-utils#build"]` لـ dev task → shared-utils تُبنى قبل أي app يبدأ
+3. **`turbo.json`** — أضفت `"dependsOn": ["@nitaq/shared-utils#build"]` لـ dev task → shared-utils تُبنى قبل أي app يبدأ
 4. **`apps/api/src/app.module.ts`** — وسّعت `envFilePath` ليلاقي الـ env من cwd ومن monorepo root معاً (يدعم تشغيل من `apps/api/` أو من root)
 5. **بنيت `dist/`** — مرة واحدة، أنتجت 32 ملف (.js + .d.ts + maps)
 
@@ -1253,8 +1272,8 @@ pnpm dev
 6. النتيجة: المستخدم يرى الصفحة الحقيقية بدون أي خطوة يدوية ✅
 
 **الملفات (8):**
-- `apps/web/{admin,client,carrier,landing}/public/sw.js` — kill-switch
-- `apps/web/{admin,client,carrier,landing}/src/components/pwa-shell.tsx` — no SW registration
+- `apps/web/{admin,client,provider,landing}/public/sw.js` — kill-switch
+- `apps/web/{admin,client,provider,landing}/src/components/pwa-shell.tsx` — no SW registration
 
 **Verification:**
 - ✅ Type-check يمرّ على الأربعة apps
@@ -1299,8 +1318,8 @@ pnpm dev
    - الـ cache version زاد إلى `v2` (يُجبر invalidation للـ caches القديمة)
 
 4. **الـ files المعدّلة (8):**
-   - `apps/web/{admin,client,carrier,landing}/src/components/pwa-shell.tsx` (×4)
-   - `apps/web/{admin,client,carrier,landing}/public/sw.js` (×4)
+   - `apps/web/{admin,client,provider,landing}/src/components/pwa-shell.tsx` (×4)
+   - `apps/web/{admin,client,provider,landing}/public/sw.js` (×4)
 
 5. **Type-check + builds:** ✅ كلها تمرّ على الأربعة + API.
 
@@ -1316,13 +1335,13 @@ pnpm dev
 
 ### 🐛 Fix: Landing `/offline` + `/_not-found` build failure + stale-cache 500s (2026-05-17)
 
-**أعراض المستخدم:** بعض الصفحات تعرض 500 بعد إعادة التحميل في تطبيقات client/carrier.
+**أعراض المستخدم:** بعض الصفحات تعرض 500 بعد إعادة التحميل في تطبيقات client/provider.
 
 **التشخيص الذي أجريته:**
 - ✅ `tsc --noEmit` يمرّ على كل الـ 6 packages — لا أخطاء كومبايل
-- ✅ `pnpm build` على admin/client/carrier/api — كلها نظيفة (ƒ Dynamic لكل الصفحات)
+- ✅ `pnpm build` على admin/client/provider/api — كلها نظيفة (ƒ Dynamic لكل الصفحات)
 - ❌ `pnpm build` على **landing** — يفشل في `/offline` + `_not-found`
-- ✅ Probed 50+ صفحة عبر curl على dev servers (admin: 18، client: 16، carrier: 22، landing: 8) → كلها 200/307
+- ✅ Probed 50+ صفحة عبر curl على dev servers (admin: 18، client: 16، provider: 22، landing: 8) → كلها 200/307
 - ✅ بحثت عن error content في HTML — لا inline errors
 
 **السبب الجذري للـ build failure (landing فقط):**
@@ -1350,8 +1369,8 @@ pnpm dev
 3. **مسح `.next` caches** لكل التطبيقات الأربعة كإجراء وقائي
 
 **التحقق:**
-- ✅ `pnpm --filter @naqla/landing build` يمرّ
-- ✅ كل الـ 5 packages تبني نظيفة (admin/client/carrier/landing/api)
+- ✅ `pnpm --filter @nitaq/landing build` يمرّ
+- ✅ كل الـ 5 packages تبني نظيفة (admin/client/provider/landing/api)
 - ✅ كل الـ 6 packages type-check نظيفة
 - ✅ `pnpm check:i18n` — 646 key × 2 lang
 - ✅ probed 50+ صفحة في dev mode → كلها 200
@@ -1372,21 +1391,21 @@ pnpm dev                            # شغّل من جديد
 
 ### v0.8.0 Slice 1 — OPEN Order Happy Path Wired End-to-End 🟢 (مكتمل)
 
-**الهدف:** تفعيل dعميل ينشر طلب → ناقل يقدّم عرض → عميل يقبل → ناقل يسلّم → escrow يُفرَج. كل خطوة فعلية على DB حقيقية، لا mock.
+**الهدف:** تفعيل: عميل ينشر طلب → مقدّم الخدمة يقدّم عرض → عميل يقبل → مقدّم الخدمة يُنجز → escrow يُفرَج. كل خطوة فعلية على DB حقيقية، لا mock.
 
 #### Backend (apps/api)
 - **Prisma schema** — `Order` model امتدّ بـ:
   - `mode: String` (OPEN/DIRECT، default OPEN)
   - `tripType: String` (SAME_CITY/INTER_CITY، default INTER_CITY)
   - `pickupWindow: String` (MORNING/EVENING/ALL_DAY، default ALL_DAY)
-  - `targetCarrierId: String?` + FK relation `TargetCarrierOrders`
+  - `targetProviderId: String?` + FK relation `TargetProviderOrders`
 - **Migration:** `20260517000000_add_order_workflow_fields/migration.sql` — آمنة (defaults للحقول الجديدة) ومتوافقة مع البيانات الحالية
 - **`CreateOrderDto`** يستقبل الحقول الجديدة (كل اختياري، validated بـ `@IsEnum`)
 - **`orders.service.create()`** يكتب الحقول الجديدة، مع fallback ذكي: لو `tripType` غير مرسل، يُستنتج من `originCity === destinationCity`
-- **`orders.service.list()`** للناقلين معاد كتابتها: ثلاث buckets معاً (OPEN marketplace + DIRECT-to-this-carrier + assigned-to-me)
+- **`orders.service.list()`** لمقدّمي الخدمات معاد كتابتها: ثلاث buckets معاً (OPEN marketplace + DIRECT-to-this-provider + assigned-to-me)
 - **`bids.service.accept()`** — مُحسَّن: بعد قبول العرض، **يُنشئ Payment row بحالة HELD** تلقائياً (upsert على orderId الـ unique) مع breakdown صحيح (8% عمولة)
 - **Endpoints جديدة:**
-  - `POST /api/orders/:id/deliver` — الناقل يضع DELIVERED (CONFIRMED/IN_TRANSIT → DELIVERED، يسجّل `actualDeliveryAt`)
+  - `POST /api/orders/:id/deliver` — مقدّم الخدمة يضع DELIVERED (CONFIRMED/IN_TRANSIT → DELIVERED، يسجّل `actualDeliveryAt`)
   - `POST /api/orders/:id/complete` — العميل يؤكّد (DELIVERED → COMPLETED + Payment HELD → RELEASED في transaction)
 
 #### Frontend (apps/web)
@@ -1400,12 +1419,12 @@ pnpm dev                            # شغّل من جديد
   - dialog الإلغاء → `POST /orders/:id/cancel`
   - dialog تأكيد الاستلام → `POST /orders/:id/complete`
   - كل بعدها `mutate()` للـ SWR لتحديث الصفحة
-- **`apps/web/carrier/src/app/(app)/opportunities/page.tsx`** — list من SWR بدل mock
-- **`apps/web/carrier/src/app/(app)/opportunities/[id]/page.tsx`** — bid submit:
+- **`apps/web/provider/src/app/(app)/opportunities/page.tsx`** — list من SWR بدل mock
+- **`apps/web/provider/src/app/(app)/opportunities/[id]/page.tsx`** — bid submit:
   - زر "إرسال العرض" → `POST /orders/:orderId/bids` مع payload كامل (amount + estimatedDays + estimatedHours + proposedPickupDate + notes)
-- **`apps/web/carrier/src/app/(app)/orders/[id]/page.tsx`** — detail من SWR:
+- **`apps/web/provider/src/app/(app)/orders/[id]/page.tsx`** — detail من SWR:
   - زر "تأكيد البدء" → `POST /orders/:id/confirm`
-  - زر "تأكيد التسليم" → `POST /orders/:id/deliver`
+  - زر "تأكيد الإنجاز" → `POST /orders/:id/deliver`
 
 #### Graceful Degradation
 - الـ api client (`apps/web/*/src/lib/api.ts`) عنده interceptor فيه `getMockResponse(url)` fallback. النتيجة:
@@ -1431,31 +1450,31 @@ pnpm dev
 
 | الخطوة | الواجهة | الإجراء | المتوقّع |
 |---|---|---|---|
-| 1 | http://localhost:3002/login | Client login (`client@naqla.sa` / `Client@1234`) | redirect إلى dashboard |
+| 1 | http://localhost:3002/login | Client login (`client@nitaq.sa` / `Client@1234`) | redirect إلى dashboard |
 | 2 | /orders/new | املأ wizard (الخطوات الخمس)، submit | redirect إلى `/orders/<id>` بحالة PUBLISHED |
-| 3 | http://localhost:3003/login | Carrier login (`carrier@naqla.sa` / `Carrier@1234`) | dashboard |
+| 3 | http://localhost:3003/login | Provider login (`provider@nitaq.sa` / `Provider@1234`) | dashboard |
 | 4 | /opportunities | الطلب الجديد يظهر في القائمة | ✓ |
 | 5 | /opportunities/<id> | أدخل سعر + أيام + اضغط "إرسال العرض" | redirect إلى `/opportunities` |
 | 6 | (client) /orders/<id> | يظهر العرض في "العروض المستلمة" مع badge ETA كامل | ✓ |
 | 7 | (client) اضغط "قبول هذا العرض" + أكّد | order → ASSIGNED، Payment HELD ينشأ في DB | ✓ |
-| 8 | (carrier) /orders/<id> | الطلب الآن في "طلباتي" | ✓ |
-| 9 | (carrier) اضغط "تأكيد البدء" | order → CONFIRMED | ✓ |
-| 10 | (carrier) اضغط "تأكيد التسليم" | order → DELIVERED + actualDeliveryAt | ✓ |
+| 8 | (provider) /orders/<id> | الطلب الآن في "طلباتي" | ✓ |
+| 9 | (provider) اضغط "تأكيد البدء" | order → CONFIRMED | ✓ |
+| 10 | (provider) اضغط "تأكيد الإنجاز" | order → DELIVERED + actualDeliveryAt | ✓ |
 | 11 | (client) /orders/<id> | يظهر `EscrowCountdown` بعدّاد 72:00:00 | ✓ |
 | 12 | (client) اضغط "تأكيد الاستلام" | order → COMPLETED + Payment → RELEASED | ✓ |
 
 **Verify في الـ DB:**
 ```bash
-docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
+docker exec -it nitaq-postgres psql -U nitaq -d nitaq_dev -c \
   'SELECT id, "orderNumber", status, "agreedPrice" FROM "Order" ORDER BY "createdAt" DESC LIMIT 5;'
 
-docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
-  'SELECT "orderId", status, "totalAmount", "carrierAmount", "releasedAt" FROM "Payment" ORDER BY "createdAt" DESC LIMIT 5;'
+docker exec -it nitaq-postgres psql -U nitaq -d nitaq_dev -c \
+  'SELECT "orderId", status, "totalAmount", "providerAmount", "releasedAt" FROM "Payment" ORDER BY "createdAt" DESC LIMIT 5;'
 ```
 
 #### ما زال mock في هذا الـ slice (يكتمل في slices لاحقة)
 - 🟡 الـ admin pages (companies/disputes/payments) — لم تُربط بعد
-- 🟡 Cancellation flow على الناقل
+- 🟡 Cancellation flow على مقدّم الخدمة
 - 🟡 DIRECT mode negotiation rounds (accept/counter/decline) — UI كامل، لكن backend غير مربوط
 - 🟡 Notifications real-time — Gateway موجود لكن لا frontend listener
 - 🟡 Tracking events (live location)
@@ -1466,9 +1485,9 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 **1. ✅ Order Workflow Engine + Escrow Countdown** (مكتمل)
 - ملف جديد `packages/shared-utils/src/workflow-engine.ts` — مرجع وحيد لكل قواعد الـ workflow:
   - `cancellationPolicy(order)` → tier (FREE/10%/DISPUTE_ONLY/NOT_ALLOWED) + breakdown
-  - `escrowBreakdown(total)` → split (8% عمولة + 92% للناقل)
+  - `escrowBreakdown(total)` → split (8% عمولة + 92% لمقدّم الخدمة)
   - `escrowAutoReleaseAt(deliveredAt)` + `escrowMsRemaining()` — لحساب وقت الإفراج التلقائي (72 ساعة)
-  - `TRANSITIONS` — جدول الـ state machine الكامل: من→إلى مع الـ actor (CLIENT/CARRIER/ADMIN/SYSTEM)
+  - `TRANSITIONS` — جدول الـ state machine الكامل: من→إلى مع الـ actor (CLIENT/PROVIDER/ADMIN/SYSTEM)
   - `canTransition(from, to, actor)` — guard للـ transitions
   - `NOTIFICATION_MATRIX` — 10 أحداث workflow × audiences متعدّدة = ~25 إشعار موصَّف
   - `renderNotification(spec, vars)` — templating بـ `{placeholders}`
@@ -1476,28 +1495,28 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
   - عدّاد لايف للـ 72 ساعة (HH:MM:SS مع leading zeros)
   - progress bar
   - تاريخ الإفراج المتوقّع
-  - تفصيل توزيع المبلغ (إجمالي / عمولة 8% / صافي للناقل)
+  - تفصيل توزيع المبلغ (إجمالي / عمولة 8% / صافي لمقدّم الخدمة)
   - زر "تأكيد الآن" للإفراج الفوري
-- مكوّن مرآة في الـ Carrier app — نفس المنطق لكن بصياغة "دفعتك قادمة"
+- مكوّن مرآة في الـ Provider app — نفس المنطق لكن بصياغة "دفعتك قادمة"
 - `CancelOrderDialog` معاد هيكلته ليستخدم `cancellationPolicy()` بدل المنطق الـ inline
 - `pnpm tsc --noEmit` يمرّ على الأربعة تطبيقات
 
-**2. ✅ Time Windows + Carrier ETA** (مكتمل)
+**2. ✅ Time Windows + Provider ETA** (مكتمل)
 - نوع جديد `PickupWindow = 'MORNING' | 'EVENING' | 'ALL_DAY'` في mock-data + Order interface
 - helpers في workflow-engine: `PICKUP_WINDOWS` constant + `pickupWindowLabel(window, locale)` + `estimateDeliveryDate(pickupDate, days, hours)`
 - **New Order Wizard** (Client): الـ Step 2 تغيّر:
   - حقل `pickupDate` صار `type="date"` (بدل `datetime-local`)
   - حقل جديد للنافذة الزمنية: صباحاً 🌅 / مساءً 🌇 / طوال اليوم ☀️
-  - hint: "الناقل سيؤكّد الوقت الدقيق داخل النافذة عند قبول العرض"
-- **Bid form** (Carrier opportunity detail):
+  - hint: "مقدّم الخدمة سيؤكّد الوقت الدقيق داخل النافذة عند قبول العرض"
+- **Bid form** (Provider opportunity detail):
   - حقل المدة انقسم إلى أيام + ساعات
-  - بطاقة جديدة "موعد الاستلام": زرّان كبيران (أؤكّد الموعد / أقترح موعداً آخر)
+  - بطاقة جديدة "موعد البدء": زرّان كبيران (أؤكّد الموعد / أقترح موعداً آخر)
   - في حالة الاقتراح: حقل تاريخ بديل
-  - معاينة لايف للـ "التسليم المتوقّع" تُحسب تلقائياً (pickup + days + hours)
+  - معاينة لايف للـ "الإنجاز المتوقّع" تُحسب تلقائياً (pickup + days + hours)
 - **Bid comparison** (Client order detail): كل عرض يعرض الآن:
-  - 📅 تاريخ الاستلام (مع badge "معدّل" لو الناقل اقترح موعداً مختلفاً)
+  - 📅 تاريخ البدء (مع badge "معدّل" لو مقدّم الخدمة اقترح موعداً مختلفاً)
   - ⏱ المدة المتوقعة (أيام + ساعات)
-  - 📦 تاريخ التسليم المتوقّع
+  - 📦 تاريخ الإنجاز المتوقّع
 - إضافة حقول `estimatedHours`, `proposedPickupDate`, `estimatedDeliveryDate` للـ Bid interface (كلها optional)
 - type-check يمرّ على الأربعة تطبيقات
 
@@ -1522,16 +1541,16 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - helpers RouteMapsBlock لتغليف الـ layout
 - type-check يمرّ
 
-**4. ✅ Individual Carrier Onboarding** (مكتمل)
-- **حال السابق:** flow الناقل الفرد كان موجوداً أصلاً في `apps/web/carrier/src/app/register/page.tsx`:
+**4. ✅ Individual Provider Onboarding** (مكتمل)
+- **حال السابق:** flow مقدّم الخدمة الفرد كان موجوداً أصلاً في `apps/web/provider/src/app/register/page.tsx`:
   - `AccountType = 'COMPANY' | 'INDIVIDUAL'` في step 1 (اختيار نوع الحساب)
-  - `COMPANY_DOCS` (CR + VAT + Zakat + TGA license + insurance) vs `INDIVIDUAL_DOCS` (national ID + driver license + istimara + insurance + TGA permit + VAT optional)
+  - `COMPANY_DOCS` (CR + VAT + Zakat + license + insurance) vs `INDIVIDUAL_DOCS` (national ID + specialty license + insurance + VAT optional)
   - `docsFor(accountType, vatChoice)` helper يعرض القائمة المناسبة
 - **ما أُضيف في v0.6.0:**
   - مكوّن `CompliancePanel` جديد في `/admin/settings → tab الامتثال`:
     - قسمان منفصلان جنباً إلى جنب (grid lg:grid-cols-2):
-      - 🏢 **متطلبات الشركات الناقلة** — CR، Zakat، VAT، TGA license، insurance، articles، bank
-      - 👤 **متطلبات الناقل الفرد** — هوية وطنية، رخصة قيادة، صورة شخصية، استمارة، تأمين، فحص دوري، TGA permit
+      - 🏢 **متطلبات شركات مقدّمي الخدمات** — CR، Zakat، VAT، license، insurance، articles، bank
+      - 👤 **متطلبات مقدّم الخدمة الفرد** — هوية وطنية، شهادة خبرة، صورة شخصية، تأمين، شهادات تخصص
     - CRUD كامل لكل قائمة (add/edit/delete + toggle required)
     - Dialog إضافة/تعديل بحقول: اسم المستند + checkbox "إلزامي"
   - الـ admin يقدر ينظّم متطلبات كل نوع حساب من نفس الصفحة بدون تعديل كود
@@ -1544,9 +1563,9 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 
 **نهج اختير عمداً:** PWA يدوي (بدون `next-pwa`) لتوافق أنظف مع Next.js 14 App Router + لتفادي تبعية build إضافية.
 
-**ما أُنجز على الـ 4 تطبيقات (admin/client/carrier/landing):**
+**ما أُنجز على الـ 4 تطبيقات (admin/client/provider/landing):**
 - **`public/manifest.webmanifest`** لكل تطبيق — name + short_name + theme (#0A3D3A) + icons + lang/dir
-- **`public/icons/`** — `icon-192.svg`, `icon-512.svg`, `apple-touch-icon.svg` (شعار Truck على خلفية البراند، 3 أحجام)
+- **`public/icons/`** — `icon-192.svg`, `icon-512.svg`, `apple-touch-icon.svg` (شعار المنصة على خلفية البراند، 3 أحجام)
 - **`public/sw.js`** — service worker بسيط:
   - install: pre-cache للشيل (`/offline` + icons + manifest)
   - navigation requests: network-first → `/offline` fallback عند الفشل
@@ -1596,7 +1615,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - ✅ `scripts/backup-db.sh` — backup يومي قابل للجدولة عبر cron:
   - `pg_dump` → `gzip` → MinIO upload في pipeline واحد
   - retention 30 يوم (قابل للتعديل عبر `BACKUP_RETENTION_DAYS`)
-  - namespace بحسب بيئة التشغيل (`naqla-${NODE_ENV}-${timestamp}.sql.gz`)
+  - namespace بحسب بيئة التشغيل (`nitaq-${NODE_ENV}-${timestamp}.sql.gz`)
   - executable + موثّق
 - ✅ `.gitignore` يستثني `.env.development/staging/production` ويسمح فقط بالـ `.example` files
 
@@ -1652,7 +1671,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
   - `otp_verification`
   - `order_published`
   - `bid_accepted`
-- ✅ صفحة `/join?token=xxx` في كل من Carrier و Client apps:
+- ✅ صفحة `/join?token=xxx` في كل من Provider و Client apps:
   - تقرأ token + memberName + companyName + roleName من query string
   - نموذج: كلمة مرور جديدة + تأكيد (≥ 8 أحرف، مع toggle visibility)
   - حالة الخطأ: رمز مفقود، رمز منتهي الصلاحية
@@ -1672,7 +1691,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 **الوضع الحالي:**
 - البنية التحتية للـ i18n مكتملة ومُختبَرة (next-intl، cookie، server actions، refresh، RTL/LTR).
 - المُترجَم فعلياً بـ `t()`: Sidebars (admin + client + carrier) + كل صفحات `/settings` بتبويباتها الأربع + نظام الفريق + اللاندينج (Hero/Features/Pricing/FAQ) + بطاقة `OnboardingLanguagePicker`.
-- المتبقّي (سلاسل عربية ثابتة في JSX): ~40-50 صفحة (PageHeaders، أعمدة الجداول، Dialogs، شارات الحالة، Empty states) في `admin`, `client`, `carrier`.
+- المتبقّي (سلاسل عربية ثابتة في JSX): ~40-50 صفحة (PageHeaders، أعمدة الجداول، Dialogs، شارات الحالة، Empty states) في `admin`, `client`, `provider`.
 
 **القرار:**
 السوق المستهدف للإطلاق عربي (السعودية)، فالأولوية لميزات الأعمال لا لترجمة سلاسل لن يستخدمها أحد قبل أن يأتي عميل دولي. نُطلق بالعربية الكاملة + الإنجليزية الجزئية، ونُكمل الإنجليزية عند الحاجة الفعلية.
@@ -1696,16 +1715,16 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
   - الملفات المعدّلة (6):
     - `apps/web/admin/src/components/language-selector.tsx`
     - `apps/web/client/src/components/language-selector.tsx`
-    - `apps/web/carrier/src/components/language-selector.tsx`
+    - `apps/web/provider/src/components/language-selector.tsx`
     - `apps/web/client/src/components/onboarding-language-picker.tsx`
-    - `apps/web/carrier/src/components/onboarding-language-picker.tsx`
+    - `apps/web/provider/src/components/onboarding-language-picker.tsx`
     - `apps/web/landing/src/components/locale-switcher.tsx` (يستخدم `nextRouter.refresh()` بعد `router.replace`)
 - ✅ **ترجمة الـ Sidebars الثلاثة فعلياً عبر `useTranslations()`** — قبل ذلك كانت السلاسل مكتوبة بالعربية مباشرةً في الـ JSX رغم وجود مفاتيح الترجمة في `messages/`.
   - `apps/web/admin/src/components/app-sidebar.tsx` — 6 مجموعات × 18 رابط، اسم التطبيق، شارة "قريباً"
-  - `apps/web/carrier/src/components/app-sidebar.tsx` — 5 مجموعات × 14 رابط
+  - `apps/web/provider/src/components/app-sidebar.tsx` — 5 مجموعات × 14 رابط
   - `apps/web/client/src/components/app-sidebar.tsx` — 4 مجموعات × 10 روابط
   - النمط: `NAV` يستخدم `titleKey`/`labelKey` ثم الـ JSX يحلّ القيم عبر `` t(`groups.${titleKey}`) `` و `` t(`nav.${labelKey}`) ``
-- ✅ مفاتيح جديدة (3): `common.comingSoon`، `carrier.nav.settings`، `client.nav.settings` → الإجمالي **546 مفتاحاً** × 2 لغة
+- ✅ مفاتيح جديدة (3): `common.comingSoon`، `provider.nav.settings`، `client.nav.settings` → الإجمالي **546 مفتاحاً** × 2 لغة
 - ✅ `pnpm check:i18n` يمرّ
 
 ### يُكمل لاحقاً
@@ -1729,7 +1748,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 ### 🏗️ إعادة هيكلة الإعدادات
 - ✅ تغيير المسارات:
   - `/client/company` → **`/client/settings`** (Sidebar: "إعدادات الشركة" مع أيقونة Settings)
-  - `/carrier/company` → **`/carrier/settings`** (Sidebar: "إعدادات الشركة" مع أيقونة Settings)
+  - `/provider/company` → **`/provider/settings`** (Sidebar: "إعدادات الشركة" مع أيقونة Settings)
 - ✅ تصميم بـ **4 تبويبات** (بدلاً من Sections):
   - **بيانات الشركة** (Company Info) — كل الحقول + ملخص النشاط
   - **الفريق** (Team) — جديد، كامل CRUD
@@ -1744,12 +1763,12 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - `TeamMember` type + `TeamMemberStatus` (`ACTIVE | SUSPENDED | PENDING_ACTIVATION`)
 - **Permissions matrix** — مصدر الحقيقة الواحد:
   - `CLIENT_ROLE_PERMISSIONS` (للعملاء): OWNER / ADMIN / STAFF / FINANCE
-  - `CARRIER_ROLE_PERMISSIONS` (للناقلين): OWNER / ADMIN / DISPATCH / FINANCE
+  - `PROVIDER_ROLE_PERMISSIONS` (لمقدّمي الخدمات): OWNER / ADMIN / DISPATCH / FINANCE
 - لكل دور: `can[]` + `cannot[]` (تُعرض كقائمتين في بطاقات الأدوار)
 - Seed: 10 أعضاء (5 لـ CL-1001 + 5 لـ CR-2001) بحالات/أدوار متنوعة
 - Helpers: `teamMembersFor`, `memberById`, `permissionsFor`, `availableRolesFor`
 
-#### واجهة الفريق (Client + Carrier)
+#### واجهة الفريق (Client + Provider)
 - ✅ **قائمة الأعضاء** كجدول: avatar، اسم، جوال، إيميل، الدور (badge ملوّن)، الحالة، تاريخ الإضافة
 - ✅ شارة `Crown` 👑 للمالك + حماية: لا يمكن حذف/تعديل المالك
 - ✅ **زر إضافة عضو** يفتح Dialog كبير مع:
@@ -1825,7 +1844,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 
 ### 📁 ملفات الترجمة
 - `messages/ar/*.json` + `messages/en/*.json` على الـ root + منسوخة لكل تطبيق
-- الفئات: `common`, `auth`, `orders`, `fleet`, `payments`, `notifications`, `admin`, `client`, `carrier`, `landing`
+- الفئات: `common`, `auth`, `orders`, `services`, `payments`, `notifications`, `admin`, `client`, `provider`, `landing`
 
 ### 🌐 Landing — URL-based locale
 - middleware يعيد توجيه `/` → `/ar` (وفق Accept-Language)
@@ -1834,13 +1853,13 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - `<html lang>` و `dir` يُحدّدان ديناميكياً بحسب الـ locale
 - `localePrefix: 'always'` — كل URL يحتوي على prefix
 
-### 🍪 Admin/Client/Carrier — Cookie-based locale
-- `naqla-locale` cookie + Accept-Language fallback
+### 🍪 Admin/Client/Provider — Cookie-based locale
+- `nitaq-locale` cookie + Accept-Language fallback
 - Server action `setLocaleAction` يحدّث الكوكي + `revalidatePath`
 - `LanguageSelector` component في:
   - Admin: `/settings` → تبويب "عامة" → بطاقة "تفضيلات العرض"
   - Client: `/company` → بطاقة "الإعدادات الشخصية"
-  - Carrier: `/company` → بطاقة "الإعدادات الشخصية"
+  - Provider: `/company` → بطاقة "الإعدادات الشخصية"
 - **لا switcher في Topbar** (حسب المواصفة)
 
 ### 🚀 Onboarding
@@ -1930,7 +1949,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 
 ### 🌐 CORS Allowlist
 - ✅ **لا wildcard `*` أبداً**
-- ✅ مسموح: `localhost:{3000,3001,3002,3003}` + `naqla.sa` + `*.naqla.sa` (https فقط في production)
+- ✅ مسموح: `localhost:{3000,3001,3002,3003}` + `nitaq.sa` + `*.nitaq.sa` (https فقط في production)
 - ✅ env `CORS_ORIGINS` لإضافة origins موثوقة
 - ✅ origin محظور → console warning + رفض الـ preflight
 
@@ -1978,7 +1997,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 
 ### 🏗️ البنية التحتية والـ Monorepo
 - ✅ إعداد Monorepo بـ **pnpm workspaces** + **Turbo** orchestration
-- ✅ 4 تطبيقات Next.js منفصلة (Landing/Admin/Client/Carrier) + API واحد
+- ✅ 4 تطبيقات Next.js منفصلة (Landing/Admin/Client/Provider) + API واحد
 - ✅ 3 packages مشتركة (`shared-types`, `shared-ui`, `shared-utils`)
 - ✅ Docker Compose للبنية التحتية المحلية (Postgres 16 + Redis 7 + MinIO)
 - ✅ TypeScript 5 موحّد + ESLint + Prettier
@@ -1986,14 +2005,14 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 ### 🔧 Backend (NestJS)
 - ✅ **NestJS 10** + Prisma 5 ORM
 - ✅ **Prisma schema** — 21 model + 13 enum:
-  - **Users & Companies**: `User`, `Company`, `KYCDocument`, `DriverProfile`
-  - **Fleet**: `Truck`
-  - **Orders**: `Order`, `Bid`, `OrderTruck`, `OrderDriver`
+  - **Users & Companies**: `User`, `Company`, `KYCDocument`, `EmployeeProfile`
+  - **Services**: `Service`
+  - **Orders**: `Order`, `Bid`, `OrderService`, `OrderEmployee`
   - **Tracking**: `TrackingEvent`, `LocationHistory`
   - **Finance**: `Payment`, `Transaction`, `Invoice`
   - **Disputes & Reviews**: `Dispute`, `Review`
   - **System**: `Notification`, `AuditLog`, `RefreshToken`, `ApiKey`, `Setting`
-- ✅ **13 module** في NestJS: `auth`, `users`, `companies`, `orders`, `bids`, `fleet`, `payments`, `invoices`, `notifications`, `admin`, `tracking`, `uploads`, `realtime`
+- ✅ **13 module** في NestJS: `auth`, `users`, `companies`, `orders`, `bids`, `services`, `payments`, `invoices`, `notifications`, `admin`, `tracking`, `uploads`, `realtime`
 - ✅ **Authentication** — JWT (access + refresh tokens) + OTP (phone verification)
 - ✅ **Swagger / OpenAPI** docs على `/docs`
 - ✅ **Throttling** الافتراضي (100 req/min)
@@ -2008,14 +2027,14 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 
 ### 🌍 الواجهات الأربع
 - ✅ **Landing** — Hero, Features, How-it-works, Testimonials, Footer + روابط قانونية
-- ✅ **Admin Dashboard** — 17 صفحة (لوحة، شركات، KYC، طلبات، نزاعات، شاحنات، سائقين، مدفوعات، محافظ، تقارير، دعم، إشعارات، Promotions، Audit، إعدادات، Legal، SEO)
+- ✅ **Admin Dashboard** — 17 صفحة (لوحة، شركات، KYC، طلبات، نزاعات، خدمات، موظفون، مدفوعات، محافظ، تقارير، دعم، إشعارات، Promotions، Audit، إعدادات، Legal، SEO)
 - ✅ **Client App** — 10 صفحات (لوحة، طلبات + new + detail، تتبع، عناوين، مالية، فواتير، نزاعات، دعم، شركة)
-- ✅ **Carrier App** — 14 صفحة (لوحة، فرص، طلبات، عروض، أسطول، سائقين، إضافة شاحنة + detail، أرباح، مالية، تقارير، وثائق، نزاعات، دعم، شركة)
+- ✅ **Provider App** — 14 صفحة (لوحة، فرص، طلبات، عروض، خدمات، موظفون، إضافة خدمة + detail، أرباح، مالية، تقارير، وثائق، نزاعات، دعم، شركة)
 
 ### 🔐 Authentication & Onboarding
 - ✅ صفحات Login لكل دور (3 صفحات)
 - ✅ **Client Registration Wizard** — 4-5 خطوات (نوع الحساب، أساسيات، شركة، تحقّق OTP، تفضيلات + موافقة قانونية)
-- ✅ **Carrier Registration Wizard** — 6 خطوات (مسؤول، شركة، أسطول، وثائق، حساب بنكي IBAN، تحقّق + موافقة)
+- ✅ **Provider Registration Wizard** — 6 خطوات (مسؤول، شركة، خدمات، وثائق، حساب بنكي IBAN، تحقّق + موافقة)
 - ✅ Password strength meter
 - ✅ OTP input (4 digits) مع auto-focus
 - ✅ Legal consent (3 checkboxes) قبل إتمام التسجيل
@@ -2025,9 +2044,9 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - ✅ دورة حياة كاملة: `DRAFT → PUBLISHED → BIDDING → ASSIGNED → CONFIRMED → IN_TRANSIT → DELIVERED → COMPLETED`
 - ✅ طريقتان للإسناد: **Open Marketplace** + **Direct Request**
 - ✅ صفحة إنشاء طلب (نموذج متكامل)
-- ✅ صفحة تفاصيل العميل: مقارنة العروض، قبول مع Dialog تأكيد، إلغاء برسوم متدرّجة، تأكيد التسليم، فتح نزاع
-- ✅ صفحة تفاصيل الناقل: تأكيد الاستلام، بدء الرحلة، تحديث الموقع، تأكيد التسليم
-- ✅ **بطاقة معلومات الناقل** تظهر للعميل عند قبول العرض (الشركة + الشاحنة + السائق + Escrow)
+- ✅ صفحة تفاصيل العميل: مقارنة العروض، قبول مع Dialog تأكيد، إلغاء برسوم متدرّجة، تأكيد الإنجاز، فتح نزاع
+- ✅ صفحة تفاصيل مقدّم الخدمة: تأكيد البدء، بدء التنفيذ، تحديث الموقع، تأكيد الإنجاز
+- ✅ **بطاقة معلومات مقدّم الخدمة** تظهر للعميل عند قبول العرض (الشركة + الخدمة + الموظف + Escrow)
 - ✅ **منطق رسوم الإلغاء**:
   - قبل `ASSIGNED` → مجاني
   - بعد `ASSIGNED` وقبل `IN_TRANSIT` → 10%
@@ -2035,30 +2054,20 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - ✅ **Timeline أحداث** لكل طلب
 
 ### 💰 Bids System
-- ✅ Carrier opportunities marketplace
-- ✅ نموذج تقديم عرض (سعر، مدة، شاحنة، ملاحظات)
+- ✅ Provider opportunities marketplace
+- ✅ نموذج تقديم عرض (سعر، مدة، خدمة، ملاحظات)
 - ✅ حساب صافي العائد بعد العمولة + VAT تلقائياً
-- ✅ سجل العروض للناقل مع نسبة الفوز
+- ✅ سجل العروض لمقدّم الخدمة مع نسبة الفوز
 - ✅ Dialog تأكيد قبول العرض من العميل
 
-### 🚚 Fleet Management
-- ✅ **مكوّن اللوحة السعودية الرسمية** (`SaudiPlate`):
-  - 17 حرف رسمي مع نظائرها بالإنجليزية
-  - عبارة "السعودية" بخط Arial في الأعلى
-  - شعار النخلة والسيفين (inline SVG)
-  - شريط جانبي يمين (أزرق `#1B3A6B` للخفيف / أصفر `#F5C518` للعام)
-  - 3 أحجام: sm (180×60) / md (240×78) / lg (320×100)
-  - عربي فوق إنجليزي للحروف والأرقام
-- ✅ صفحة الأسطول مع البحث والفلترة
-- ✅ صفحة إضافة شاحنة (Wizard):
-  - معاينة لحظية لـ SaudiPlate
-  - 9 أنواع شاحنات (يديرها الأدمن)
-  - **Auto-fill السعة** من نوع الشاحنة المختار
+### 🛠️ Services Management
+- ✅ صفحة الخدمات مع البحث والفلترة
+- ✅ صفحة إضافة خدمة (Wizard):
+  - 8 أنواع خدمات (يديرها الأدمن): CONSULTING, DESIGN, DEVELOPMENT, MAINTENANCE, CLEANING, SECURITY, CATERING, OTHER
   - **معاينة الصورة التوصيفية** للنوع
-  - dropdowns البراند → الموديل (cascading)
-  - حقول الأبعاد، GPS، تبريد، صور (حتى 5)
-- ✅ صفحة تفاصيل الشاحنة مع الصورة التوصيفية + سجل الرحلات
-- ✅ صفحة السائقين
+  - حقول التخصص، الشهادات، التوافر، صور (حتى 5)
+- ✅ صفحة تفاصيل الخدمة مع الصورة التوصيفية + سجل الطلبات
+- ✅ صفحة الموظفين
 
 ### 💼 أنواع الشاحنات (يديرها الأدمن)
 - ✅ 8 أنواع افتراضية (فان، صندوقي، مسطح ×2، مبرّد، صهريج، لوبد، حاوية)
@@ -2071,14 +2080,14 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 ### 🏷️ البراندات والموديلات
 - ✅ 8 براندات افتراضية (مرسيدس بنز، فولفو، مان، سكانيا، إيفيكو، إيسوزو، هينو، DAF) مع موديلاتها
 - ✅ Admin CRUD master-detail
-- ✅ يقرأ منها نموذج إضافة الشاحنة عند الناقل
+- ✅ يقرأ منها نموذج إضافة الخدمة عند مقدّم الخدمة
 
 ### 💸 Wallet System + Escrow
-- ✅ 3 محافظ: Admin platform wallet + Client wallet + Carrier wallet
+- ✅ 3 محافظ: Admin platform wallet + Client wallet + Provider wallet
 - ✅ Transactions seed (إيداع، سحب، Escrow، إفراج، عمولة)
 - ✅ صفحة محافظ الشركات للأدمن
 - ✅ صفحة Finance للعميل (3 tabs)
-- ✅ صفحة Finance + Earnings للناقل
+- ✅ صفحة Finance + Earnings لمقدّم الخدمة
 - ✅ Escrow flow: دفع عند القبول → احتجاز → إفراج عند التسليم
 
 ### 🗺️ Maps & Tracking (Leaflet + OpenStreetMap)
@@ -2088,7 +2097,7 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - ✅ مؤشّر progress أثناء الرحلة
 - ✅ **15 مدينة سعودية** مع إحداثياتها
 - ✅ حساب المسافة (haversine) + مدّة تقديرية + الطريق الرئيسي
-- ✅ صفحة Tracking للعميل (قائمة شحنات نشطة + خريطة كبيرة + شارة "مباشر")
+- ✅ صفحة Tracking للعميل (قائمة طلبات نشطة + خريطة كبيرة + شارة "مباشر")
 - ✅ خرائط في تفاصيل كل طلب (3 تطبيقات)
 
 ### 📜 Legal System
@@ -2102,8 +2111,8 @@ docker exec -it naqla-postgres psql -U naqla -d naqla_dev -c \
 - ✅ Onboarding consent: 3 checkboxes قبل إكمال التسجيل
 
 ### ⚖️ Disputes Management
-- ✅ نوعا dispute: من العميل / من الناقل
-- ✅ صفحة `/disputes` للعميل والناقل (إنشاء + قائمة)
+- ✅ نوعا dispute: من العميل / من مقدّم الخدمة
+- ✅ صفحة `/disputes` للعميل ومقدّم الخدمة (إنشاء + قائمة)
 - ✅ Dialog فتح نزاع مع dropdown أسباب + وصف
 - ✅ **صفحة تفاصيل النزاع للأدمن** مع:
   - أطراف النزاع (party cards)

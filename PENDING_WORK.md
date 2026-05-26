@@ -1,4 +1,4 @@
-# Pending Work — حالة الربط الحالية
+# Pending Work — حالة الربط الحالية (Nitaq Platform)
 
 > آخر تحديث: 2026-05-25 (بعد v0.9.15)
 >
@@ -11,7 +11,7 @@
 
 > ⚠️ "مربوط" لا تعني "خالٍ من البق". هذه الأشياء استُدعي فيها endpoint حقيقي
 > مع toast/spinner/mutate. لكن قد تظهر مشاكل في:
-> - اختلاف أسماء حقول بين mock و API (مثل ما حصل مع Truck و Payment)
+> - اختلاف أسماء حقول بين mock و API (مثل ما حصل مع Service و Payment)
 > - Rules-of-Hooks بعد إضافة SWR
 > - حالات حافة (empty/null/long lists) لم تُختَبر بعد
 >
@@ -19,29 +19,29 @@
 
 ربط end-to-end لـ:
 - Auth (login/register/refresh/logout + admin login)
-- Auto Token Refresh ✅ v0.9.9 — client + carrier يجدّدان الـ token على 401 قبل redirect
+- Auto Token Refresh ✅ v0.9.9 — client + provider يجدّدان الـ token على 401 قبل redirect
 - Companies (GET/PUT، members CRUD، KYC submit + approve/reject)
 - Orders (CRUD كامل + lifecycle publish/cancel/confirm/deliver/complete + tracking)
 - Bids (POST/PUT/accept/reject + retry بعد REJECTED + proposedDeliveryDate)
-- Fleet trucks (list + create + detail + photo upload بعد v0.9.3)
-- Fleet drivers (list + detail + invite بعد v0.9.3)
+- Services (list + create + detail + photo upload بعد v0.9.3)
+- Employees (list + detail + invite بعد v0.9.3)
 - Payments (list + release + admin force-release)
 - Invoices (list + send)
 - Notifications (list + mark-read + mark-all-read)
-- Disputes (POST جديد للعميل/الناقل + admin update)
+- Disputes (POST جديد للعميل/مقدّم الخدمة + admin update)
 - Support Tickets (POST/GET + admin update)
 - Admin dashboard/companies/orders/disputes/transactions/settings
 - Locale isolation (cookies منفصلة لكل بورتال)
 - Toast infrastructure (sonner + lib/notify.ts على كل بورتال)
-- normalizeOrder + normalizeBid + normalizeTruck + normalizePayment adapters
-- Carrier opportunities filtering (يستثني المُسندة لنفس الناقل)
-- Carrier order detail متطابق بصرياً مع العميل (ShipmentStatusCard inline timeline)
-- Dynamic Logo ✅ v0.9.9 — admin يحفظ في DB، client/carrier يجلبان من `GET /settings/platform`
+- normalizeOrder + normalizeBid + normalizeService + normalizePayment adapters
+- Provider opportunities filtering (يستثني المُسندة لنفس مقدّم الخدمة)
+- Provider order detail متطابق بصرياً مع العميل (RequestStatusCard inline timeline)
+- Dynamic Logo ✅ v0.9.9 — admin يحفظ في DB، client/provider يجلبان من `GET /settings/platform`
 - Direct Assignment بسعر ثابت ✅ v0.9.9 — `agreedPriceUpfront` يتجاوز التفاوض ويُسند مباشرة
 - Saved Addresses ✅ migration طُبّقت في v0.9.3 (20260521043732_add_saved_addresses_and_national_id)
-- قائمة الناقلين في New Order ✅ v0.9.10 — `GET /companies?type=CARRIER&status=ACTIVE` بدل COMPANIES mock
-- Carrier order controls ✅ v0.9.11 — أزرار ASSIGNED/CONFIRMED/IN_TRANSIT مع dialog صحيح لكل مرحلة
-- Driver Assignment ✅ v0.9.11 — `POST /orders/:id/assign-driver` + `GET /fleet/drivers/available` + auto ON_TRIP/AVAILABLE
+- قائمة مقدّمي الخدمات في New Order ✅ v0.9.10 — `GET /companies?type=PROVIDER&status=ACTIVE` بدل COMPANIES mock
+- Provider order controls ✅ v0.9.11 — أزرار ASSIGNED/CONFIRMED/IN_TRANSIT مع dialog صحيح لكل مرحلة
+- Employee Assignment ✅ v0.9.11 — `POST /orders/:id/assign-employee` + `GET /employees/available` + auto ON_ASSIGNMENT/AVAILABLE
 
 ---
 
@@ -61,9 +61,9 @@
 | `/legal` | admin | نصوص قانونية ثابتة — لا يحتاج API |
 | `/promotions` | admin | Static UI — ميزة مستقبلية |
 | `/audit` | admin | Stub — يحتاج `GET /admin/audit-logs` |
-| `/reports` | carrier | Static charts — لا endpoint بعد |
-| `/finance` | carrier | Static UI — يحتاج ربط Wallet API |
-| `/documents` | carrier | Static UI — يحتاج ربط KYC/uploads |
+| `/reports` | provider | Static charts — لا endpoint بعد |
+| `/finance` | provider | Static UI — يحتاج ربط Wallet API |
+| `/documents` | provider | Static UI — يحتاج ربط KYC/uploads |
 | `/tracking` | client | Static map — يحتاج GPS live feed |
 | `/finance` | client | Static charts — يحتاج ربط Wallet API |
 
@@ -83,8 +83,8 @@
 - **shared-utils CJS dist**: Node 25 لا يقدر يحمّل `.ts` من main. `package.json.main = dist/index.js`. بعد كل تعديل لـ shared-utils run `pnpm exec tsc` من داخل `packages/shared-utils`.
 - **date-fns @2.30.0**: v3+ ESM يكسر CJS bundling. لا ترفّع.
 - **Rules of Hooks**: كل الـ hooks قبل أي `if/return`. خاصةً مع SWR الذي يقفز بين undefined ↔ resolved.
-- **Per-portal cookies**: localhost cookies تتقاسم عبر الـ ports. كل مفتاح state-حسب-البورتال لازم suffix (`-admin/-client/-carrier`).
-- **API adapters**: لا تشتغل مباشرة على `data` من SWR. مرّرها على `normalizeOrder/normalizeBid/normalizeTruck/normalizePayment` أولاً.
+- **Per-portal cookies**: localhost cookies تتقاسم عبر الـ ports. كل مفتاح state-حسب-البورتال لازم suffix (`-admin/-client/-provider`).
+- **API adapters**: لا تشتغل مباشرة على `data` من SWR. مرّرها على `normalizeOrder/normalizeBid/normalizeService/normalizePayment` أولاً.
 
 ---
 
@@ -92,12 +92,12 @@
 
 19 خطوة موثّقة في `GETTING_STARTED.md` — تغطّي:
 1. Client login → wizard → publish order
-2. Carrier login → opportunities → submit bid مع proposedDeliveryDate
+2. Provider login → opportunities → submit bid مع proposedDeliveryDate
 3. Client: تفاصيل dialog → accept
-4. Carrier: confirm pickup → confirm delivery
+4. Provider: confirm pickup → confirm delivery
 5. Admin: status + escrow auto-refresh كل 15 ثانية
 6. Client: تأكيد الاستلام → escrow released
-7. Disputes / Support tickets / KYC / Payments release / Fleet truck add / Location update / Notifications
+7. Disputes / Support tickets / KYC / Payments release / Service add / Location update / Notifications
 
 ---
 
@@ -109,7 +109,7 @@
 | companies | ✅ | ✅ | ✗ | KYC + members CRUD |
 | orders | ✅ | ✅ | ✗ | List include `bids` selected fields (v0.9.0) + agreedPriceUpfront (v0.9.9) + assignDriver (v0.9.11) |
 | bids | ✅ | ✅ | ✗ | `proposedDeliveryDate` (v0.9.0) |
-| fleet | ✅ | ✅ | ✗ | TruckType enum extended (v0.9.2) |
+| services | ✅ | ✅ | ✗ | ServiceType enum extended (v0.9.2) |
 | payments | ✅ | ✅ | ✗ | List includes `order.client/carrier.nameAr` (v0.9.1) |
 | invoices | ✅ | ✅ | ✗ | |
 | notifications | ✅ | ✅ | ✗ | |
@@ -133,6 +133,6 @@
 
 ### آخر ما أُنجز (v0.9.13 → v0.9.15):
 
-- **v0.9.13**: Premium UI/UX — framer-motion على client/carrier portals + driver app (dashboard hero، animated sidebar، EmptyState، PageTransition، split login)
+- **v0.9.13**: Premium UI/UX — framer-motion على client/provider portals (dashboard hero، animated sidebar، EmptyState، PageTransition، split login)
 - **v0.9.14**: Executive KPI Dashboard — 6 analytics endpoints في admin + Bloomberg Terminal dark theme + PDF export (jspdf)
 - **v0.9.15**: Landing page إعادة كتابة كاملة (animated hero, stats counters, testimonials slider, mobile hamburger) + تغيير اسم تبويب التقارير إلى "الملخص الاستراتيجي"

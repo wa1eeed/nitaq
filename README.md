@@ -1,8 +1,8 @@
-# نقلة لوجيستك — Naqla Logistics Platform
+# نيطاق — Nitaq Platform
 
-> **Marketplace + TMS + Freight Management Platform للسوق السعودي (B2B)**
+> **Marketplace + Services Management Platform للسوق السعودي (B2B)**
 
-منصة رقمية احترافية تربط الشركات والأفراد طالبي خدمات النقل بشركات النقل البري المعتمدة في المملكة العربية السعودية، وتتولّى دورة الطلب الكاملة: العرض، التعاقد، التحصيل عبر Escrow، التتبّع اللحظي، وإدارة الأسطول والسائقين.
+منصة رقمية احترافية تربط الشركات والأفراد طالبي الخدمات بشركات ومقدّمي الخدمات المعتمدين في المملكة العربية السعودية، وتتولّى دورة الطلب الكاملة: العرض، التعاقد، التحصيل عبر Escrow، التتبّع اللحظي، وإدارة الخدمات والموظفين.
 
 ---
 
@@ -10,10 +10,10 @@
 
 | المحور | الوصف |
 |---|---|
-| **النوع** | B2B Marketplace + Transport Management System (TMS) |
-| **القطاع** | النقل البرّي الثقيل للبضائع |
+| **النوع** | B2B Marketplace + Services Management System |
+| **القطاع** | سوق الخدمات (استشارات، تصميم، تطوير، صيانة، وغيرها) |
 | **الجغرافيا** | المملكة العربية السعودية (15+ مدينة) |
-| **الأطراف** | العميل (شركة/فرد) · الناقل · السائق · الأدمن |
+| **الأطراف** | العميل (شركة/فرد) · مقدّم الخدمة · الموظف · الأدمن |
 | **التسعير** | عمولة 8% على كل طلب + VAT 15% على العمولة |
 | **اللغة** | عربي (RTL) + English |
 | **الامتثال** | نظام حماية البيانات السعودي (PDPL) + الزكاة والضريبة |
@@ -54,7 +54,7 @@
 ## 🏗️ بنية المشروع (Monorepo)
 
 ```
-naqla-platform/
+nitaq-platform/
 ├── apps/
 │   ├── api/                    # NestJS Backend          → :4000
 │   │   ├── prisma/             # Schema (23 model + 14 enum)
@@ -63,7 +63,7 @@ naqla-platform/
 │       ├── landing/            # الصفحة التسويقية         → :3000
 │       ├── admin/              # لوحة الأدمن              → :3001
 │       ├── client/             # تطبيق العميل             → :3002
-│       └── carrier/            # تطبيق الناقل             → :3003
+│       └── carrier/            # تطبيق مقدّم الخدمة       → :3003
 │
 ├── packages/
 │   ├── shared-types/           # TypeScript types مشتركة
@@ -114,18 +114,18 @@ pnpm dev
 
 ```bash
 # بناء من جذر الـ monorepo
-docker build -f apps/api/Dockerfile         -t naqla-api:latest    .
-docker build -f apps/web/landing/Dockerfile -t naqla-landing:latest .
-docker build -f apps/web/admin/Dockerfile   -t naqla-admin:latest   .
-docker build -f apps/web/client/Dockerfile  -t naqla-client:latest  .
-docker build -f apps/web/carrier/Dockerfile -t naqla-carrier:latest .
+docker build -f apps/api/Dockerfile          -t nitaq-api:latest      .
+docker build -f apps/web/landing/Dockerfile  -t nitaq-landing:latest  .
+docker build -f apps/web/admin/Dockerfile    -t nitaq-admin:latest    .
+docker build -f apps/web/client/Dockerfile   -t nitaq-client:latest   .
+docker build -f apps/web/carrier/Dockerfile  -t nitaq-provider:latest .
 ```
 
 > لتطبيقات Next.js، يجب تمرير `NEXT_PUBLIC_*` كـ `--build-arg` لأنها تُضمَّن وقت البناء:
 > ```bash
 > docker build -f apps/web/client/Dockerfile \
 >   --build-arg NEXT_PUBLIC_API_URL=https://api.nqlah.nx.sa \
->   -t naqla-client:latest .
+>   -t nitaq-client:latest .
 > ```
 >
 > في Coolify: أضف هذه المتغيرات في **Build Variables** (ليس Environment Variables).
@@ -140,9 +140,9 @@ docker build -f apps/web/carrier/Dockerfile -t naqla-carrier:latest .
 
 | الدور | البريد | كلمة المرور |
 |---|---|---|
-| **Admin** | `admin@naqla.sa` | `Admin@1234` |
-| **Client** | `client@naqla.sa` | `Client@1234` |
-| **Carrier** | `carrier@naqla.sa` | `Carrier@1234` |
+| **Admin** | `admin@nitaq.sa` | `Admin@1234` |
+| **Client** | `client@nitaq.sa` | `Client@1234` |
+| **Provider** | `provider@nitaq.sa` | `Provider@1234` |
 
 ---
 
@@ -153,11 +153,11 @@ docker build -f apps/web/carrier/Dockerfile -t naqla-carrier:latest .
 | **Landing** | http://localhost:3000 | الصفحة التسويقية + الصفحات القانونية |
 | **Admin** | http://localhost:3001 | لوحة إدارة المنصة |
 | **Client** | http://localhost:3002 | تطبيق العملاء (شركات/أفراد) |
-| **Carrier** | http://localhost:3003 | تطبيق شركات النقل |
+| **Provider** | http://localhost:3003 | تطبيق مقدّمي الخدمات |
 | **API** | http://localhost:4000 | REST API (NestJS) |
 | **API Docs** | http://localhost:4000/docs | Swagger / OpenAPI |
 | **MinIO Console** | http://localhost:9001 | إدارة الـ object storage |
-| **Postgres** | `localhost:5432` | DB (user: `naqla`, pass: `naqla_dev_pass`) |
+| **Postgres** | `localhost:5432` | DB (user: `nitaq`, pass: `nitaq_dev_pass`) |
 | **Redis** | `localhost:6379` | Cache |
 
 ---
@@ -171,30 +171,30 @@ docker build -f apps/web/carrier/Dockerfile -t naqla-carrier:latest .
 | **Landing** | https://nqlah.nx.sa | 🟡 قيد التحقق |
 | **Admin** | https://admin.nqlah.nx.sa | 🟡 قيد التحقق |
 | **Client** | https://app.nqlah.nx.sa | 🟡 قيد التحقق |
-| **Carrier** | https://carrier.nqlah.nx.sa | 🟡 قيد التحقق |
+| **Provider** | https://provider.nqlah.nx.sa | 🟡 قيد التحقق |
 | **Storage** | https://storage.nqlah.nx.sa | ✅ MinIO |
 
 ---
 
 ## ✨ الميزات الرئيسية (v0.9.3)
 
-- ✅ **3 لوحات تحكم متخصّصة**: Admin / Client / Carrier — مع sidebars وlayouts مستقلّة
+- ✅ **3 لوحات تحكم متخصّصة**: Admin / Client / Provider — مع sidebars وlayouts مستقلّة
 - ✅ **Marketplace مفتوح + Direct Request** — طريقتان لإسناد الطلبات
 - ✅ **نظام عروض كامل** — تقديم، مقارنة، قبول، سحب
 - ✅ **Escrow Wallet System** — حجز المبلغ حتى التسليم
 - ✅ **تتبّع لحظي عبر Leaflet** — في تفاصيل كل طلب
 - ✅ **اللوحة السعودية الرسمية** — مكوّن مطابق للمواصفات (17 حرف + شعار + أنواع تسجيل)
-- ✅ **إدارة أسطول كاملة** — شاحنات، سائقين، وثائق، صور توصيفية
-- ✅ **أنواع شاحنات يديرها الأدمن** — مع سعة افتراضية وصورة (رفع/رابط)
-- ✅ **براندات وموديلات الشاحنات** — يديرها الأدمن
-- ✅ **نظام النزاعات** — للعميل والناقل + لوحة تدخّل للأدمن
+- ✅ **إدارة خدمات كاملة** — خدمات، موظفين، وثائق، صور توصيفية
+- ✅ **أنواع خدمات يديرها الأدمن** — مع سعة افتراضية وصورة (رفع/رابط)
+- ✅ **براندات وموديلات الخدمات** — يديرها الأدمن
+- ✅ **نظام النزاعات** — للعميل ومقدّم الخدمة + لوحة تدخّل للأدمن
 - ✅ **مركز إشعارات شامل** — Email (Resend) + SMS + In-app
 - ✅ **25 قالب إشعار قابل للتحرير** — لكل حدث في النظام
 - ✅ **الصفحات القانونية القابلة للتحرير** — Terms / Privacy / Transport T&C مع نظام مسودّات + إصدارات
 - ✅ **Onboarding احترافي** — wizards متعدّدة الخطوات + موافقة قانونية
 - ✅ **SEO Admin Panel** — Meta / OG / JSON-LD / Analytics / SERP preview
 - ✅ **KYC Approval Queue** — للأدمن مع 6 أنواع مستندات
-- ✅ **Reports & Analytics** — للأدمن والناقل
+- ✅ **Reports & Analytics** — للأدمن ومقدّم الخدمة
 - ✅ **Audit Log** — كل الإجراءات الحسّاسة
 - ✅ **Support Tickets** — للأطراف الثلاثة
 - ✅ **Promotions / Promo codes** — حملات ترويجية
@@ -202,31 +202,31 @@ docker build -f apps/web/carrier/Dockerfile -t naqla-carrier:latest .
 - ✅ **Settings refactor** (v0.4.0) — `/settings` بدلاً من `/company` بـ 4 تبويبات (Company/Team/Settings/KYC)
 - ✅ **Three Environments** (v0.5.0) — dev/staging/prod مع env validation + backup script يومي → MinIO
 - ✅ **White Label Branding** (v0.5.0) — رفع شعار + تعديل اسم المنصة بلغتين من `/admin/settings`
-- ✅ **Admin Catalogs** (v0.5.0) — إدارة المدن (15 مدينة) + أنواع البضائع (10) + قوالب SMS من اللوحة
+- ✅ **Admin Catalogs** (v0.5.0) — إدارة المدن (15 مدينة) + أنواع الخدمات (10) + قوالب SMS من اللوحة
 - ✅ **Team Invitation Activation** (v0.5.0) — صفحة `/join?token=` لتفعيل أعضاء الفريق الجدد
 - ✅ **Workflow Engine** (v0.6.0) — مرجع وحيد لقواعد الـ state machine + Escrow + Cancellation + Notification matrix
-- ✅ **Escrow 72h Countdown** (v0.6.0) — عدّاد لايف على الطلبات DELIVERED لكل من العميل والناقل
-- ✅ **Pickup Time Windows** (v0.6.0) — العميل يختار نافذة زمنية (صباحاً/مساءً/طوال اليوم)، الناقل يؤكّد أو يقترح بديلاً
+- ✅ **Escrow 72h Countdown** (v0.6.0) — عدّاد لايف على الطلبات DELIVERED لكل من العميل ومقدّم الخدمة
+- ✅ **Pickup Time Windows** (v0.6.0) — العميل يختار نافذة زمنية (صباحاً/مساءً/طوال اليوم)، مقدّم الخدمة يؤكّد أو يقترح بديلاً
 - ✅ **Interactive Maps + Address Search** (v0.6.0) — Leaflet + Nominatim API + Pin قابل للسحب، دعم Same-City/Inter-City
-- ✅ **Individual Carrier Compliance** (v0.6.0) — قسمان منفصلان في تبويب الامتثال للأدمن: شركات ناقلة / ناقلون أفراد
+- ✅ **Individual Provider Compliance** (v0.6.0) — قسمان منفصلان في تبويب الامتثال للأدمن: شركات مزوّدة / مزوّدون أفراد
 - ✅ **Online/Offline Status Bar** (v0.8.0) — banner أحمر/أخضر عند انقطاع/عودة الاتصال. *(الـ PWA الكامل من v0.7.0 أُلغي مؤقتاً — سيرجع في v1.0+ بتصميم أنظف عبر Workbox، production-only)*
-- 🟢 **OPEN Order Wired End-to-End** (v0.8.0 Slice 1) — العميل ينشر، الناقل يقدّم عرضاً، يقبله، يسلّم، Escrow يُفرَج — كل خطوة على DB حقيقي. راجع [GETTING_STARTED.md](./GETTING_STARTED.md#-smoke-test) للتجربة كاملة.
+- 🟢 **OPEN Order Wired End-to-End** (v0.8.0 Slice 1) — العميل ينشر، مقدّم الخدمة يقدّم عرضاً، يقبله، يسلّم، Escrow يُفرَج — كل خطوة على DB حقيقي. راجع [GETTING_STARTED.md](./GETTING_STARTED.md#-smoke-test) للتجربة كاملة.
 - ✅ **Frontend↔Backend Adapter Layer** (v0.8.0) — `normalizeOrder` يحوّل API field names إلى mock shape — يحمي من crashes عند تبديل المصدر
-- ✅ **Full Dashboard Wiring** (v0.8.0) — admin/client/carrier dashboards + lists + fleet + earnings كلها متّصلة بـ Backend API عبر SWR، مع mock fallback آمن (GETs فقط، الـ mutations تطرح خطأ حقيقي عند الفشل)
-- ✅ **Smart Carrier Opportunity CTA** (v0.8.0) — تابان فقط: "طلبات السوق المفتوح" و "طلبات خاصة". زر الصف يتبدّل تلقائياً بناءً على حالة عرض الناقل: `قدّم عرضاً` (لم يقدّم) / `تفاصيل` (PENDING) / `إعادة تقديم` (REJECTED) — يعتمد على `bids[]` المرفقة بالـ /api/orders list response
-- ✅ **Per-portal locale isolation** (v0.8.0) — كل لوحة (admin/client/carrier) تحتفظ بلغتها مستقلّة عن الأخرى عبر cookies مسمّاة `naqla-locale-{portal}` بدل cookie واحد مشترك
-- ✅ **Concrete Proposed Delivery Date** (v0.8.0) — الناقل يحدّد موعد تسليم بتاريخ صريح بدل "أيام + ساعات"، يظهر للعميل بـ alert بارز ووسم "موعد تسليم آخر تم اقتراحه" مع فرق الأيام عن موعده
-- ✅ **Bid Details Dialog** (v0.8.0) — زر "تفاصيل" بجانب "قبول" يفتح نافذه بكامل معلومات العرض (الناقل، المواعيد، الملاحظات) مع أزرار قبول / رفض / إغلاق
-- ✅ **Rich Assigned View** (v0.8.0) — بعد القبول: card موحّد على لوحات العميل/الناقل/الأدمن يعرض status header، 3-step progress (استلام → في الطريق → تسليم)، مواعيد فعلية، سجل تتبّع. لوحة الأدمن تتحدّث تلقائياً كل 15 ثانية + Escrow countdown مرئي
+- ✅ **Full Dashboard Wiring** (v0.8.0) — admin/client/provider dashboards + lists + services + earnings كلها متّصلة بـ Backend API عبر SWR، مع mock fallback آمن (GETs فقط، الـ mutations تطرح خطأ حقيقي عند الفشل)
+- ✅ **Smart Provider Opportunity CTA** (v0.8.0) — تابان فقط: "طلبات السوق المفتوح" و "طلبات خاصة". زر الصف يتبدّل تلقائياً بناءً على حالة عرض مقدّم الخدمة: `قدّم عرضاً` (لم يقدّم) / `تفاصيل` (PENDING) / `إعادة تقديم` (REJECTED) — يعتمد على `bids[]` المرفقة بالـ /api/orders list response
+- ✅ **Per-portal locale isolation** (v0.8.0) — كل لوحة (admin/client/provider) تحتفظ بلغتها مستقلّة عن الأخرى عبر cookies مسمّاة `nitaq-locale-{portal}` بدل cookie واحد مشترك
+- ✅ **Concrete Proposed Delivery Date** (v0.8.0) — مقدّم الخدمة يحدّد موعد تسليم بتاريخ صريح بدل "أيام + ساعات"، يظهر للعميل بـ alert بارز ووسم "موعد تسليم آخر تم اقتراحه" مع فرق الأيام عن موعده
+- ✅ **Bid Details Dialog** (v0.8.0) — زر "تفاصيل" بجانب "قبول" يفتح نافذه بكامل معلومات العرض (مقدّم الخدمة، المواعيد، الملاحظات) مع أزرار قبول / رفض / إغلاق
+- ✅ **Rich Assigned View** (v0.8.0) — بعد القبول: card موحّد على لوحات العميل/مقدّم الخدمة/الأدمن يعرض status header، 3-step progress (استلام → في الطريق → تسليم)، مواعيد فعلية، سجل تتبّع. لوحة الأدمن تتحدّث تلقائياً كل 15 ثانية + Escrow countdown مرئي
 - 🟢 **Full System Wiring** (v0.9.0) — كل صفحة في الثلاث portals مربوطة بالـ API الحقيقي. Backend modules جديدة: Disputes + Support Tickets. Toast infrastructure (sonner) على كل portal مع `lib/notify.ts` helper موحّد. كل form صار يعطّل الزر + spinner أثناء الإرسال + toast نجاح/خطأ + `mutate()` على SWR. الاستثناءات: SMS/Email/Payment provider (تنتظر integration بعد deploy)
-- ✅ **Field-Shape Adapters** (v0.9.1) — `normalizeTruck` + `normalizePayment` في shared-utils يعالجان اختلاف أسماء الحقول بين الـ mock والـ Prisma API (truckType↔type، state↔status، إلخ). Carrier opportunities تستثني الطلبات المُسندة لنفس الناقل.
-- ✅ **TruckType Enum Alignment** (v0.9.2) — Prisma `TruckType` enum صار superset للـ catalog (SMALL_VAN، CONTAINER_TRAILER مضافان). إصلاح Rules-of-Hooks في صفحة تفاصيل الشاحنة.
-- ✅ **Dynamic Catalogs** (v0.9.3) — `GET /settings/catalogs` (public، بدون auth) يُعيد المدن/أنواع البضائع/أنواع الشاحنات من الـ DB. Admin panels تحفظ أي تعديل تلقائياً. Client wizard يقرأ الـ catalog عبر SWR مع static fallback.
-- ✅ **Truck Photo Upload** (v0.9.3) — صور الشاحنة تُرفع عبر presigned URL قبل إنشاء السجل — flow: `POST /uploads/presign` → PUT to S3 → store publicUrl.
-- ✅ **Contact Info After Bid Acceptance** (v0.9.3) — CarrierInfoCard تعرض هاتف/إيميل الناقل الحقيقي من `order.carrier` مع روابط `tel:` / `mailto:`.
+- ✅ **Field-Shape Adapters** (v0.9.1) — `normalizeService` + `normalizePayment` في shared-utils يعالجان اختلاف أسماء الحقول بين الـ mock والـ Prisma API (serviceType↔type، state↔status، إلخ). Provider opportunities تستثني الطلبات المُسندة لنفس مقدّم الخدمة.
+- ✅ **ServiceType Enum Alignment** (v0.9.2) — Prisma `ServiceType` enum صار superset للـ catalog (CONSULTING، DESIGN مضافان). إصلاح Rules-of-Hooks في صفحة تفاصيل الخدمة.
+- ✅ **Dynamic Catalogs** (v0.9.3) — `GET /settings/catalogs` (public، بدون auth) يُعيد المدن/أنواع الخدمات من الـ DB. Admin panels تحفظ أي تعديل تلقائياً. Client wizard يقرأ الـ catalog عبر SWR مع static fallback.
+- ✅ **Service Photo Upload** (v0.9.3) — صور الخدمة تُرفع عبر presigned URL قبل إنشاء السجل — flow: `POST /uploads/presign` → PUT to S3 → store publicUrl.
+- ✅ **Contact Info After Bid Acceptance** (v0.9.3) — ProviderInfoCard تعرض هاتف/إيميل مقدّم الخدمة الحقيقي من `order.provider` مع روابط `tel:` / `mailto:`.
 - ✅ **Saved Addresses Backend** (v0.9.3) — نموذج `SavedAddress` في DB + module كامل + `GET /companies/:id/addresses`. Migration مُطبَّق.
 - ✅ **City-Bounded Map Search** (v0.8.0) — Nominatim search في الـ Wizard يحصر النتائج بـ ~50km حول مركز المدينة المختارة
-- ✅ **DIRECT negotiation** (v0.3.x) — تفاوض مباشر عميل↔ناقل: accept/counter/decline rounds
+- ✅ **DIRECT negotiation** (v0.3.x) — تفاوض مباشر عميل↔مقدّم الخدمة: accept/counter/decline rounds
 - ✅ **Pulsing badges + sound** (v0.3.x) — تنبيه بصري وصوتي للطلبات الجديدة
 - ✅ **404 + 500 Pages** — في كل التطبيقات الأربعة
 - ✅ **Dark Mode** — في كل واجهة
@@ -244,12 +244,12 @@ docker build -f apps/web/carrier/Dockerfile -t naqla-carrier:latest .
 | **English** | `en` | LTR | Inter | ✅ مكتملة |
 
 ### الميزات
-- **11 ملف ترجمة لكل لغة** (`common`, `auth`, `orders`, `fleet`, `payments`, `notifications`, `admin`, `client`, `carrier`, `landing`, `settings`) = **646 مفتاحاً** متطابقاً بين اللغتين
+- **11 ملف ترجمة لكل لغة** (`common`, `auth`, `orders`, `services`, `payments`, `notifications`, `admin`, `client`, `provider`, `landing`, `settings`) = **646 مفتاحاً** متطابقاً بين اللغتين
 - **Landing** يستخدم URL-based routing: `/ar/...` و `/en/...` مع switcher في الـ navbar
-- **Admin / Client / Carrier** يستخدمون cookie-based locale — يُغيَّر من إعدادات كل دور:
+- **Admin / Client / Provider** يستخدمون cookie-based locale — يُغيَّر من إعدادات كل دور:
   - Admin: `/settings` → تفضيلات العرض
   - Client: `/company` → الإعدادات الشخصية
-  - Carrier: `/company` → الإعدادات الشخصية
+  - Provider: `/company` → الإعدادات الشخصية
 - **Onboarding**: بطاقة اختيار اللغة في أعلى صفحات التسجيل
 - **DB**: `User.preferredLanguage` و `Company.defaultLanguage` (default: `ar`)
 - **Validation**: `pnpm check:i18n` يضمن مساواة الملفات والمفاتيح بين اللغتين
@@ -277,7 +277,7 @@ pnpm check:i18n
 | **Rate Limiting** | Global 100/min + per-endpoint (login: 5/15min، OTP: 3/hour، uploads: 10/min) |
 | **Password Policy** | 8+ أحرف، upper/lower/digit/symbol، bcrypt (12 rounds) |
 | **File Uploads** | Magic-byte validation (JPG/PNG/PDF/XLSX) + حد 10 MB |
-| **CORS** | Allowlist صارمة (لا wildcard) — localhost للتطوير + `naqla.sa` & `*.naqla.sa` للإنتاج |
+| **CORS** | Allowlist صارمة (لا wildcard) — localhost للتطوير + `nitaq.sa` & `*.nitaq.sa` للإنتاج |
 | **Helmet** | Headers كاملة: HSTS، CSP، X-Frame-Options=DENY، nosniff، Referrer-Policy |
 | **Audit Log** | كل إجراء حسّاس (auth، orders، payments، KYC، settings، uploads، PDPL) |
 | **PDPL** | حقوق المستخدم: export البيانات، حذف الحساب (soft + anonymise) — السجلات المالية تُحفظ 7 سنوات |
@@ -304,10 +304,10 @@ pnpm check:i18n
 
 ## 🤝 المساهمة
 
-هذا المشروع حالياً قيد التطوير الداخلي. للاستفسار: `dev@naqla.sa`
+هذا المشروع حالياً قيد التطوير الداخلي. للاستفسار: `dev@nitaq.sa`
 
 ---
 
 ## 📄 الترخيص
 
-© 2026 نقلة لوجيستك — جميع الحقوق محفوظة.
+© 2026 Nitaq Platform — جميع الحقوق محفوظة.
