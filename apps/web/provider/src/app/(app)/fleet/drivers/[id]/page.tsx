@@ -66,8 +66,8 @@ export default function DriverDetailPage() {
       <Card>
         <CardContent className="py-16 text-center">
           <User className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-          <h3 className="font-semibold">السائق غير موجود</h3>
-          <Button onClick={() => router.push('/fleet/drivers')} className="mt-4">عودة للسائقين</Button>
+          <h3 className="font-semibold">الموظف غير موجود</h3>
+          <Button onClick={() => router.push('/fleet/drivers')} className="mt-4">عودة للموظفين</Button>
         </CardContent>
       </Card>
     );
@@ -77,13 +77,16 @@ export default function DriverDetailPage() {
     ? `${driver.user.firstName} ${driver.user.lastName}`
     : (driver as unknown as { fullName?: string }).fullName ?? '—';
 
+  const jobTitle = (driver as unknown as { jobTitle?: string }).jobTitle ?? driver.licenseType ?? '—';
+  const nationalId = driver.user?.nationalId ?? (driver as unknown as { nationalId?: string }).nationalId;
+
   const initials = fullName.split(' ').slice(0, 2).map((w) => w[0]).join('');
 
   return (
     <>
       <PageHeader
         title={fullName}
-        subtitle={`سائق · ${driver.licenseType} · ${driver.licenseNumber}`}
+        subtitle={`موظف · ${jobTitle}`}
         actions={
           <Button variant="outline" onClick={() => router.push('/fleet/drivers')}>
             <ArrowRight className="h-4 w-4 rtl:rotate-180" /> رجوع
@@ -111,10 +114,10 @@ export default function DriverDetailPage() {
               {driver.user?.phone && (
                 <InfoRow icon={Phone} label="الهاتف" value={<span className="num" dir="ltr">{driver.user.phone}</span>} />
               )}
-              {driver.user?.nationalId && (
-                <InfoRow icon={User} label="رقم الهوية" value={<span className="num">{driver.user.nationalId}</span>} />
+              {nationalId && (
+                <InfoRow icon={User} label="رقم الهوية" value={<span className="num">{nationalId}</span>} />
               )}
-              <InfoRow icon={Calendar} label="انتهاء الرخصة" value={formatDate(driver.licenseExpiry)} />
+              <InfoRow icon={Calendar} label="تاريخ الانضمام" value={formatDate(driver.licenseExpiry)} />
               <InfoRow icon={Star} label="التقييم" value={
                 <span className="num">{(driver.rating ?? 0).toFixed(1)} / 5.0</span>
               } />
@@ -122,22 +125,22 @@ export default function DriverDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Stats + trip history */}
+        {/* Stats + assignment history */}
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <StatCard label="إجمالي الرحلات" value={String(driver.totalTrips ?? 0)} />
+            <StatCard label="إجمالي المهام" value={String(driver.totalTrips ?? 0)} />
             <StatCard label="التقييم" value={`${(driver.rating ?? 0).toFixed(1)} ★`} />
-            <StatCard label="فئة الرخصة" value={`فئة ${driver.licenseType}`} />
+            <StatCard label="المسمى الوظيفي" value={jobTitle} />
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>سجل الرحلات</CardTitle>
-              <CardDescription>آخر الرحلات المنجزة</CardDescription>
+              <CardTitle>سجل المهام</CardTitle>
+              <CardDescription>آخر المهام المنجزة</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {history.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">لا توجد رحلات مسجّلة بعد.</p>
+                <p className="text-sm text-muted-foreground text-center py-8">لا توجد مهام مسجّلة بعد.</p>
               ) : (
                 <Table>
                   <TableHeader>

@@ -21,7 +21,7 @@ import { PageHeader } from '@/components/page-header';
 import { StatusBadge } from '@/components/status-badge';
 import { fetcher, api } from '@/lib/api';
 import { notify } from '@/lib/notify';
-import { DRIVERS, formatDate } from '@naqla/shared-utils';
+import { DRIVERS } from '@naqla/shared-utils';
 
 type Driver = {
   id: string;
@@ -35,9 +35,20 @@ type Driver = {
   fullName?: string;
   phone?: string;
   nationalId?: string;
+  jobTitle?: string;
 };
 
-const LICENSE_CLASSES = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+const JOB_TITLES = [
+  'مهندس',
+  'فني',
+  'مصمم',
+  'مستشار',
+  'مطوّر برمجيات',
+  'مدير مشروع',
+  'محاسب',
+  'محلل أعمال',
+  'أخرى',
+] as const;
 
 export default function CarrierFleetDrivers() {
   const router = useRouter();
@@ -55,31 +66,43 @@ export default function CarrierFleetDrivers() {
   const counts = useMemo(() => ({
     all: all.length,
     available: all.filter((d) => d.status === 'AVAILABLE').length,
-    onTrip: all.filter((d) => d.status === 'ON_TRIP').length,
+    onAssignment: all.filter((d) => d.status === 'ON_ASSIGNMENT' || d.status === 'ON_TRIP').length,
     offDuty: all.filter((d) => d.status === 'OFF_DUTY').length,
   }), [all]);
 
-  const rows = useMemo(() => (tab === 'ALL' ? all : all.filter((d) => d.status === tab)), [tab, all]);
+  const rows = useMemo(() => {
+    if (tab === 'ALL') return all;
+    if (tab === 'ON_ASSIGNMENT') return all.filter((d) => d.status === 'ON_ASSIGNMENT' || d.status === 'ON_TRIP');
+    return all.filter((d) => d.status === tab);
+  }, [tab, all]);
 
-  // Add driver dialog
+  // Add employee dialog
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    fullName: '', phone: '', nationalId: '',
-    licenseNumber: '', licenseExpiry: '', licenseType: 'B',
+    fullName: '', phone: '', nationalId: '', email: '', jobTitle: 'مهندس',
   });
 
-  const addDriver = async () => {
-    if (!form.fullName || !form.phone || !form.licenseNumber || !form.licenseExpiry || saving) return;
+  const addEmployee = async () => {
+    if (!form.fullName || !form.phone || saving) return;
     setSaving(true);
     try {
-      await api.post('/fleet/drivers/invite', form);
-      notify.success('تم إضافة السائق', 'تم إرسال رابط تفعيل الحساب للسائق');
+      const farFuture = new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      await api.post('/fleet/drivers/invite', {
+        fullName: form.fullName,
+        phone: form.phone,
+        nationalId: form.nationalId,
+        email: form.email,
+        licenseNumber: form.phone,
+        licenseExpiry: farFuture,
+        licenseType: form.jobTitle,
+      });
+      notify.success('تم إضافة الموظف', 'تم إرسال رابط تفعيل الحساب للموظف');
       await mutate();
       setOpen(false);
-      setForm({ fullName: '', phone: '', nationalId: '', licenseNumber: '', licenseExpiry: '', licenseType: 'B' });
+      setForm({ fullName: '', phone: '', nationalId: '', email: '', jobTitle: 'مهندس' });
     } catch (err) {
-      notify.error(err, 'فشل إضافة السائق');
+      notify.error(err, 'فشل إضافة الموظف');
     } finally {
       setSaving(false);
     }
@@ -90,15 +113,17 @@ export default function CarrierFleetDrivers() {
 
   const getPhone = (d: Driver) => d.phone ?? d.user?.phone ?? '—';
 
+  const getJobTitle = (d: Driver) => d.jobTitle ?? d.licenseType ?? '—';
+
   return (
     <>
       <PageHeader
-        title="السائقون"
-        subtitle={`${counts.all} سائق مسجّل`}
+        title="الموظفون"
+        subtitle={`${counts.all} موظف مسجّل`}
         actions={
           <Button onClick={() => setOpen(true)}>
             <Plus className="h-4 w-4" />
-            إضافة سائق
+            إضافة موظف
           </Button>
         }
       />
@@ -107,7 +132,7 @@ export default function CarrierFleetDrivers() {
         <TabsList>
           <TabsTrigger value="ALL">الكل <Badge variant="secondary" className="ms-1">{counts.all}</Badge></TabsTrigger>
           <TabsTrigger value="AVAILABLE">متاح <Badge variant="secondary" className="ms-1">{counts.available}</Badge></TabsTrigger>
-          <TabsTrigger value="ON_TRIP">في رحلة <Badge variant="secondary" className="ms-1">{counts.onTrip}</Badge></TabsTrigger>
+          <TabsTrigger value="ON_ASSIGNMENT">في مهمة <Badge variant="secondary" className="ms-1">{counts.onAssignment}</Badge></TabsTrigger>
           <TabsTrigger value="OFF_DUTY">خارج الخدمة <Badge variant="secondary" className="ms-1">{counts.offDuty}</Badge></TabsTrigger>
         </TabsList>
       </Tabs>
@@ -118,20 +143,18 @@ export default function CarrierFleetDrivers() {
             <TableHeader>
               <TableRow>
                 <TableHead>الاسم</TableHead>
-                <TableHead>الهوية</TableHead>
-                <TableHead>فئة الرخصة</TableHead>
-                <TableHead>انتهاء الرخصة</TableHead>
-                <TableHead>الهاتف</TableHead>
-                <TableHead className="text-center">رحلات</TableHead>
+                <TableHead>المسمى الوظيفي</TableHead>
+                <TableHead>رقم الهوية</TableHead>
+                <TableHead>رقم الجوال</TableHead>
                 <TableHead>الحالة</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
                     <Users className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-                    لا يوجد سائقون
+                    لا يوجد موظفون
                   </TableCell>
                 </TableRow>
               ) : (
@@ -151,15 +174,11 @@ export default function CarrierFleetDrivers() {
                         <span className="font-medium">{getName(d)}</span>
                       </div>
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{getJobTitle(d)}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
-                      {(d as unknown as { nationalId?: string }).nationalId ?? '—'}
-                    </TableCell>
-                    <TableCell>{d.licenseType}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {d.licenseExpiry ? formatDate(d.licenseExpiry) : '—'}
+                      {d.nationalId ?? '—'}
                     </TableCell>
                     <TableCell><span className="font-mono text-xs" dir="ltr">{getPhone(d)}</span></TableCell>
-                    <TableCell className="text-center num">{d.totalTrips ?? 0}</TableCell>
                     <TableCell><StatusBadge status={d.status} /></TableCell>
                   </TableRow>
                 ))
@@ -169,49 +188,45 @@ export default function CarrierFleetDrivers() {
         </CardContent>
       </Card>
 
-      {/* Add Driver Dialog */}
+      {/* Add Employee Dialog */}
       <Dialog open={open} onOpenChange={(o) => !saving && setOpen(o)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>إضافة سائق جديد</DialogTitle>
-            <DialogDescription>سيتم إنشاء حساب للسائق ويُرسَل له رابط التفعيل</DialogDescription>
+            <DialogTitle>إضافة موظف جديد</DialogTitle>
+            <DialogDescription>سيتم إنشاء حساب للموظف ويُرسَل له رابط التفعيل</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
             <div className="space-y-1.5 sm:col-span-2">
               <Label>الاسم الكامل</Label>
               <Input value={form.fullName} onChange={(e) => setForm((f) => ({ ...f, fullName: e.target.value }))} placeholder="محمد عبدالله الغامدي" />
             </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>المسمى الوظيفي</Label>
+              <Select value={form.jobTitle} onValueChange={(v) => setForm((f) => ({ ...f, jobTitle: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {JOB_TITLES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1.5">
-              <Label>رقم الهاتف</Label>
+              <Label>رقم الجوال</Label>
               <Input dir="ltr" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+966 5XX XXX XXXX" />
             </div>
             <div className="space-y-1.5">
-              <Label>رقم الهوية (اختياري)</Label>
+              <Label>رقم الهوية / الإقامة (اختياري)</Label>
               <Input dir="ltr" value={form.nationalId} onChange={(e) => setForm((f) => ({ ...f, nationalId: e.target.value }))} placeholder="1XXXXXXXXX" />
             </div>
-            <div className="space-y-1.5">
-              <Label>رقم رخصة القيادة</Label>
-              <Input dir="ltr" value={form.licenseNumber} onChange={(e) => setForm((f) => ({ ...f, licenseNumber: e.target.value }))} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>تاريخ انتهاء الرخصة</Label>
-              <Input type="date" value={form.licenseExpiry} onChange={(e) => setForm((f) => ({ ...f, licenseExpiry: e.target.value }))} />
-            </div>
             <div className="space-y-1.5 sm:col-span-2">
-              <Label>فئة الرخصة</Label>
-              <Select value={form.licenseType} onValueChange={(v) => setForm((f) => ({ ...f, licenseType: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {LICENSE_CLASSES.map((c) => <SelectItem key={c} value={c}>فئة {c}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Label>البريد الإلكتروني (اختياري)</Label>
+              <Input dir="ltr" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="employee@example.com" />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>إلغاء</Button>
             <Button
-              onClick={addDriver}
-              disabled={saving || !form.fullName || !form.phone || !form.licenseNumber || !form.licenseExpiry}
+              onClick={addEmployee}
+              disabled={saving || !form.fullName || !form.phone}
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               إضافة
