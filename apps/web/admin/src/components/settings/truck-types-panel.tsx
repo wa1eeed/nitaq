@@ -18,10 +18,10 @@ import { useTruckTypesStore } from '@/stores/truck-types-store';
 
 type DraftType = Omit<TruckTypeOption, 'id'> & { id?: string };
 
-const EMOJI_OPTIONS = ['🚐', '🚚', '🚛', '🛻', '❄️', '🛢️', '🚜', '📦', '🏍️', '🚙', '🚌'];
+const EMOJI_OPTIONS = ['💼', '🎨', '🔧', '🛠️', '🖥️', '📚', '💻', '📦', '📋', '⚡', '🏗️', '🔬', '📊', '🤝', '🌐'];
 
 const BLANK: DraftType = {
-  nameAr: '', nameEn: '', capacityKg: 0, description: '', imageUrl: '', icon: '🚛', active: true,
+  nameAr: '', nameEn: '', capacityKg: 0, description: '', imageUrl: '', icon: '💼', active: true,
 };
 
 export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOption[]) => Promise<void> }) {
@@ -42,7 +42,7 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
   const persist = () => void onPersist?.(useTruckTypesStore.getState().types);
 
   const save = () => {
-    if (!draft.nameAr.trim() || !draft.capacityKg) return;
+    if (!draft.nameAr.trim()) return;
     if (editingId) updateType(editingId, draft);
     else addType(draft);
     setOpen(false);
@@ -58,11 +58,11 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Truck className="h-5 w-5" /> أنواع الشاحنات
+                <Truck className="h-5 w-5" /> أنواع الخدمات
               </CardTitle>
               <CardDescription className="mt-1">
-                تُستخدم هذه القائمة في نموذج إضافة شاحنة لدى الناقل وفي تسجيل الناقل الجديد.
-                كل نوع يربط بسعته الافتراضية وصورته التوصيفية.
+                تُستخدم هذه القائمة في نموذج إضافة خدمة لدى المزود وفي تسجيل المزود الجديد.
+                كل نوع يمثّل فئة خدمة متاحة للعملاء.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  if (confirm('استرجاع كل أنواع الشاحنات للقائمة الافتراضية؟ ستُفقد التعديلات.')) {
+                  if (confirm('استرجاع كل أنواع الخدمات للقائمة الافتراضية؟ ستُفقد التعديلات.')) {
                     resetToDefaults(); persist();
                   }
                 }}
@@ -89,7 +89,7 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
           {types.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground">
               <Truck className="h-10 w-10 mx-auto mb-2 opacity-40" />
-              لا توجد أنواع — أضف أولاً
+              لا توجد أنواع خدمات — أضف أولاً
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -100,7 +100,7 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
                   onEdit={() => openEdit(t)}
                   onToggle={(v) => { toggleActive(t.id, v); persist(); }}
                   onRemove={() => {
-                    if (confirm(`حذف "${t.nameAr}"؟ لن يظهر في قوائم الناقلين بعد الآن.`)) {
+                    if (confirm(`حذف "${t.nameAr}"؟ لن يظهر في قوائم المزودين بعد الآن.`)) {
                       removeType(t.id); persist();
                     }
                   }}
@@ -115,9 +115,9 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl max-h-[85vh] overflow-hidden flex flex-col p-0">
           <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
-            <DialogTitle>{editingId ? 'تعديل نوع الشاحنة' : 'إضافة نوع جديد'}</DialogTitle>
+            <DialogTitle>{editingId ? 'تعديل نوع الخدمة' : 'إضافة نوع خدمة'}</DialogTitle>
             <DialogDescription>
-              املأ معلومات النوع — ستظهر للناقلين عند إضافة شاحنة أو في تسجيل ناقل جديد.
+              املأ معلومات النوع — ستظهر للمزودين عند إضافة خدمة أو في تسجيل مزود جديد.
             </DialogDescription>
           </DialogHeader>
 
@@ -144,37 +144,21 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>السعة الاستيعابية (كجم)</Label>
-                <Input
-                  type="number"
-                  dir="ltr"
-                  className="text-end num"
-                  value={draft.capacityKg || ''}
-                  onChange={(e) => setDraft({ ...draft, capacityKg: Number(e.target.value) || 0 })}
-                  placeholder="25000"
-                />
-                <p className="text-xs text-muted-foreground num">
-                  ≈ {((draft.capacityKg || 0) / 1000).toFixed(1)} طن
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label>الأيقونة الرمزية (Emoji)</Label>
-                <div className="flex flex-wrap gap-1.5">
-                  {EMOJI_OPTIONS.map((e) => (
-                    <button
-                      key={e}
-                      type="button"
-                      onClick={() => setDraft({ ...draft, icon: e })}
-                      className={`h-10 w-10 rounded-md border-2 text-xl ${
-                        draft.icon === e ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
-                      }`}
-                    >
-                      {e}
-                    </button>
-                  ))}
-                </div>
+            <div className="space-y-2">
+              <Label>الأيقونة الرمزية (Emoji)</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {EMOJI_OPTIONS.map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    onClick={() => setDraft({ ...draft, icon: e })}
+                    className={`h-10 w-10 rounded-md border-2 text-xl ${
+                      draft.icon === e ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'
+                    }`}
+                  >
+                    {e}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -194,7 +178,7 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
 
           <DialogFooter className="px-6 py-4 border-t shrink-0">
             <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
-            <Button onClick={save} disabled={!draft.nameAr.trim() || !draft.capacityKg}>
+            <Button onClick={save} disabled={!draft.nameAr.trim()}>
               <CheckCircle2 className="h-4 w-4" />
               {editingId ? 'حفظ التغييرات' : 'إضافة النوع'}
             </Button>
@@ -242,17 +226,12 @@ function TruckTypeCard({
       </div>
 
       <CardContent className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{type.icon}</span>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-lg">{type.icon}</span>
-              <h3 className="font-semibold truncate">{type.nameAr}</h3>
-            </div>
+            <h3 className="font-semibold truncate">{type.nameAr}</h3>
             <div className="text-xs text-muted-foreground" dir="ltr">{type.nameEn}</div>
           </div>
-          <Badge variant="default" className="shrink-0 num">
-            {(type.capacityKg / 1000).toFixed(0)} طن
-          </Badge>
         </div>
 
         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 min-h-[2.5rem]">

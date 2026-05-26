@@ -87,9 +87,9 @@ export default function AdminSettingsPage() {
   const persistServiceTypes = async (types: TruckTypeOption[]) => {
     try {
       await api.put('/admin/settings', { settings: [{ key: 'catalog.truck_types', value: JSON.stringify(types) }] });
-      notify.success('تم حفظ أنواع الشاحنات');
+      notify.success('تم حفظ أنواع الخدمات');
       await mutateSettings();
-    } catch (err) { notify.error(err, 'فشل حفظ أنواع الشاحنات'); }
+    } catch (err) { notify.error(err, 'فشل حفظ أنواع الخدمات'); }
   };
 
   const saveFinancial = async () => {
