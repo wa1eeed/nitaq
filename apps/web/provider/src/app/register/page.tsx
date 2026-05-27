@@ -736,7 +736,6 @@ function StepFleet({
           <Label>التجهيزات</Label>
           <ToggleRow label="نظام تتبع GPS" desc="على جميع الشاحنات" checked={form.hasGps} onChange={(v) => set('hasGps', v)} />
           <ToggleRow label="تأمين شامل" desc="على البضائع والشاحنات" checked={form.hasInsurance} onChange={(v) => set('hasInsurance', v)} />
-          <ToggleRow label="شاحنات مبرّدة متوفرة" desc="لنقل المواد الغذائية والأدوية" icon={Snowflake} checked={form.hasRefrigeration} onChange={(v) => set('hasRefrigeration', v)} />
         </div>
       </div>
     </>
