@@ -28,9 +28,11 @@ RUN pnpm --filter @naqla/api deploy --prod /prod
 # prisma generate writes the query engine to .prisma/client inside the pnpm
 # virtual store (not a declared package), so pnpm deploy omits it.
 # Use a shell glob on the known store path — version-agnostic.
-RUN mkdir -p /prod/node_modules/.prisma && \
-    cp -r /repo/node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client \
-          /prod/node_modules/.prisma/client
+RUN for src in /repo/node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client; do \
+      rel="${src#/repo/node_modules/}"; \
+      mkdir -p "/prod/node_modules/$(dirname "$rel")"; \
+      cp -r "$src" "/prod/node_modules/$rel"; \
+    done
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
