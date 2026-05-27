@@ -1,5 +1,8 @@
 FROM node:20-alpine AS builder
 WORKDIR /repo
+# Force development mode during build so pnpm installs devDependencies
+# (nest, typescript, etc.) even if the deployment server injects NODE_ENV=production/staging.
+ENV NODE_ENV=development
 RUN corepack enable && corepack prepare pnpm@9 --activate
 
 # Copy ALL workspace manifests so pnpm install sees the full workspace.
