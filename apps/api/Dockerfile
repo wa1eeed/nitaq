@@ -27,26 +27,19 @@ RUN cd /repo/apps/api && node_modules/.bin/tsc \
   --target ES2020 --module commonjs --esModuleInterop --skipLibCheck \
   --resolveJsonModule --outDir dist/prisma prisma/seed.ts
 
-# pnpm deploy produces a virtual-store node_modules in /prod but omits
-# the generated .prisma/client directory (query engine + JS).
 RUN pnpm --filter @naqla/api deploy --prod /prod
-
-# Manually copy the generated .prisma/client (with the binary) into the
-# exact same virtual-store path inside /prod/node_modules so that
-# `COPY /prod/node_modules` in the runtime stage brings it along.
-RUN cp -r \
-  /repo/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma \
-  /prod/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN apk add --no-cache openssl tini
-# /prod/node_modules now includes .prisma/client with the query-engine binary.
 COPY --from=builder /prod/node_modules ./node_modules
 COPY --from=builder /repo/apps/api/dist ./dist
 COPY --from=builder /repo/apps/api/package.json ./
 COPY --from=builder /repo/apps/api/prisma ./prisma
+# Generate Prisma client in the exact runtime environment so the correct
+# linux-musl-openssl-3.0.x binary ends up in the right node_modules path.
+RUN node ./node_modules/.bin/prisma generate --schema ./prisma/schema.prisma
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO /dev/null http://localhost:4000/health || exit 1
