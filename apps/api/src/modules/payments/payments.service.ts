@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { PaginationDto, paginate } from '../../common/dto/pagination.dto';
 import type { AuthUser } from '../../common/decorators/current-user.decorator';
-import type { Prisma } from '../../generated/prisma';
+import type { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymentsService {

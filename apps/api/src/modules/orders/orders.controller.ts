@@ -12,7 +12,7 @@ import {
   AssignEmployeeDto, AssignOrderDto, CancelOrderDto, CreateOrderDto,
   CreateTrackingEventDto, UpdateOrderDto,
 } from './dto/create-order.dto';
-import type { OrderStatus } from '../../generated/prisma';
+import type { OrderStatus } from '@prisma/client';
 
 const ORDER_STATUS = [
   'DRAFT','PUBLISHED','BIDDING','ASSIGNED','CONFIRMED',

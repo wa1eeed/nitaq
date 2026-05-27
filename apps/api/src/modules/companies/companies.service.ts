@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { PaginationDto, paginate } from '../../common/dto/pagination.dto';
 import { SubmitKycDto, UpdateCompanyDto } from './dto/update-company.dto';
-import type { KYCStatus, Prisma } from '../../generated/prisma';
+import type { KYCStatus, Prisma } from '@prisma/client';
 
 @Injectable()
 export class CompaniesService {

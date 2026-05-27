@@ -7,7 +7,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Audit } from '../../common/audit/audit.decorator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { AdminService } from './admin.service';
-import type { CompanyStatus, DisputeStatus } from '../../generated/prisma';
+import type { CompanyStatus, DisputeStatus } from '@prisma/client';
 
 class CompanyStatusDto {
   @IsIn(['PENDING_VERIFICATION', 'ACTIVE', 'SUSPENDED', 'REJECTED'])

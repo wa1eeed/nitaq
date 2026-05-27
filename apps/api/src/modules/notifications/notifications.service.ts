@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { PaginationDto, paginate } from '../../common/dto/pagination.dto';
-import { Prisma, type NotificationType } from '../../generated/prisma';
+import { Prisma, type NotificationType } from '@prisma/client';
 
 @Injectable()
 export class NotificationsService {

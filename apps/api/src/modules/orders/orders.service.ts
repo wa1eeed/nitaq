@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { EmployeeStatus } from '../../generated/prisma';
+import type { EmployeeStatus } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { PaginationDto, paginate } from '../../common/dto/pagination.dto';
 import {
@@ -17,7 +17,7 @@ import {
 } from './dto/create-order.dto';
 import type { AuthUser } from '../../common/decorators/current-user.decorator';
 import { customAlphabet } from 'nanoid';
-import type { OrderStatus, Prisma } from '../../generated/prisma';
+import type { OrderStatus, Prisma } from '@prisma/client';
 
 const orderNumberGen = customAlphabet('0123456789', 6);
 
