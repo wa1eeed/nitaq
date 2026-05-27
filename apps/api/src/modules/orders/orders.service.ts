@@ -109,26 +109,44 @@ export class OrdersService {
   }
 
   async create(dto: CreateOrderDto, actor: AuthUser) {
-    if (!actor.companyId) {
-      throw new BadRequestException({ code: 'NO_COMPANY', message: 'يجب أن تكون ضمن شركة' });
+    // ── Resolve company ID ─────────────────────────────────────────────────
+    // JWT companyId can be stale after a DB reseed. Fall back to a live DB
+    // lookup by user ID so the order never fails due to a stale token alone.
+    let companyId = actor.companyId;
+
+    if (companyId) {
+      const exists = await this.prisma.company.findUnique({ where: { id: companyId }, select: { id: true } });
+      if (!exists) companyId = null;
     }
 
-    // Verify the company still exists — JWT may outlive a DB reseed.
-    const company = await this.prisma.company.findUnique({ where: { id: actor.companyId }, select: { id: true } });
-    if (!company) {
-      throw new BadRequestException({ code: 'COMPANY_NOT_FOUND', message: 'لم يُعثر على الشركة، يرجى تسجيل الخروج وإعادة الدخول' });
+    if (!companyId) {
+      const user = await this.prisma.user.findUnique({ where: { id: actor.id }, select: { companyId: true } });
+      companyId = user?.companyId ?? null;
     }
+
+    if (!companyId) {
+      throw new BadRequestException({ code: 'NO_COMPANY', message: 'حسابك غير مرتبط بشركة. يرجى تسجيل الخروج وإعادة الدخول أو التواصل مع الدعم' });
+    }
+
+    // ── Resolve requiredServiceType ────────────────────────────────────────
+    // Fall back to cargoType so the order is never rejected for a missing
+    // or unknown service type value.
+    const SERVICE_TYPES_SET = new Set([
+      'CONSULTING','DESIGN','INSTALLATION','MAINTENANCE','TECHNICAL_SUPPORT',
+      'TRAINING','IT_SERVICES','LOGISTICS','PROJECT_MANAGEMENT','OTHER',
+    ]);
+    const serviceType = (dto.requiredServiceType && SERVICE_TYPES_SET.has(dto.requiredServiceType))
+      ? dto.requiredServiceType
+      : dto.cargoType;
 
     const orderNumber = `ORD-${new Date().getFullYear()}-${orderNumberGen()}`;
     try {
       return await this.prisma.order.create({
         data: {
           orderNumber,
-          clientId: actor.companyId,
-          // v0.6.0 workflow fields — defaults preserve old behavior.
+          clientId: companyId,
           mode: dto.mode ?? 'OPEN',
           targetProviderId: dto.mode === 'DIRECT' ? dto.targetProviderId : null,
-          // Pre-seed agreed price for DIRECT orders with upfront price.
           ...(dto.mode === 'DIRECT' && dto.agreedPriceUpfront ? {
             agreedPrice:      dto.agreedPriceUpfront,
             commissionAmount: +(dto.agreedPriceUpfront * 0.08).toFixed(2),
@@ -151,7 +169,7 @@ export class OrdersService {
           destinationAddress: dto.destinationAddress,
           destinationLat: dto.destinationLat,
           destinationLng: dto.destinationLng,
-          requiredServiceType: dto.requiredServiceType,
+          requiredServiceType: serviceType,
           requiresRefrigeration: dto.requiresRefrigeration ?? false,
           requiresInsurance: dto.requiresInsurance ?? false,
           specialInstructions: dto.specialInstructions,

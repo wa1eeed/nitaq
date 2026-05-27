@@ -37,12 +37,12 @@ COPY --from=builder /prod/node_modules ./node_modules
 COPY --from=builder /repo/apps/api/dist ./dist
 COPY --from=builder /repo/apps/api/package.json ./
 COPY --from=builder /repo/apps/api/prisma ./prisma
-# pnpm deploy omits .prisma/client (the generated query engine + JS).
-# Copy it directly from the builder repo into the matching pnpm virtual store
-# path so @prisma/client can find it at runtime.
+# pnpm deploy produces flat node_modules. @prisma/client/index.js resolves
+# the generated client via require('.prisma/client/default'), which in a flat
+# layout maps to node_modules/.prisma/client/. Copy there directly.
 COPY --from=builder \
   /repo/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client \
-  ./node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client
+  ./node_modules/.prisma/client
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO /dev/null http://localhost:4000/health || exit 1

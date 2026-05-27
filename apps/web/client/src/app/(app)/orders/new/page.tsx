@@ -152,9 +152,9 @@ export default function NewOrderWizard() {
   const activeCities: CatalogCity[] = catalog?.cities
     ? catalog.cities.filter((c) => c.active !== false)
     : DEFAULT_CITIES.filter((c) => c.active);
-  const serviceTypesList: { value: string; label: string }[] = catalog?.truckTypes
-    ? catalog.truckTypes.filter((t) => t.active !== false).map((t) => ({ value: t.id, label: t.nameAr }))
-    : SERVICE_TYPES;
+  // Always use static enum values for requiredServiceType — catalog truckTypes
+  // use UUID IDs which the DTO does not accept.
+  const serviceTypesList = SERVICE_TYPES;
 
   const selectedSavedAddress = savedAddresses?.find((a) => a.id === form.savedAddressId);
 

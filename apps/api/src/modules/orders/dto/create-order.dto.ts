@@ -54,7 +54,7 @@ export class CreateOrderDto {
   @IsOptional() @IsNumber() destinationLat?: number;
   @IsOptional() @IsNumber() destinationLng?: number;
 
-  @IsEnum(SERVICE_TYPES) requiredServiceType!: (typeof SERVICE_TYPES)[number];
+  @IsOptional() @IsEnum(SERVICE_TYPES) requiredServiceType?: (typeof SERVICE_TYPES)[number];
   @IsOptional() @IsBoolean() requiresRefrigeration?: boolean;
   @IsOptional() @IsBoolean() requiresInsurance?: boolean;
   @IsOptional() @IsString() specialInstructions?: string;
