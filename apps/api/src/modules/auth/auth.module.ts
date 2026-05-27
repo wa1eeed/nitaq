@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AdminAuthController } from './admin-auth.controller';
@@ -10,10 +11,13 @@ import { TokenBlacklistService } from '../../common/security/token-blacklist.ser
 
 @Module({
   imports: [
-    JwtModule.register({
+    JwtModule.registerAsync({
       global: true,
-      secret: process.env.JWT_SECRET ?? 'change-me',
-      signOptions: { expiresIn: process.env.JWT_ACCESS_TTL ?? '15m' },
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: config.get<string>('JWT_ACCESS_TTL', '15m') },
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [AuthController, AdminAuthController],
