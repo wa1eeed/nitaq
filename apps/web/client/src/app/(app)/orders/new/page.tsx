@@ -3,8 +3,9 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
-  Check, ChevronLeft, ChevronRight, Clock, Eye, Package, Radio,
-  Search, Send, ShieldCheck, Truck, UserSearch, Wallet,
+  Briefcase, Building2, Check, ChevronLeft, ChevronRight, Clock,
+  Eye, MapPin, Package, Plus, Radio, Search, Send, ShieldCheck,
+  UserSearch, Wallet, Wifi,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,15 +23,18 @@ import { PageHeader } from '@/components/page-header';
 import { playSoundIfEnabled } from '@/lib/sound';
 import { DEFAULT_CITIES } from '@naqla/shared-utils';
 import { api, fetcher } from '@/lib/api';
+import { useAuthStore } from '@/lib/auth-store';
 
 export type PickupWindow = 'MORNING' | 'EVENING' | 'ALL_DAY';
+type DeliveryMode = 'ON_SITE' | 'REMOTE' | 'AT_PROVIDER';
 
 interface FormState {
   cargoType: string;
   cargoDescription: string;
+  deliveryMode: DeliveryMode;
+  savedAddressId: string | null;
   originAddress: string;
   originCity: string;
-  destinationCity: string;
   pickupDate: string;
   pickupWindow: PickupWindow;
   mode: 'OPEN' | 'DIRECT' | null;
@@ -43,11 +47,11 @@ interface FormState {
 }
 
 const STEPS = [
-  { id: 1, label: 'الخدمة',           icon: Package },
-  { id: 2, label: 'التوقيت',          icon: Clock },
-  { id: 3, label: 'طريقة الإرسال',   icon: Send },
-  { id: 4, label: 'المتطلبات',        icon: Wallet },
-  { id: 5, label: 'مراجعة',           icon: Eye },
+  { id: 1, label: 'الخدمة',         icon: Package },
+  { id: 2, label: 'الموقع والموعد', icon: MapPin },
+  { id: 3, label: 'طريقة الإرسال', icon: Send },
+  { id: 4, label: 'المتطلبات',      icon: Wallet },
+  { id: 5, label: 'مراجعة',         icon: Eye },
 ];
 
 const SERVICE_CATEGORIES = [
@@ -76,24 +80,54 @@ const SERVICE_TYPES = [
   { value: 'OTHER',              label: 'أخرى' },
 ];
 
+const DELIVERY_MODE_OPTIONS: { value: DeliveryMode; icon: React.ElementType; title: string; description: string }[] = [
+  {
+    value: 'ON_SITE',
+    icon: Building2,
+    title: 'في موقعنا / مقرّنا',
+    description: 'المزوّد يحضر إلى موقعك لتقديم الخدمة — مثل التركيب والصيانة والتدريب الحضوري.',
+  },
+  {
+    value: 'REMOTE',
+    icon: Wifi,
+    title: 'عن بُعد / إلكترونياً',
+    description: 'الخدمة تُقدَّم عبر الإنترنت دون حضور مادي — مثل الاستشارات وخدمات IT والتصميم.',
+  },
+  {
+    value: 'AT_PROVIDER',
+    icon: Briefcase,
+    title: 'في مقر المزوّد',
+    description: 'تزور أنت مقر المزوّد للحصول على الخدمة — مثل الاختبارات المعملية والفحوصات.',
+  },
+];
+
 type CatalogCity = { id: string; nameAr: string; nameEn: string; region: string; lat: number; lng: number; active?: boolean };
 type CatalogTruckType = { id: string; nameAr: string; active?: boolean };
 type CatalogData = { cities: CatalogCity[] | null; cargoTypes: unknown; truckTypes: CatalogTruckType[] | null };
 type ApiCarrier = { id: string; nameAr: string; nameEn: string | null; city: string; status: string; kycStatus: string };
+type SavedAddress = { id: string; label: string; city: string; address: string; isDefault: boolean };
 
 export default function NewOrderWizard() {
   const router = useRouter();
+  const companyId = useAuthStore((s) => s.user?.companyId);
   const { data: catalog } = useSWR<CatalogData>('/settings/catalogs', fetcher);
   const { data: carriersRaw, isLoading: carriersLoading } =
     useSWR<ApiCarrier[]>('/companies?type=CARRIER&status=ACTIVE&limit=100', fetcher);
+  const { data: savedAddresses } = useSWR<SavedAddress[]>(
+    companyId ? `/companies/${companyId}/addresses` : null,
+    fetcher,
+  );
+
   const [step, setStep] = useState(1);
   const [carrierSearch, setCarrierSearch] = useState('');
+  const [showManualAddress, setShowManualAddress] = useState(false);
   const [form, setForm] = useState<FormState>({
     cargoType: 'CONSULTING',
     cargoDescription: '',
+    deliveryMode: 'ON_SITE',
+    savedAddressId: null,
     originAddress: '',
     originCity: 'الرياض',
-    destinationCity: 'الرياض',
     pickupDate: '',
     pickupWindow: 'ALL_DAY',
     mode: null,
@@ -122,10 +156,28 @@ export default function NewOrderWizard() {
     ? catalog.truckTypes.filter((t) => t.active !== false).map((t) => ({ value: t.id, label: t.nameAr }))
     : SERVICE_TYPES;
 
+  const selectedSavedAddress = savedAddresses?.find((a) => a.id === form.savedAddressId);
+
+  const locationSummary = useMemo(() => {
+    if (form.deliveryMode === 'REMOTE') return 'عن بُعد / إلكترونياً';
+    if (form.deliveryMode === 'AT_PROVIDER') return `مقر المزوّد — ${form.originCity}`;
+    if (selectedSavedAddress) return `${selectedSavedAddress.label} — ${selectedSavedAddress.city}`;
+    if (form.originAddress) return `${form.originAddress}، ${form.originCity}`;
+    return form.originCity || '—';
+  }, [form.deliveryMode, form.originCity, form.originAddress, selectedSavedAddress]);
+
+  const step2Valid = useMemo(() => {
+    if (!form.pickupDate) return false;
+    if (form.deliveryMode === 'ON_SITE') {
+      return !!(form.savedAddressId || form.originAddress || form.originCity);
+    }
+    return !!form.originCity;
+  }, [form.pickupDate, form.deliveryMode, form.savedAddressId, form.originAddress, form.originCity]);
+
   const canNext = useMemo(() => {
     switch (step) {
       case 1: return !!form.cargoType && form.cargoDescription.length > 3;
-      case 2: return !!form.pickupDate;
+      case 2: return step2Valid;
       case 3: return form.mode === 'OPEN' || (
         form.mode === 'DIRECT' && !!form.targetCarrierId &&
         (!form.hasPreAgreedPrice || (form.agreedPriceUpfront != null && form.agreedPriceUpfront > 0))
@@ -133,7 +185,7 @@ export default function NewOrderWizard() {
       case 4: return !!form.truckType;
       default: return true;
     }
-  }, [step, form]);
+  }, [step, form, step2Valid]);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -141,22 +193,25 @@ export default function NewOrderWizard() {
   const submit = async () => {
     setSubmitError(null);
     setSubmitting(true);
+    const effAddress = selectedSavedAddress?.address || form.originAddress || form.originCity;
+    const effCity = selectedSavedAddress?.city || form.originCity;
     try {
       const body = {
         mode: form.mode ?? 'OPEN',
         cargoType: form.cargoType,
         cargoDescription: form.cargoDescription,
-        originCity: form.originCity,
-        originRegion: form.originCity,
-        originAddress: form.originAddress || form.originCity,
-        destinationCity: form.originCity,
-        destinationRegion: form.originCity,
-        destinationAddress: form.originAddress || form.originCity,
+        originCity: effCity,
+        originRegion: effCity,
+        originAddress: effAddress,
+        destinationCity: effCity,
+        destinationRegion: effCity,
+        destinationAddress: effAddress,
         requiredServiceType: form.truckType,
         requiresInsurance: form.requiresInsurance,
         pickupDate: form.pickupDate,
         pickupWindow: form.pickupWindow,
         ...(form.specialInstructions ? { specialInstructions: form.specialInstructions } : {}),
+        ...(form.deliveryMode === 'REMOTE' ? { specialInstructions: `[عن بُعد] ${form.specialInstructions}`.trim() } : {}),
         ...(form.mode === 'DIRECT' && form.targetCarrierId
           ? { targetProviderId: form.targetCarrierId }
           : {}),
@@ -259,17 +314,165 @@ export default function NewOrderWizard() {
           )}
 
           {step === 2 && (
-            <Step title="التوقيت والموقع" description="حدّد موعد تنفيذ الخدمة وموقعها">
-              <div className="space-y-2">
-                <Label>موقع تنفيذ الخدمة (اختياري)</Label>
-                <Input
-                  value={form.originAddress}
-                  onChange={(e) => set('originAddress', e.target.value)}
-                  placeholder="مثال: حي الملقا، الرياض — المستودع الرئيسي"
-                />
-                <p className="text-xs text-muted-foreground">يمكن تركه فارغاً وتحديده لاحقاً مع مزود الخدمة</p>
+            <Step title="الموقع والموعد" description="أين وكيف ستُقدَّم الخدمة؟">
+              {/* Delivery mode */}
+              <div className="space-y-3">
+                <Label>كيف سيتم تقديم الخدمة؟</Label>
+                <div className="grid grid-cols-1 gap-3">
+                  {DELIVERY_MODE_OPTIONS.map(({ value, icon: Icon, title, description }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        set('deliveryMode', value);
+                        set('savedAddressId', null);
+                        set('originAddress', '');
+                        setShowManualAddress(false);
+                      }}
+                      className={cn(
+                        'text-start p-4 rounded-xl border-2 transition-all flex items-start gap-3',
+                        form.deliveryMode === value
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/40',
+                      )}
+                    >
+                      <div className={cn(
+                        'shrink-0 h-10 w-10 rounded-lg grid place-items-center',
+                        form.deliveryMode === value
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground',
+                      )}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm">{title}</span>
+                          {form.deliveryMode === value && (
+                            <Check className="h-4 w-4 text-primary" strokeWidth={3} />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
 
+              {/* Location — only when ON_SITE */}
+              {form.deliveryMode === 'ON_SITE' && (
+                <div className="space-y-3">
+                  <Label>موقع التنفيذ</Label>
+
+                  {/* Saved addresses */}
+                  {savedAddresses && savedAddresses.length > 0 && !showManualAddress && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">اختر من عناوينك المحفوظة:</p>
+                      <div className="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
+                        {savedAddresses.map((addr) => (
+                          <button
+                            key={addr.id}
+                            type="button"
+                            onClick={() => {
+                              set('savedAddressId', addr.id);
+                              set('originCity', addr.city);
+                              set('originAddress', '');
+                            }}
+                            className={cn(
+                              'text-start p-3 rounded-lg border-2 transition-all flex items-start gap-3',
+                              form.savedAddressId === addr.id
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/40',
+                            )}
+                          >
+                            <MapPin className={cn(
+                              'h-4 w-4 mt-0.5 shrink-0',
+                              form.savedAddressId === addr.id ? 'text-primary' : 'text-muted-foreground',
+                            )} />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-medium">{addr.label}</span>
+                                {addr.isDefault && (
+                                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">افتراضي</Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">{addr.address} — {addr.city}</p>
+                            </div>
+                            {form.savedAddressId === addr.id && (
+                              <Check className="h-4 w-4 text-primary shrink-0" strokeWidth={3} />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setShowManualAddress(true); set('savedAddressId', null); }}
+                        className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        أدخل عنواناً مختلفاً
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Manual address input */}
+                  {(showManualAddress || !savedAddresses || savedAddresses.length === 0) && (
+                    <div className="space-y-3">
+                      {showManualAddress && (
+                        <button
+                          type="button"
+                          onClick={() => { setShowManualAddress(false); }}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          ← العودة للعناوين المحفوظة
+                        </button>
+                      )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label>المدينة</Label>
+                          <Select value={form.originCity} onValueChange={(v) => set('originCity', v)}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {activeCities.map((c) => (
+                                <SelectItem key={c.id} value={c.nameAr}>{c.nameAr}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>تفاصيل العنوان (اختياري)</Label>
+                          <Input
+                            value={form.originAddress}
+                            onChange={(e) => set('originAddress', e.target.value)}
+                            placeholder="مثال: حي الملقا، المستودع الرئيسي"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* City only for REMOTE or AT_PROVIDER */}
+              {form.deliveryMode !== 'ON_SITE' && (
+                <div className="space-y-2">
+                  <Label>المدينة {form.deliveryMode === 'REMOTE' ? '(مدينة التعامل)' : '(مدينة مقر المزوّد)'}</Label>
+                  <Select value={form.originCity} onValueChange={(v) => set('originCity', v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {activeCities.map((c) => (
+                        <SelectItem key={c.id} value={c.nameAr}>{c.nameAr}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.deliveryMode === 'REMOTE' && (
+                    <p className="text-xs text-muted-foreground">
+                      💡 ستُقدَّم الخدمة عن بُعد — سيتواصل معك المزوّد بعد قبول العرض.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Timing */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>تاريخ البدء المطلوب</Label>
@@ -338,7 +541,7 @@ export default function NewOrderWizard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
                     {carriersLoading && (
                       <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">
-                        <Truck className="h-6 w-6 mx-auto mb-2 animate-pulse" />
+                        <Briefcase className="h-6 w-6 mx-auto mb-2 animate-pulse" />
                         جارٍ تحميل المزوّدين...
                       </div>
                     )}
@@ -470,8 +673,9 @@ export default function NewOrderWizard() {
                 <Row label="وصف الطلب" value={form.cargoDescription} />
               </Section>
               <Separator />
-              <Section title="التوقيت">
-                <Row label="الموقع" value={form.originAddress || '—'} />
+              <Section title="الموقع والموعد">
+                <Row label="طريقة التقديم" value={DELIVERY_MODE_OPTIONS.find((d) => d.value === form.deliveryMode)?.title} />
+                <Row label="الموقع" value={locationSummary} />
                 <Row label="تاريخ البدء" value={form.pickupDate || '—'} />
               </Section>
               <Separator />
@@ -505,7 +709,7 @@ export default function NewOrderWizard() {
         ) : (
           <Button onClick={submit} disabled={!canNext || submitting}>
             <Send className="h-4 w-4" />
-            {submitting ? 'جاري الإرسال...' : 'إرسال الطلب'}
+            {submitting ? 'جارٍ الإرسال...' : 'إرسال الطلب'}
           </Button>
         )}
       </div>
