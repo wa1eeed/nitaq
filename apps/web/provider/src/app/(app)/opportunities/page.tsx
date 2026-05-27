@@ -98,7 +98,7 @@ export default function CarrierOpportunitiesPage() {
     // displayed list matches the badge counts exactly.
     let arr = pool.filter((o) => o.mode === tab);
     if (sort === 'newest') arr = [...arr].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-    if (sort === 'weight') arr = [...arr].sort((a, b) => b.weightKg - a.weightKg);
+    if (sort === 'weight') arr = [...arr].sort((a, b) => (b.weightKg ?? 0) - (a.weightKg ?? 0));
     if (sort === 'pickup') arr = [...arr].sort((a, b) => +new Date(a.pickupDate) - +new Date(b.pickupDate));
     return arr;
   }, [pool, tab, sort]);
@@ -177,7 +177,7 @@ export default function CarrierOpportunitiesPage() {
                   <p className="text-sm text-muted-foreground leading-relaxed">{o.cargoDescription}</p>
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <Tag icon={<Weight className="h-3.5 w-3.5" />} label={`${o.weightKg.toLocaleString('en-US')} كجم`} />
+                    {(o.weightKg ?? 0) > 0 && <Tag icon={<Weight className="h-3.5 w-3.5" />} label={`${o.weightKg!.toLocaleString('en-US')} كجم`} />}
                     <Tag icon={<Truck className="h-3.5 w-3.5" />} label={o.truckType} />
                     <Tag icon={<Calendar className="h-3.5 w-3.5" />} label={formatDate(o.pickupDate)} />
                     <Tag icon={<MapPin className="h-3.5 w-3.5" />} label={o.originAddress.split('،')[0] ?? '—'} />
