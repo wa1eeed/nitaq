@@ -26,18 +26,11 @@ RUN cd /repo/apps/api && node_modules/.bin/tsc \
 # pnpm deploy produces flat node_modules (no pnpm store symlinks)
 RUN pnpm --filter @naqla/api deploy --prod /prod
 # prisma generate writes the query engine to .prisma/client inside the pnpm
-# store (not a declared package), so pnpm deploy omits it. Resolve the real
-# path via @prisma/client and copy to the prod deployment.
-RUN node -e " \
-  const {realpathSync,cpSync,mkdirSync}=require('fs'); \
-  const {dirname,join}=require('path'); \
-  const pkg=realpathSync(require.resolve('@prisma/client')); \
-  const src=join(dirname(pkg),'../.prisma/client'); \
-  const dest='/prod/node_modules/.prisma/client'; \
-  mkdirSync('/prod/node_modules/.prisma',{recursive:true}); \
-  cpSync(src,dest,{recursive:true}); \
-  console.log('copied .prisma/client from',src); \
-"
+# virtual store (not a declared package), so pnpm deploy omits it.
+# Use a shell glob on the known store path — version-agnostic.
+RUN mkdir -p /prod/node_modules/.prisma && \
+    cp -r /repo/node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client \
+          /prod/node_modules/.prisma/client
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
