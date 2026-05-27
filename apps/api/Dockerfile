@@ -25,14 +25,6 @@ RUN cd /repo/apps/api && node_modules/.bin/tsc \
 
 # pnpm deploy produces flat node_modules (no pnpm store symlinks)
 RUN pnpm --filter @naqla/api deploy --prod /prod
-# prisma generate writes the query engine to .prisma/client inside the pnpm
-# virtual store (not a declared package), so pnpm deploy omits it.
-# Use a shell glob on the known store path — version-agnostic.
-RUN for src in /repo/node_modules/.pnpm/@prisma+client*/node_modules/.prisma/client; do \
-      rel="${src#/repo/node_modules/}"; \
-      mkdir -p "/prod/node_modules/$(dirname "$rel")"; \
-      cp -r "$src" "/prod/node_modules/$rel"; \
-    done
 
 FROM node:20-alpine AS runtime
 WORKDIR /app
@@ -42,6 +34,12 @@ COPY --from=builder /prod/node_modules ./node_modules
 COPY --from=builder /repo/apps/api/dist ./dist
 COPY --from=builder /repo/apps/api/package.json ./
 COPY --from=builder /repo/apps/api/prisma ./prisma
+# pnpm deploy omits .prisma/client (the generated query engine + JS).
+# Copy it directly from the builder repo into the matching pnpm virtual store
+# path so @prisma/client can find it at runtime.
+COPY --from=builder \
+  /repo/node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client \
+  ./node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO /dev/null http://localhost:4000/health || exit 1
