@@ -42,9 +42,7 @@ export class JwtAuthGuard implements CanActivate {
 
     let payload: JwtPayload;
     try {
-      payload = this.jwtService.verify<JwtPayload>(token, {
-        secret: process.env.JWT_SECRET,
-      });
+      payload = this.jwtService.verify<JwtPayload>(token);
     } catch {
       throw new UnauthorizedException({ code: 'INVALID_TOKEN', message: 'الجلسة غير صالحة' });
     }

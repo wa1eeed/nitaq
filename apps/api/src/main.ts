@@ -1,3 +1,6 @@
+// Must be the very first import so process.env is populated before any module
+// decorator (e.g. JwtModule.register) reads it.
+import 'dotenv/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
