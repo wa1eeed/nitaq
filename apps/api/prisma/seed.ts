@@ -44,10 +44,10 @@ async function main() {
     { key: 'commission_default_rate', value: '0.08', category: 'finance' },
     { key: 'vat_rate', value: '0.15', category: 'finance' },
 
-    // White-label / branding
-    { key: 'platform_name_ar', value: 'نِطاق', category: 'branding' },
-    { key: 'platform_name_en', value: 'Nitaq', category: 'branding' },
-    { key: 'platform_logo', value: '', category: 'branding' }, // URL to logo (PNG/SVG)
+    // White-label / branding (keys must match settings.controller.ts /settings/platform reads)
+    { key: 'platform.nameAr', value: 'نِطاق', category: 'branding' },
+    { key: 'platform.nameEn', value: 'Nitaq', category: 'branding' },
+    { key: 'platform.logoUrl', value: '', category: 'branding' }, // URL to logo (PNG/SVG)
 
     // Localization defaults
     { key: 'default_locale', value: 'ar', category: 'localization' },

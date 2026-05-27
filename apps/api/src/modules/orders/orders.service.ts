@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import type { EmployeeStatus } from '@prisma/client';
@@ -111,50 +112,68 @@ export class OrdersService {
     if (!actor.companyId) {
       throw new BadRequestException({ code: 'NO_COMPANY', message: 'يجب أن تكون ضمن شركة' });
     }
+
+    // Verify the company still exists — JWT may outlive a DB reseed.
+    const company = await this.prisma.company.findUnique({ where: { id: actor.companyId }, select: { id: true } });
+    if (!company) {
+      throw new BadRequestException({ code: 'COMPANY_NOT_FOUND', message: 'لم يُعثر على الشركة، يرجى تسجيل الخروج وإعادة الدخول' });
+    }
+
     const orderNumber = `ORD-${new Date().getFullYear()}-${orderNumberGen()}`;
-    return this.prisma.order.create({
-      data: {
-        orderNumber,
-        clientId: actor.companyId,
-        // v0.6.0 workflow fields — defaults preserve old behavior.
-        mode: dto.mode ?? 'OPEN',
-        targetProviderId: dto.mode === 'DIRECT' ? dto.targetProviderId : null,
-        // Pre-seed agreed price for DIRECT orders with upfront price.
-        ...(dto.mode === 'DIRECT' && dto.agreedPriceUpfront ? {
-          agreedPrice:      dto.agreedPriceUpfront,
-          commissionAmount: +(dto.agreedPriceUpfront * 0.08).toFixed(2),
-          providerAmount:   +(dto.agreedPriceUpfront * 0.92).toFixed(2),
-        } : {}),
-        tripType: dto.tripType ?? (dto.originCity === dto.destinationCity ? 'SAME_CITY' : 'INTER_CITY'),
-        pickupWindow: dto.pickupWindow ?? 'ALL_DAY',
-        cargoType: dto.cargoType,
-        cargoDescription: dto.cargoDescription,
-        weight: dto.weight,
-        pallets: dto.pallets,
-        volume: dto.volume,
-        originCity: dto.originCity,
-        originRegion: dto.originRegion,
-        originAddress: dto.originAddress,
-        originLat: dto.originLat,
-        originLng: dto.originLng,
-        destinationCity: dto.destinationCity,
-        destinationRegion: dto.destinationRegion,
-        destinationAddress: dto.destinationAddress,
-        destinationLat: dto.destinationLat,
-        destinationLng: dto.destinationLng,
-        requiredServiceType: dto.requiredServiceType,
-        requiresRefrigeration: dto.requiresRefrigeration ?? false,
-        requiresInsurance: dto.requiresInsurance ?? false,
-        specialInstructions: dto.specialInstructions,
-        pickupDate: new Date(dto.pickupDate),
-        deliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : null,
-        bidDeadline: dto.bidDeadline ? new Date(dto.bidDeadline) : null,
-        clientBudget: dto.clientBudget,
-        poNumber: dto.poNumber,
-        notes: dto.notes,
-        documents: dto.documents ?? [],
-      },
-    });
+    try {
+      return await this.prisma.order.create({
+        data: {
+          orderNumber,
+          clientId: actor.companyId,
+          // v0.6.0 workflow fields — defaults preserve old behavior.
+          mode: dto.mode ?? 'OPEN',
+          targetProviderId: dto.mode === 'DIRECT' ? dto.targetProviderId : null,
+          // Pre-seed agreed price for DIRECT orders with upfront price.
+          ...(dto.mode === 'DIRECT' && dto.agreedPriceUpfront ? {
+            agreedPrice:      dto.agreedPriceUpfront,
+            commissionAmount: +(dto.agreedPriceUpfront * 0.08).toFixed(2),
+            providerAmount:   +(dto.agreedPriceUpfront * 0.92).toFixed(2),
+          } : {}),
+          tripType: dto.tripType ?? (dto.originCity === dto.destinationCity ? 'SAME_CITY' : 'INTER_CITY'),
+          pickupWindow: dto.pickupWindow ?? 'ALL_DAY',
+          cargoType: dto.cargoType,
+          cargoDescription: dto.cargoDescription,
+          weight: dto.weight,
+          pallets: dto.pallets,
+          volume: dto.volume,
+          originCity: dto.originCity,
+          originRegion: dto.originRegion,
+          originAddress: dto.originAddress,
+          originLat: dto.originLat,
+          originLng: dto.originLng,
+          destinationCity: dto.destinationCity,
+          destinationRegion: dto.destinationRegion,
+          destinationAddress: dto.destinationAddress,
+          destinationLat: dto.destinationLat,
+          destinationLng: dto.destinationLng,
+          requiredServiceType: dto.requiredServiceType,
+          requiresRefrigeration: dto.requiresRefrigeration ?? false,
+          requiresInsurance: dto.requiresInsurance ?? false,
+          specialInstructions: dto.specialInstructions,
+          pickupDate: new Date(dto.pickupDate),
+          deliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : null,
+          bidDeadline: dto.bidDeadline ? new Date(dto.bidDeadline) : null,
+          clientBudget: dto.clientBudget,
+          poNumber: dto.poNumber,
+          notes: dto.notes,
+          documents: dto.documents ?? [],
+        },
+      });
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code === 'P2003') {
+        throw new BadRequestException({ code: 'FK_VIOLATION', message: 'بيانات الحساب قديمة، يرجى تسجيل الخروج وإعادة الدخول' });
+      }
+      if (code === 'P2002') {
+        throw new BadRequestException({ code: 'DUPLICATE_ORDER', message: 'رقم الطلب مكرر، حاول مرة أخرى' });
+      }
+      throw new InternalServerErrorException({ code: 'ORDER_CREATE_FAILED', message: 'فشل إنشاء الطلب، حاول مرة أخرى' });
+    }
   }
 
   async update(id: string, dto: UpdateOrderDto, actor: AuthUser) {

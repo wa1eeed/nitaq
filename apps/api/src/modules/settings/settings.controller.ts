@@ -32,8 +32,8 @@ export class SettingsController {
     const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
     return {
       logoUrl: map['platform.logoUrl'] ?? '',
-      nameAr:  map['platform.nameAr']  ?? 'نقلة لوجيستك',
-      nameEn:  map['platform.nameEn']  ?? 'Naqla Logistics',
+      nameAr:  map['platform.nameAr']  ?? 'نِطاق',
+      nameEn:  map['platform.nameEn']  ?? 'Nitaq',
     };
   }
 }

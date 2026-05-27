@@ -112,7 +112,7 @@ export default function NewOrderWizard() {
   const companyId = useAuthStore((s) => s.user?.companyId);
   const { data: catalog } = useSWR<CatalogData>('/settings/catalogs', fetcher);
   const { data: carriersRaw, isLoading: carriersLoading } =
-    useSWR<ApiCarrier[]>('/companies?type=CARRIER&status=ACTIVE&limit=100', fetcher);
+    useSWR<ApiCarrier[]>('/companies?type=PROVIDER&status=ACTIVE&limit=100', fetcher);
   const { data: savedAddresses } = useSWR<SavedAddress[]>(
     companyId ? `/companies/${companyId}/addresses` : null,
     fetcher,
