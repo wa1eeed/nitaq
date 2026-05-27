@@ -69,35 +69,29 @@ enum OrderStatus {
 }
 
 enum ServiceType {
-  // The provider add-service UI uses the catalog in
-  // packages/shared-utils/src/mock-data.ts → DEFAULT_SERVICE_TYPES.
-  // Keep this enum a superset of those IDs so the form can submit any value
-  // the provider selects without a manual mapping.
-  SMALL_VAN
-  SMALL_FLATBED
-  MEDIUM_FLATBED
-  LARGE_FLATBED
-  REFRIGERATED
-  CONTAINER_20
-  CONTAINER_40
-  CONTAINER_TRAILER
-  TANKER
-  CURTAINSIDER
-  BOX_TRUCK
-  LOWBED
+  CONSULTING
+  DESIGN
+  INSTALLATION
+  MAINTENANCE
+  TECHNICAL_SUPPORT
+  TRAINING
+  IT_SERVICES
+  LOGISTICS
+  PROJECT_MANAGEMENT
+  OTHER
 }
 
 enum CargoType {
-  GENERAL
-  FOOD
-  CHEMICALS
-  ELECTRONICS
-  FURNITURE
-  CONSTRUCTION
-  AUTOMOTIVE
-  MEDICAL
-  HAZARDOUS
-  FRAGILE
+  CONSULTING
+  DESIGN
+  INSTALLATION
+  MAINTENANCE
+  TECHNICAL_SUPPORT
+  TRAINING
+  IT_SERVICES
+  LOGISTICS
+  PROJECT_MANAGEMENT
+  OTHER
 }
 
 enum BidStatus {
@@ -366,7 +360,7 @@ model Order {
 
   cargoType             CargoType
   cargoDescription      String
-  weight                Float
+  weight                Float?
   pallets               Int?
   volume                Float?
 

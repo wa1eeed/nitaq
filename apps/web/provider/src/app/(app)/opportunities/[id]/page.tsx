@@ -32,9 +32,10 @@ import {
 } from '@naqla/shared-utils';
 
 const TRUCK_LABELS: Record<string, string> = {
-  SMALL_VAN: 'فان صغير', BOX_TRUCK: 'صندوق مغلق', MEDIUM_FLATBED: 'مسطح متوسط',
-  LARGE_FLATBED: 'مسطح كبير', REFRIGERATED: 'مبرّد', TANKER: 'صهريج',
-  LOWBED: 'لوبد', CONTAINER_TRAILER: 'حاوية',
+  CONSULTING: 'استشارات', DESIGN: 'تصميم', INSTALLATION: 'تركيب وتنصيب',
+  MAINTENANCE: 'صيانة', TECHNICAL_SUPPORT: 'دعم تقني', TRAINING: 'تدريب',
+  IT_SERVICES: 'خدمات تقنية', LOGISTICS: 'لوجستيات',
+  PROJECT_MANAGEMENT: 'إدارة مشاريع', OTHER: 'أخرى',
 };
 
 export default function CarrierOpportunityDetail() {

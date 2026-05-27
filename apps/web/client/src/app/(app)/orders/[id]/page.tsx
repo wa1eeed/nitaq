@@ -34,15 +34,12 @@ import {
 } from '@naqla/shared-utils';
 
 const TRUCK_LABELS: Record<string, string> = {
-  SMALL_VAN: 'فان صغير', BOX_TRUCK: 'صندوق مغلق', MEDIUM_FLATBED: 'مسطح متوسط',
-  LARGE_FLATBED: 'مسطح كبير', REFRIGERATED: 'مبرّد', TANKER: 'صهريج',
-  LOWBED: 'لوبد', CONTAINER_TRAILER: 'حاوية',
+  CONSULTING: 'استشارات', DESIGN: 'تصميم', INSTALLATION: 'تركيب وتنصيب',
+  MAINTENANCE: 'صيانة', TECHNICAL_SUPPORT: 'دعم تقني', TRAINING: 'تدريب',
+  IT_SERVICES: 'خدمات تقنية', LOGISTICS: 'لوجستيات',
+  PROJECT_MANAGEMENT: 'إدارة مشاريع', OTHER: 'أخرى',
 };
-const CARGO_LABELS: Record<string, string> = {
-  GENERAL: 'بضاعة عامة', FRAGILE: 'هشّة', PERISHABLE: 'قابلة للتلف',
-  HAZARDOUS: 'مواد خطرة', OVERSIZED: 'حمولة استثنائية', CONSTRUCTION: 'مواد بناء',
-  AUTOMOTIVE: 'مركبات', LIVESTOCK: 'مواشي',
-};
+const CARGO_LABELS: Record<string, string> = TRUCK_LABELS;
 const TITLES: Record<string, string> = {
   CREATED: 'إنشاء الطلب', PUBLISHED: 'نشر الطلب', BID_RECEIVED: 'استلام عروض',
   BID_ACCEPTED: 'قبول العرض', CONFIRMED: 'تأكيد التحميل', PICKED_UP: 'تم الاستلام',

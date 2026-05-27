@@ -1,11 +1,8 @@
 import { IsArray, IsBoolean, IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
 
-// Must stay in sync with Prisma enum `ServiceType` in apps/api/prisma/schema.prisma.
-// The provider UI's service-types catalog (DEFAULT_SERVICE_TYPES) is the source of
-// what the user actually sees — keep this enum a superset of those IDs.
 const TRUCKS = [
-  'SMALL_VAN','SMALL_FLATBED','MEDIUM_FLATBED','LARGE_FLATBED','REFRIGERATED',
-  'CONTAINER_20','CONTAINER_40','CONTAINER_TRAILER','TANKER','CURTAINSIDER','BOX_TRUCK','LOWBED',
+  'CONSULTING','DESIGN','INSTALLATION','MAINTENANCE','TECHNICAL_SUPPORT',
+  'TRAINING','IT_SERVICES','LOGISTICS','PROJECT_MANAGEMENT','OTHER',
 ] as const;
 
 export class CreateTruckDto {

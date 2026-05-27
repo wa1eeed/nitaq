@@ -12,34 +12,22 @@ export const orderStatusLabels: Record<string, { ar: string; en: string }> = {
 };
 
 export const serviceTypeLabels: Record<string, { ar: string; en: string }> = {
-  SMALL_FLATBED: { ar: 'استشارات', en: 'Consulting' },
-  MEDIUM_FLATBED: { ar: 'تصميم', en: 'Design' },
-  LARGE_FLATBED: { ar: 'تركيب', en: 'Installation' },
-  REFRIGERATED: { ar: 'صيانة', en: 'Maintenance' },
-  CONTAINER_20: { ar: 'دعم تقني', en: 'Technical Support' },
-  CONTAINER_40: { ar: 'تدريب', en: 'Training' },
-  TANKER: { ar: 'خدمات تقنية', en: 'IT Services' },
-  CURTAINSIDER: { ar: 'لوجستيات', en: 'Logistics' },
-  BOX_TRUCK: { ar: 'إدارة مشاريع', en: 'Project Management' },
-  LOWBED: { ar: 'أخرى', en: 'Other' },
+  CONSULTING: { ar: 'استشارات', en: 'Consulting' },
+  DESIGN: { ar: 'تصميم', en: 'Design' },
+  INSTALLATION: { ar: 'تركيب وتنصيب', en: 'Installation' },
+  MAINTENANCE: { ar: 'صيانة', en: 'Maintenance' },
+  TECHNICAL_SUPPORT: { ar: 'دعم تقني', en: 'Technical Support' },
+  TRAINING: { ar: 'تدريب', en: 'Training' },
+  IT_SERVICES: { ar: 'خدمات تقنية', en: 'IT Services' },
+  LOGISTICS: { ar: 'لوجستيات', en: 'Logistics' },
+  PROJECT_MANAGEMENT: { ar: 'إدارة مشاريع', en: 'Project Management' },
+  OTHER: { ar: 'أخرى', en: 'Other' },
 };
+export const serviceCategoryLabels = serviceTypeLabels;
 /** @deprecated use serviceTypeLabels */
 export const truckTypeLabels = serviceTypeLabels;
-
-export const serviceCategoryLabels: Record<string, { ar: string; en: string }> = {
-  GENERAL: { ar: 'خدمات عامة', en: 'General Services' },
-  FOOD: { ar: 'تموين وأغذية', en: 'Catering & Food' },
-  CHEMICALS: { ar: 'مواد كيميائية', en: 'Chemicals' },
-  ELECTRONICS: { ar: 'تقنية ومعلومات', en: 'Technology & IT' },
-  FURNITURE: { ar: 'تركيب وتجميع', en: 'Installation & Assembly' },
-  CONSTRUCTION: { ar: 'إنشاء وهندسة', en: 'Construction & Engineering' },
-  AUTOMOTIVE: { ar: 'سيارات ونقليات', en: 'Automotive' },
-  MEDICAL: { ar: 'رعاية صحية', en: 'Healthcare' },
-  HAZARDOUS: { ar: 'مواد متخصصة', en: 'Specialized Materials' },
-  FRAGILE: { ar: 'قابل للكسر', en: 'Fragile' },
-};
 /** @deprecated use serviceCategoryLabels */
-export const cargoTypeLabels = serviceCategoryLabels;
+export const cargoTypeLabels = serviceTypeLabels;
 
 export const kycStatusLabels: Record<string, { ar: string; en: string }> = {
   NOT_SUBMITTED: { ar: 'لم يُقدّم', en: 'Not submitted' },

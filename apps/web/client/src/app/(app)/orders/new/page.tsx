@@ -146,22 +146,19 @@ export default function NewOrderWizard() {
         mode: form.mode ?? 'OPEN',
         cargoType: form.cargoType,
         cargoDescription: form.cargoDescription,
-        weight: 0,
         originCity: form.originCity,
         originRegion: form.originCity,
         originAddress: form.originAddress || form.originCity,
-        destinationCity: form.destinationCity,
-        destinationRegion: form.destinationCity,
-        destinationAddress: form.originAddress || form.destinationCity,
-        requiredTruckType: form.truckType,
-        requiresRefrigeration: false,
+        destinationCity: form.originCity,
+        destinationRegion: form.originCity,
+        destinationAddress: form.originAddress || form.originCity,
+        requiredServiceType: form.truckType,
         requiresInsurance: form.requiresInsurance,
         pickupDate: form.pickupDate,
         pickupWindow: form.pickupWindow,
-        tripType: 'INTER_CITY',
         ...(form.specialInstructions ? { specialInstructions: form.specialInstructions } : {}),
         ...(form.mode === 'DIRECT' && form.targetCarrierId
-          ? { targetCarrierId: form.targetCarrierId }
+          ? { targetProviderId: form.targetCarrierId }
           : {}),
         ...(form.mode === 'DIRECT' && form.hasPreAgreedPrice && form.agreedPriceUpfront
           ? { agreedPriceUpfront: form.agreedPriceUpfront }

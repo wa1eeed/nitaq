@@ -52,34 +52,30 @@ export const OrderStatus = {
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export const ServiceType = {
-  SMALL_FLATBED: 'SMALL_FLATBED',
-  MEDIUM_FLATBED: 'MEDIUM_FLATBED',
-  LARGE_FLATBED: 'LARGE_FLATBED',
-  REFRIGERATED: 'REFRIGERATED',
-  CONTAINER_20: 'CONTAINER_20',
-  CONTAINER_40: 'CONTAINER_40',
-  TANKER: 'TANKER',
-  CURTAINSIDER: 'CURTAINSIDER',
-  BOX_TRUCK: 'BOX_TRUCK',
-  LOWBED: 'LOWBED',
+  CONSULTING: 'CONSULTING',
+  DESIGN: 'DESIGN',
+  INSTALLATION: 'INSTALLATION',
+  MAINTENANCE: 'MAINTENANCE',
+  TECHNICAL_SUPPORT: 'TECHNICAL_SUPPORT',
+  TRAINING: 'TRAINING',
+  IT_SERVICES: 'IT_SERVICES',
+  LOGISTICS: 'LOGISTICS',
+  PROJECT_MANAGEMENT: 'PROJECT_MANAGEMENT',
+  OTHER: 'OTHER',
 } as const;
 export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType];
-/** @deprecated use ServiceType */
-export const TruckType = ServiceType;
-/** @deprecated use ServiceType */
-export type TruckType = ServiceType;
 
 export const CargoType = {
-  GENERAL: 'GENERAL',
-  FOOD: 'FOOD',
-  CHEMICALS: 'CHEMICALS',
-  ELECTRONICS: 'ELECTRONICS',
-  FURNITURE: 'FURNITURE',
-  CONSTRUCTION: 'CONSTRUCTION',
-  AUTOMOTIVE: 'AUTOMOTIVE',
-  MEDICAL: 'MEDICAL',
-  HAZARDOUS: 'HAZARDOUS',
-  FRAGILE: 'FRAGILE',
+  CONSULTING: 'CONSULTING',
+  DESIGN: 'DESIGN',
+  INSTALLATION: 'INSTALLATION',
+  MAINTENANCE: 'MAINTENANCE',
+  TECHNICAL_SUPPORT: 'TECHNICAL_SUPPORT',
+  TRAINING: 'TRAINING',
+  IT_SERVICES: 'IT_SERVICES',
+  LOGISTICS: 'LOGISTICS',
+  PROJECT_MANAGEMENT: 'PROJECT_MANAGEMENT',
+  OTHER: 'OTHER',
 } as const;
 export type CargoType = (typeof CargoType)[keyof typeof CargoType];
 

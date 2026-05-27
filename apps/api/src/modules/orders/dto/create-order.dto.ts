@@ -12,12 +12,12 @@ import {
 } from 'class-validator';
 
 const CARGO = [
-  'GENERAL','FOOD','CHEMICALS','ELECTRONICS','FURNITURE',
-  'CONSTRUCTION','AUTOMOTIVE','MEDICAL','HAZARDOUS','FRAGILE',
+  'CONSULTING','DESIGN','INSTALLATION','MAINTENANCE','TECHNICAL_SUPPORT',
+  'TRAINING','IT_SERVICES','LOGISTICS','PROJECT_MANAGEMENT','OTHER',
 ] as const;
-const TRUCKS = [
-  'SMALL_FLATBED','MEDIUM_FLATBED','LARGE_FLATBED','REFRIGERATED',
-  'CONTAINER_20','CONTAINER_40','TANKER','CURTAINSIDER','BOX_TRUCK','LOWBED',
+const SERVICE_TYPES = [
+  'CONSULTING','DESIGN','INSTALLATION','MAINTENANCE','TECHNICAL_SUPPORT',
+  'TRAINING','IT_SERVICES','LOGISTICS','PROJECT_MANAGEMENT','OTHER',
 ] as const;
 const MODES = ['OPEN', 'DIRECT'] as const;
 const TRIP_TYPES = ['SAME_CITY', 'INTER_CITY'] as const;
@@ -26,7 +26,7 @@ const PICKUP_WINDOWS = ['MORNING', 'EVENING', 'ALL_DAY'] as const;
 export class CreateOrderDto {
   @IsEnum(CARGO) cargoType!: (typeof CARGO)[number];
   @IsString() cargoDescription!: string;
-  @IsNumber() @Min(1) weight!: number;
+  @IsOptional() @IsNumber() @Min(0) weight?: number;
 
   /// OPEN (default) → marketplace; DIRECT → only `targetProviderId` sees it.
   @IsOptional() @IsEnum(MODES) mode?: (typeof MODES)[number];
@@ -54,7 +54,7 @@ export class CreateOrderDto {
   @IsOptional() @IsNumber() destinationLat?: number;
   @IsOptional() @IsNumber() destinationLng?: number;
 
-  @IsEnum(TRUCKS) requiredServiceType!: (typeof TRUCKS)[number];
+  @IsEnum(SERVICE_TYPES) requiredServiceType!: (typeof SERVICE_TYPES)[number];
   @IsOptional() @IsBoolean() requiresRefrigeration?: boolean;
   @IsOptional() @IsBoolean() requiresInsurance?: boolean;
   @IsOptional() @IsString() specialInstructions?: string;

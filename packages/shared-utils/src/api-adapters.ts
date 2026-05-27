@@ -22,6 +22,7 @@ import type { Order, Bid } from './mock-data';
 interface ApiOrder {
   // Prisma-style field names that differ from the mock:
   weight?: number;
+  requiredServiceType?: string;
   requiredTruckType?: string;
   // API still uses carrier* field names — mapped to provider* in normalized shape
   carrierId?: string;
@@ -55,7 +56,7 @@ export function normalizeOrder(input: ApiOrder | Order | null | undefined): Orde
   return {
     ...(o as object),
     weightKg: (o.weight ?? o.weightKg ?? 0) as number,
-    truckType: (o.requiredTruckType ?? o.truckType ?? '') as string,
+    truckType: (o.requiredServiceType ?? o.requiredTruckType ?? o.truckType ?? '') as string,
     bidCount: (o._count?.bids ?? o.bidCount ?? (Array.isArray(o.bids) ? o.bids.length : 0)) as number,
     // Normalize carrier* → provider* (API uses old names; UI uses new names)
     carrierId: (o.carrierId ?? o.providerId ?? null) as string | null,
