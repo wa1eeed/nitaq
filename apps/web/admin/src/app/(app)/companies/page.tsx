@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Building2, Plus, Search, Truck, User as UserIcon, Users } from 'lucide-react';
+import { Briefcase, Building2, Plus, Search, User as UserIcon, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -52,8 +52,8 @@ export default function AdminCompaniesPage() {
   return (
     <>
       <PageHeader
-        title="الناقلون والعملاء"
-        subtitle={`${list.length} كيان مسجّل — ${counts.CARRIER} ناقل (${list.filter((c) => c.kind === 'CARRIER' && c.accountType === 'INDIVIDUAL').length} فرد) · ${counts.CLIENT} عميل`}
+        title="المزودون والعملاء"
+        subtitle={`${list.length} كيان مسجّل — ${counts.CARRIER} مزوّد (${list.filter((c) => c.kind === 'CARRIER' && c.accountType === 'INDIVIDUAL').length} فرد) · ${counts.CLIENT} عميل`}
         actions={
           <Button>
             <Plus className="h-4 w-4" />
@@ -74,8 +74,8 @@ export default function AdminCompaniesPage() {
               العملاء ({counts.CLIENT})
             </TabsTrigger>
             <TabsTrigger value="CARRIER">
-              <Truck className="h-3.5 w-3.5 me-1.5" />
-              الناقلون ({counts.CARRIER})
+              <Briefcase className="h-3.5 w-3.5 me-1.5" />
+              المزودون ({counts.CARRIER})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -132,7 +132,7 @@ export default function AdminCompaniesPage() {
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <Badge variant={c.kind === 'CLIENT' ? 'default' : 'success'}>
-                          {c.kind === 'CLIENT' ? 'عميل' : 'ناقل'}
+                          {c.kind === 'CLIENT' ? 'عميل' : 'مزوّد'}
                         </Badge>
                         {c.accountType === 'INDIVIDUAL' && (
                           <Badge variant="outline" className="inline-flex items-center gap-1 w-fit">
@@ -151,7 +151,7 @@ export default function AdminCompaniesPage() {
                     <TableCell className="text-end">
                       {c.kind === 'CARRIER' ? (
                         <span className="text-xs text-muted-foreground num">
-                          {(c.completedTrips ?? 0).toLocaleString('en-US')} رحلة
+                          {(c.completedTrips ?? 0).toLocaleString('en-US')} طلب
                         </span>
                       ) : c.monthlyVolume ? (
                         <Currency amount={c.monthlyVolume} />

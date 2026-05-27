@@ -6,8 +6,8 @@ import { fetcher, api } from '@/lib/api';
 import { notify } from '@/lib/notify';
 import { useAuthStore } from '@/lib/auth-store';
 import {
-  ArrowRight, Building2, Calendar, CheckCircle2, Clock, History, MapPin, MessageSquare, Package,
-  Send, ShieldCheck, Snowflake, Truck, UserSearch, Weight, X,
+  ArrowRight, Briefcase, Building2, Calendar, CheckCircle2, Clock, History, MapPin, MessageSquare, Package,
+  Send, ShieldCheck, UserSearch, X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -183,7 +183,7 @@ export default function CarrierOpportunityDetail() {
                   </div>
                 </div>
                 <div className="rounded-lg border bg-card p-3">
-                  <div className="text-xs text-muted-foreground">موعد التسليم المقترح</div>
+                  <div className="text-xs text-muted-foreground">موعد الإنجاز المقترح</div>
                   <div className="mt-0.5 text-sm font-medium">
                     {myBid.proposedDeliveryDate
                       ? formatDate(myBid.proposedDeliveryDate, 'EEEE d MMM')
@@ -362,7 +362,7 @@ export default function CarrierOpportunityDetail() {
                 Must be on or after the effective pickup date. */}
             <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
               <Label htmlFor="proposedDeliveryDate" className="text-xs font-semibold text-muted-foreground uppercase">
-                موعد التسليم المقترح
+                موعد الإنجاز المقترح
               </Label>
               <Input
                 id="proposedDeliveryDate"
@@ -376,7 +376,7 @@ export default function CarrierOpportunityDetail() {
               />
               {proposedDeliveryDate && (
                 <div className="text-xs text-muted-foreground">
-                  سيظهر للعميل: 📦 التسليم{' '}
+                  سيظهر للعميل: 📦 الإنجاز{' '}
                   <span className="font-medium num" dir="ltr">
                     {formatDate(proposedDeliveryDate, 'EEEE d MMM')}
                   </span>
@@ -385,13 +385,13 @@ export default function CarrierOpportunityDetail() {
             </div>
 
             <div className="space-y-2">
-              <Label>الشاحنة المخصّصة</Label>
+              <Label>الخدمة المخصّصة</Label>
               <Select value={truckId} onValueChange={setTruckId}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {TRUCKS.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
-                      {t.plateNumber} · {TRUCK_LABELS[t.truckType]} · {(t.capacityKg / 1000).toFixed(0)} طن
+                      {t.plateNumber} · {TRUCK_LABELS[t.truckType]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -403,7 +403,7 @@ export default function CarrierOpportunityDetail() {
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="مثال: شاحنة موديل 2024، تأمين شامل، خبرة 5 سنوات."
+                placeholder="مثال: خدمة متخصصة مع ضمان الجودة، خبرة 5 سنوات."
               />
             </div>
 
@@ -489,25 +489,22 @@ export default function CarrierOpportunityDetail() {
           )}
 
           <Card>
-            <CardHeader><CardTitle>تفاصيل الشحنة</CardTitle></CardHeader>
+            <CardHeader><CardTitle>تفاصيل الطلب</CardTitle></CardHeader>
             <CardContent>
               <dl className="divide-y">
-                <Row label="نوع البضاعة" icon={Package} value={order.cargoType} />
-                <Row label="الوزن" icon={Weight} value={<span className="num">{(order.weightKg ?? 0).toLocaleString('en-US')} كجم</span>} />
-                <Row label="الشاحنة" icon={Truck} value={(order.truckType && TRUCK_LABELS[order.truckType]) || order.truckType || '—'} />
-                <Row label="تأمين" icon={ShieldCheck} value={order.requiresInsurance ? 'مطلوب' : '—'} />
-                <Row label="تبريد" icon={Snowflake} value={order.requiresRefrigeration ? 'مطلوب' : '—'} />
+                <Row label="نوع الخدمة" icon={Package} value={order.cargoType} />
+                <Row label="نوع المورد" icon={Briefcase} value={(order.truckType && TRUCK_LABELS[order.truckType]) || order.truckType || '—'} />
+                {order.requiresInsurance && <Row label="تأمين" icon={ShieldCheck} value="مطلوب" />}
               </dl>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader><CardTitle>المسار</CardTitle></CardHeader>
+            <CardHeader><CardTitle>الموقع والموعد</CardTitle></CardHeader>
             <CardContent>
               <dl className="divide-y">
-                <Row label="من" icon={MapPin} value={order.originCity} />
-                <Row label="إلى" icon={MapPin} value={order.destinationCity} />
-                <Row label="الاستلام" icon={Calendar} value={formatDate(order.pickupDate, 'EEEE d MMM · HH:mm')} />
+                <Row label="المدينة" icon={MapPin} value={order.originCity} />
+                <Row label="تاريخ البدء" icon={Calendar} value={formatDate(order.pickupDate, 'EEEE d MMM · HH:mm')} />
               </dl>
             </CardContent>
           </Card>
@@ -597,7 +594,7 @@ function DirectNegotiationView({
       } else if (action === 'DECLINE') {
         // POST /orders/:id/decline-direct → resets order to PUBLISHED so client can reassign
         await api.post(`/orders/${order.id}/decline-direct`, { reason: reason || undefined });
-        notify.success('تم إرسال اعتذارك', 'سيتمكّن العميل من اختيار ناقل آخر');
+        notify.success('تم إرسال اعتذارك', 'سيتمكّن العميل من اختيار مزوّد آخر');
       }
       setAction(null);
     } catch (err) {
@@ -610,7 +607,7 @@ function DirectNegotiationView({
   return (
     <>
       <PageHeader
-        title={`طلب مباشر · ${order.originCity} ← ${order.destinationCity}`}
+        title={`طلب مباشر · ${order.originCity}`}
         subtitle={`${order.orderNumber} · من ${client?.nameAr ?? '—'}`}
         actions={
           <>
@@ -665,8 +662,8 @@ function DirectNegotiationView({
                   <div>
                     <h3 className="font-semibold">طلب مباشر جديد من {client?.nameAr ?? 'العميل'}</h3>
                     <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                      لم يحدّد العميل سعراً. كناقل مرسَل إليه الطلب مباشرة، يمكنك:
-                      اقتراح سعر، أو الاعتذار. لن تظهر هذه الفرصة لأي ناقل آخر.
+                      لم يحدّد العميل سعراً. كمزوّد مُرسَل إليه الطلب مباشرة، يمكنك:
+                      اقتراح سعر، أو الاعتذار. لن تظهر هذه الفرصة لأي مزوّد آخر.
                     </p>
                   </div>
                 </div>
@@ -741,7 +738,7 @@ function DirectNegotiationView({
                 <X className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-destructive">انتهى التفاوض</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">العميل قد يختار ناقلاً آخر أو يحوّل الطلب للسوق المفتوح.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">العميل قد يختار مزوّداً آخر أو يحوّل الطلب للسوق المفتوح.</p>
                 </div>
               </CardContent>
             </Card>
@@ -767,7 +764,7 @@ function DirectNegotiationView({
                       <div className="flex-1 min-w-0 rounded-md border bg-card p-3">
                         <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
                           <span className="text-sm font-semibold">
-                            {r.by === 'CARRIER' ? 'أنت (الناقل)' : 'العميل'} —{' '}
+                            {r.by === 'CARRIER' ? 'أنت (المزوّد)' : 'العميل'} —{' '}
                             {r.kind === 'COUNTER' ? 'اقترح' : r.kind === 'ACCEPT' ? 'قبل' : 'رفض'}
                           </span>
                           <span className="text-xs text-muted-foreground">{formatDateTime(r.at)}</span>
@@ -810,19 +807,16 @@ function DirectNegotiationView({
           )}
 
           <Card>
-            <CardHeader><CardTitle className="text-base">تفاصيل الشحنة</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">تفاصيل الطلب</CardTitle></CardHeader>
             <CardContent>
               <dl className="divide-y">
                 <Row label="رقم الطلب" value={<span className="font-mono text-xs">{order.orderNumber}</span>} />
-                <Row label="نوع البضاعة" icon={Package} value={order.cargoType} />
+                <Row label="نوع الخدمة" icon={Package} value={order.cargoType} />
                 <Row label="الوصف" value={order.cargoDescription} />
-                <Row label="الوزن" icon={Weight} value={<span className="num">{(order.weightKg ?? 0).toLocaleString('en-US')} كجم</span>} />
-                <Row label="نوع الشاحنة" icon={Truck} value={order.truckType} />
-                <Row label="الاستلام" icon={Calendar} value={formatDate(order.pickupDate, 'EEEE d MMM · HH:mm')} />
-                <Row label="من" icon={MapPin} value={`${order.originCity} — ${order.originAddress}`} />
-                <Row label="إلى" icon={MapPin} value={`${order.destinationCity} — ${order.destinationAddress}`} />
+                <Row label="نوع المورد" icon={Briefcase} value={order.truckType} />
+                <Row label="تاريخ البدء" icon={Calendar} value={formatDate(order.pickupDate, 'EEEE d MMM · HH:mm')} />
+                <Row label="المدينة" icon={MapPin} value={order.originCity} />
                 {order.requiresInsurance && <Row label="تأمين" icon={ShieldCheck} value="مطلوب" />}
-                {order.requiresRefrigeration && <Row label="تبريد" icon={Snowflake} value="مطلوب" />}
               </dl>
             </CardContent>
           </Card>
@@ -905,11 +899,11 @@ function DirectNegotiationView({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>الاعتذار عن الطلب</DialogTitle>
-            <DialogDescription>سيتم إعلام العميل ليختار ناقلاً آخر أو يحوّل الطلب للسوق المفتوح</DialogDescription>
+            <DialogDescription>سيتم إعلام العميل ليختار مزوّداً آخر أو يحوّل الطلب للسوق المفتوح</DialogDescription>
           </DialogHeader>
           <div className="py-2 space-y-2">
             <Label>السبب (اختياري — يساعد العميل في فهم القرار)</Label>
-            <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} placeholder="مثال: الأسطول مشغول في الموعد المطلوب" />
+            <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} placeholder="مثال: مواردنا مشغولة في الموعد المطلوب" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAction(null)}>تراجع</Button>

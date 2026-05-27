@@ -32,8 +32,8 @@ import {
 type ResolutionType = 'REFUND_CLIENT' | 'PAY_CARRIER' | 'SPLIT' | 'DISMISS';
 
 const RESOLUTIONS: { value: ResolutionType; label: string; description: string; tone: string }[] = [
-  { value: 'REFUND_CLIENT', label: 'استرداد كامل للعميل',  description: 'يُعاد المبلغ كاملاً وتُحمَّل الغرامة على الناقل',     tone: 'text-info' },
-  { value: 'PAY_CARRIER',   label: 'إفراج المبلغ للناقل',  description: 'الناقل محقّ — يُصرف المبلغ كما هو متّفق',             tone: 'text-success' },
+  { value: 'REFUND_CLIENT', label: 'استرداد كامل للعميل',  description: 'يُعاد المبلغ كاملاً وتُحمَّل الغرامة على المزوّد',    tone: 'text-info' },
+  { value: 'PAY_CARRIER',   label: 'إفراج المبلغ للمزوّد', description: 'المزوّد محقّ — يُصرف المبلغ كما هو متّفق',            tone: 'text-success' },
   { value: 'SPLIT',         label: 'تقسيم 50/50',          description: 'يُقسَّم المبلغ بين الطرفين بالتساوي',                  tone: 'text-warning' },
   { value: 'DISMISS',       label: 'رفض النزاع',           description: 'لا يوجد أساس للنزاع، يستمر الإجراء الطبيعي',           tone: 'text-muted-foreground' },
 ];
@@ -177,14 +177,14 @@ export default function AdminDisputeDetail() {
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <PartyCard
                 title="المُنشئ"
-                badge={dispute.raisedBy === 'CLIENT' ? 'عميل' : 'ناقل'}
+                badge={dispute.raisedBy === 'CLIENT' ? 'عميل' : 'مزوّد'}
                 badgeVariant="default"
                 company={raiser}
                 accent
               />
               <PartyCard
                 title="الطرف الآخر"
-                badge={dispute.raisedBy === 'CLIENT' ? 'ناقل' : 'عميل'}
+                badge={dispute.raisedBy === 'CLIENT' ? 'مزوّد' : 'عميل'}
                 badgeVariant="outline"
                 company={otherParty}
               />

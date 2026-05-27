@@ -33,7 +33,7 @@ export default function AdminPaymentsPage() {
     try {
       await api.post(`/payments/${id}/release`, {});
       await mutate();
-      notify.success('تم الإفراج', 'حُوّل المبلغ لمحفظة الناقل');
+      notify.success('تم الإفراج', 'حُوّل المبلغ لمحفظة المزوّد');
     } catch (err) {
       notify.error(err, 'فشل الإفراج');
     } finally {
@@ -109,7 +109,7 @@ export default function AdminPaymentsPage() {
                 <TableHead>العملية</TableHead>
                 <TableHead>الطلب</TableHead>
                 <TableHead>العميل</TableHead>
-                <TableHead>الناقل</TableHead>
+                <TableHead>المزوّد</TableHead>
                 <TableHead className="text-end">المبلغ</TableHead>
                 <TableHead className="text-end">العمولة</TableHead>
                 <TableHead>الحالة</TableHead>

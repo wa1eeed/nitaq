@@ -1,7 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import {
-  CheckCircle2, Gauge, Package, Star, TrendingUp, Truck, Wallet, X,
+  Briefcase, CheckCircle2, Gauge, Package, Star, TrendingUp, Wallet, X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,10 +90,10 @@ export default function CarrierReportsPage() {
           hint={`${stats.acceptedBids} من ${stats.totalBids}`}
         />
         <StatsCard
-          label="استخدام الأسطول"
+          label="استخدام الخدمات"
           value={`${stats.utilization.toFixed(0)}%`}
           icon={Gauge}
-          hint={`${trucks.length} شاحنة`}
+          hint={`${trucks.length} خدمة`}
         />
       </div>
 
@@ -140,15 +140,15 @@ export default function CarrierReportsPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm flex items-center gap-2">
-                <Truck className="h-4 w-4 text-muted-foreground" />
-                حجم الأسطول
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                عدد الخدمات
               </span>
-              <span className="font-bold num">{trucks.length} شاحنة</span>
+              <span className="font-bold num">{trucks.length} خدمة</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm flex items-center gap-2">
                 <Package className="h-4 w-4 text-muted-foreground" />
-                إجمالي الرحلات
+                إجمالي الطلبات
               </span>
               <span className="font-bold num">{carrier?.completedTrips?.toLocaleString('en-US')}</span>
             </div>
@@ -163,7 +163,7 @@ export default function CarrierReportsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>أعلى المسارات إيراداً</CardTitle>
+            <CardTitle>أعلى المدن إيراداً</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {topRoutes.length === 0 ? (
@@ -189,7 +189,7 @@ export default function CarrierReportsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>أفضل السائقين</CardTitle>
+            <CardTitle>أفضل الموظفين</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {topDrivers.map((d, i) => (
@@ -203,7 +203,7 @@ export default function CarrierReportsPage() {
                     <div className="text-xs text-muted-foreground">{d.licenseClass}</div>
                   </div>
                 </div>
-                <Badge variant="outline" className="num">{d.totalTrips} رحلة</Badge>
+                <Badge variant="outline" className="num">{d.totalTrips} طلب</Badge>
               </div>
             ))}
           </CardContent>

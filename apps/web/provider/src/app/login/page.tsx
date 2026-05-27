@@ -2,7 +2,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertCircle, CheckCircle, Eye, EyeOff, Truck } from 'lucide-react';
+import { AlertCircle, Briefcase, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,11 +53,11 @@ export default function CarrierLoginPage() {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
-            <Truck className="h-6 w-6 text-white" />
+            <Briefcase className="h-6 w-6 text-white" />
           </div>
           <div>
             <div className="text-lg font-bold text-white">نِطاق</div>
-            <div className="text-xs text-white/60">منصة الناقل</div>
+            <div className="text-xs text-white/60">منصة المزوّد</div>
           </div>
         </div>
 
@@ -68,14 +68,14 @@ export default function CarrierLoginPage() {
               وسّع نطاق أعمالك<br />مع نِطاق
             </h2>
             <p className="mt-3 text-white/70 text-sm leading-relaxed">
-              منصة رقمية لشركات النقل في المملكة
+              منصة رقمية لمزودي الخدمات في المملكة
             </p>
           </motion.div>
 
           <div className="space-y-4">
             {[
-              { icon: CheckCircle, text: 'فرص نقل يومية من العملاء' },
-              { icon: CheckCircle, text: 'إدارة الأسطول والسائقين' },
+              { icon: CheckCircle, text: 'فرص خدمات يومية من العملاء' },
+              { icon: CheckCircle, text: 'إدارة الخدمات والموظفين' },
               { icon: CheckCircle, text: 'مدفوعات آمنة ومضمونة' },
             ].map(({ icon: Icon, text }, i) => (
               <motion.div
@@ -107,16 +107,16 @@ export default function CarrierLoginPage() {
           {/* Mobile logo (only shown on small screens) */}
           <div className="flex flex-col items-center gap-3 text-center lg:hidden">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
-              <Truck className="h-7 w-7" />
+              <Briefcase className="h-7 w-7" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">نِطاق</h1>
-            <p className="text-sm text-muted-foreground">منصة الناقل · فرص نقل + إدارة أسطول</p>
+            <p className="text-sm text-muted-foreground">منصة المزوّد · فرص خدمات + إدارة موارد</p>
           </div>
 
           <Card>
             <CardHeader>
               <CardTitle className="text-xl">أهلاً بعودتك</CardTitle>
-              <CardDescription>سجّل دخولك للمتابعة إلى منصة الناقل</CardDescription>
+              <CardDescription>سجّل دخولك للمتابعة إلى منصة المزوّد</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={submit} className="space-y-4">
@@ -173,13 +173,13 @@ export default function CarrierLoginPage() {
                 <div className="relative pt-2">
                   <div className="absolute inset-x-0 top-1/2 border-t border-border" />
                   <div className="relative flex justify-center">
-                    <span className="bg-card px-3 text-xs text-muted-foreground">ناقل جديد؟</span>
+                    <span className="bg-card px-3 text-xs text-muted-foreground">مزوّد جديد؟</span>
                   </div>
                 </div>
 
                 <Link href="/register" className="block">
                   <Button type="button" variant="outline" className="w-full" size="lg">
-                    انضم كشركة نقل
+                    انضم كمزوّد خدمات
                   </Button>
                 </Link>
               </form>

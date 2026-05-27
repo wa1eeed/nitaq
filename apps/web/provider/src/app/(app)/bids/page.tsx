@@ -75,7 +75,7 @@ export default function CarrierBidsPage() {
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <Search className="absolute end-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث برقم العرض، الطلب، أو المسار..." className="pe-10" />
+                <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث برقم العرض أو الطلب..." className="pe-10" />
               </div>
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
@@ -91,7 +91,7 @@ export default function CarrierBidsPage() {
                 <TableRow>
                   <TableHead>رقم العرض</TableHead>
                   <TableHead>الطلب</TableHead>
-                  <TableHead>المسار</TableHead>
+                  <TableHead>المدينة</TableHead>
                   <TableHead className="text-end">السعر</TableHead>
                   <TableHead>المدة</TableHead>
                   <TableHead>الملاحظات</TableHead>
@@ -117,7 +117,7 @@ export default function CarrierBidsPage() {
                           <Link href={`/orders/${b.orderId}`} className="font-mono text-xs text-primary">{b.orderId}</Link>
                         </TableCell>
                         <TableCell className="text-sm">
-                          {order ? `${order.originCity} ← ${order.destinationCity}` : '—'}
+                          {order ? order.originCity : '—'}
                         </TableCell>
                         <TableCell className="text-end font-medium"><Currency amount={b.price} /></TableCell>
                         <TableCell className="num text-sm">{b.estimatedDays} {b.estimatedDays === 1 ? 'يوم' : 'أيام'}</TableCell>

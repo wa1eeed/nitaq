@@ -41,7 +41,7 @@ export function AppTopbar() {
   const logout = useAuthStore((s) => s.logout);
   const { theme, mounted, toggle } = useTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const fullName = user ? `${user.firstName} ${user.lastName}` : 'الناقل';
+  const fullName = user ? `${user.firstName} ${user.lastName}` : 'المزوّد';
   const initials = fullName.split(' ').slice(0, 2).map((w) => w[0]).join('');
 
   return (
@@ -61,7 +61,7 @@ export function AppTopbar() {
       <div className="flex flex-1 items-center gap-2 max-w-xl">
         <div className="relative flex-1">
           <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="ابحث عن فرص، طلبات، شاحنات..." className="ps-9" />
+          <Input type="search" placeholder="ابحث عن فرص، طلبات، خدمات..." className="ps-9" />
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export function AppTopbar() {
               </Avatar>
               <div className="hidden md:flex flex-col leading-tight items-start">
                 <span className="text-sm font-medium">{fullName}</span>
-                <span className="text-xs text-muted-foreground">ناقل</span>
+                <span className="text-xs text-muted-foreground">مزوّد</span>
               </div>
             </button>
           </DropdownMenuTrigger>

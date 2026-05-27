@@ -10,8 +10,8 @@ const tajawal = Tajawal({ subsets: ['arabic'], weight: ['400', '500', '700'], va
 const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'نِطاق — منصة الناقل',
-  description: 'فرص نقل، إدارة أسطول، أرباح',
+  title: 'نِطاق — منصة المزوّد',
+  description: 'فرص خدمات، إدارة موارد، أرباح',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

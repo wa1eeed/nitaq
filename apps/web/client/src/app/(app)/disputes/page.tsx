@@ -29,11 +29,11 @@ import {
 } from '@naqla/shared-utils';
 
 const DISPUTE_REASONS = [
-  'تلف جزئي في البضاعة',
-  'تأخّر التسليم',
+  'جودة الخدمة دون المستوى',
+  'تأخّر الإنجاز',
   'خلاف على رسوم إضافية',
-  'فقدان جزء من الشحنة',
-  'سلوك السائق',
+  'عدم اكتمال الخدمة',
+  'سلوك الموظف',
   'عدم الالتزام بالموعد',
   'أخرى',
 ];
@@ -140,7 +140,7 @@ export default function ClientDisputesPage() {
                     <TableCell className="text-xs text-muted-foreground max-w-[280px] truncate">{d.description}</TableCell>
                     <TableCell>
                       <Badge variant={('raisedBy' in d ? d.raisedBy : 'CLIENT') === 'CLIENT' ? 'default' : 'outline'}>
-                        {('raisedBy' in d ? d.raisedBy : 'CLIENT') === 'CLIENT' ? 'أنت' : 'الناقل'}
+                        {('raisedBy' in d ? d.raisedBy : 'CLIENT') === 'CLIENT' ? 'أنت' : 'المزوّد'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{formatRelative(d.createdAt)}</TableCell>

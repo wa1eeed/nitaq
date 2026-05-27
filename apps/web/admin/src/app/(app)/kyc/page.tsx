@@ -92,12 +92,12 @@ export default function KycQueuePage() {
   return (
     <>
       <PageHeader
-        title="اعتماد الشركات (KYC)"
-        subtitle="طابور الشركات المنتظرة لاعتماد المستندات والمصادقة"
+        title="اعتماد حسابات المزودين"
+        subtitle="طابور المزودين المنتظرين لاعتماد المستندات والمصادقة"
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatsCard label="إجمالي الشركات" value={total.toLocaleString('en-US')} icon={Building2} />
+        <StatsCard label="إجمالي المزودين" value={total.toLocaleString('en-US')} icon={Building2} />
         <StatsCard label="بانتظار الاعتماد" value={pending.length.toLocaleString('en-US')} icon={Clock} tone="warning" />
         <StatsCard label="معتمدة" value={approved.toLocaleString('en-US')} icon={ShieldCheck} tone="success" />
         <StatsCard label="مرفوضة" value={rejected.toLocaleString('en-US')} icon={X} tone="danger" />
@@ -127,7 +127,7 @@ export default function KycQueuePage() {
                         {c.nameAr}
                       </Link>
                       <Badge variant={c.kind === 'CARRIER' ? 'default' : 'outline'}>
-                        {c.kind === 'CARRIER' ? 'ناقل' : 'عميل'}
+                        {c.kind === 'CARRIER' ? 'مزوّد' : 'عميل'}
                       </Badge>
                       {c.accountType === 'INDIVIDUAL' && (
                         <Badge variant="outline">فرد</Badge>

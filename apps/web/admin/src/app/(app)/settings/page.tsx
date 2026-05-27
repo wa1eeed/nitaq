@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 import { fetcher, api } from '@/lib/api';
 import { notify } from '@/lib/notify';
-import { Bell, Globe, MapPin, MessageSquare, Package, Palette, Percent, ShieldCheck, Truck } from 'lucide-react';
+import { Bell, Briefcase, Globe, MapPin, MessageSquare, Palette, Percent, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
@@ -17,15 +17,13 @@ import {
 import { PageHeader } from '@/components/page-header';
 import { BrandingPanel } from '@/components/settings/branding-panel';
 import { CitiesPanel } from '@/components/settings/cities-panel';
-import { CargoTypesPanel } from '@/components/settings/cargo-types-panel';
 import { SmsTemplatesPanel } from '@/components/settings/sms-templates-panel';
 import { CompliancePanel } from '@/components/settings/compliance-panel';
 import { NotificationsPanel } from '@/components/settings/notifications-panel';
 import { TruckTypesPanel } from '@/components/settings/truck-types-panel';
 import { useCitiesStore } from '@/stores/cities-store';
-import { useCargoTypesStore } from '@/stores/cargo-types-store';
 import { useTruckTypesStore } from '@/stores/truck-types-store';
-import type { City, CargoTypeDef, TruckTypeOption } from '@naqla/shared-utils';
+import type { City, TruckTypeOption } from '@naqla/shared-utils';
 
 export default function AdminSettingsPage() {
   const t = useTranslations('admin');
@@ -53,7 +51,6 @@ export default function AdminSettingsPage() {
     if (settingMap['general.supportPhone']) setSupportPhone(settingMap['general.supportPhone']);
     try {
       if (settingMap['catalog.cities']) useCitiesStore.setState({ cities: JSON.parse(settingMap['catalog.cities']) });
-      if (settingMap['catalog.cargo_types']) useCargoTypesStore.setState({ cargoTypes: JSON.parse(settingMap['catalog.cargo_types']) });
       if (settingMap['catalog.truck_types']) useTruckTypesStore.setState({ types: JSON.parse(settingMap['catalog.truck_types']) });
     } catch { /* malformed JSON in DB — keep store defaults */ }
   }, [settingsArr]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -64,14 +61,6 @@ export default function AdminSettingsPage() {
       notify.success('تم حفظ قائمة المدن');
       await mutateSettings();
     } catch (err) { notify.error(err, 'فشل حفظ المدن'); }
-  };
-
-  const persistCargoTypes = async (types: CargoTypeDef[]) => {
-    try {
-      await api.put('/admin/settings', { settings: [{ key: 'catalog.cargo_types', value: JSON.stringify(types) }] });
-      notify.success('تم حفظ أنواع البضائع');
-      await mutateSettings();
-    } catch (err) { notify.error(err, 'فشل حفظ أنواع البضائع'); }
   };
 
   const persistServiceTypes = async (types: TruckTypeOption[]) => {
@@ -148,12 +137,8 @@ export default function AdminSettingsPage() {
             {t('settings.tabs.smsTemplates')}
           </TabsTrigger>
           <TabsTrigger value="truck-types">
-            <Truck className="h-4 w-4 me-1.5" />
+            <Briefcase className="h-4 w-4 me-1.5" />
             {t('settings.tabs.truckTypes')}
-          </TabsTrigger>
-          <TabsTrigger value="cargo-types">
-            <Package className="h-4 w-4 me-1.5" />
-            {t('settings.tabs.cargoTypes')}
           </TabsTrigger>
           <TabsTrigger value="cities">
             <MapPin className="h-4 w-4 me-1.5" />
@@ -187,7 +172,7 @@ export default function AdminSettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="escrow">مدة احتجاز Escrow (أيام)</Label>
                 <Input id="escrow" type="number" value={escrowDays} onChange={(e) => setEscrowDays(Number(e.target.value))} />
-                <p className="text-xs text-muted-foreground">الحد الأدنى قبل الإفراج التلقائي للناقل</p>
+                <p className="text-xs text-muted-foreground">الحد الأدنى قبل الإفراج التلقائي للمزوّد</p>
               </div>
               <div className="flex items-center gap-2 pt-2">
                 <Button onClick={saveFinancial} disabled={savingFinancial}>
@@ -208,10 +193,6 @@ export default function AdminSettingsPage() {
 
         <TabsContent value="truck-types">
           <TruckTypesPanel onPersist={persistServiceTypes} />
-        </TabsContent>
-
-        <TabsContent value="cargo-types">
-          <CargoTypesPanel onPersist={persistCargoTypes} />
         </TabsContent>
 
         <TabsContent value="cities">

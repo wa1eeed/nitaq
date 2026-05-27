@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { fetcher, api } from '@/lib/api';
 import {
-  AlertTriangle, ArrowRight, BadgeCheck, CheckCircle2, MapPin, MessageSquare,
+  AlertTriangle, ArrowRight, BadgeCheck, Briefcase, CheckCircle2, MapPin, MessageSquare,
   Package, Phone, ShieldCheck, Shield, Star, Timer, Truck, User, UserSearch, X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -231,7 +231,7 @@ export default function ClientOrderDetail() {
                             <span className="inline-flex items-center gap-1">
                               <Star className="h-3 w-3 fill-warning text-warning" />
                               <span className="num">{c.rating?.toFixed(1)}</span>
-                              <span>({c.completedTrips} رحلة)</span>
+                              <span>({c.completedTrips} طلب)</span>
                             </span>
                             <span>· {c.city}</span>
                             <span>· استجابة {c.responseTimeMins} د</span>
@@ -379,7 +379,7 @@ export default function ClientOrderDetail() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>تأكيد قبول العرض</DialogTitle>
-            <DialogDescription>سيُسند الطلب للناقل ويُحجَز المبلغ في Escrow. تُرفض باقي العروض تلقائياً.</DialogDescription>
+            <DialogDescription>سيُسند الطلب للمزوّد ويُحجَز المبلغ في Escrow. تُرفض باقي العروض تلقائياً.</DialogDescription>
           </DialogHeader>
           {acceptBid && (() => {
             const provider = (acceptBid as typeof acceptBid & { provider?: { id: string; nameAr: string; logo?: string | null; rating?: number; completedTrips?: number } }).provider
@@ -394,7 +394,7 @@ export default function ClientOrderDetail() {
                     <div className="min-w-0">
                       <div className="font-semibold">{provider?.nameAr}</div>
                       <div className="text-xs text-muted-foreground">
-                        <Star className="h-3 w-3 inline fill-warning text-warning" /> {provider?.rating?.toFixed(1)} · {provider?.completedTrips} رحلة
+                        <Star className="h-3 w-3 inline fill-warning text-warning" /> {provider?.rating?.toFixed(1)} · {provider?.completedTrips} طلب
                       </div>
                     </div>
                   </div>
@@ -412,7 +412,7 @@ export default function ClientOrderDetail() {
                 <div className="rounded-md bg-info/10 border border-info/30 p-3 flex items-start gap-2 text-xs">
                   <ShieldCheck className="h-4 w-4 text-info shrink-0 mt-0.5" />
                   <p className="text-muted-foreground leading-relaxed">
-                    سيُحتجز المبلغ في حساب Escrow الآمن، ولا يُحوّل للناقل إلا بعد تأكيد التسليم.
+                    سيُحتجز المبلغ في حساب Escrow الآمن، ولا يُحوّل للمزوّد إلا بعد تأكيد الإنجاز.
                   </p>
                 </div>
               </div>
@@ -450,7 +450,7 @@ export default function ClientOrderDetail() {
       <Dialog open={!!detailsBid} onOpenChange={(o) => !o && setDetailsBid(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>تفاصيل عرض الناقل</DialogTitle>
+            <DialogTitle>تفاصيل عرض المزوّد</DialogTitle>
             <DialogDescription>راجع المعلومات قبل القبول أو الرفض.</DialogDescription>
           </DialogHeader>
           {detailsBid && (() => {
@@ -472,7 +472,7 @@ export default function ClientOrderDetail() {
                         <span className="inline-flex items-center gap-1">
                           <Star className="h-3 w-3 fill-warning text-warning" />
                           <span className="num">{provider?.rating?.toFixed(1) ?? '—'}</span>
-                          {provider?.completedTrips != null && <span>({provider.completedTrips} رحلة)</span>}
+                          {provider?.completedTrips != null && <span>({provider.completedTrips} طلب)</span>}
                         </span>
                         {provider?.city && <span>· {provider.city}</span>}
                         {provider?.insurance && <Badge variant="default" className="h-4 text-[10px] gap-1"><Shield className="h-3 w-3" /> تأمين</Badge>}
@@ -522,7 +522,7 @@ export default function ClientOrderDetail() {
 
                 {detailsBid.notes && (
                   <div className="rounded-md bg-muted/40 p-3 text-sm">
-                    <div className="text-xs text-muted-foreground mb-1">ملاحظات الناقل</div>
+                    <div className="text-xs text-muted-foreground mb-1">ملاحظات المزوّد</div>
                     {detailsBid.notes}
                   </div>
                 )}
@@ -593,17 +593,17 @@ export default function ClientOrderDetail() {
       <Dialog open={confirmDeliveryOpen} onOpenChange={setConfirmDeliveryOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تأكيد استلام الشحنة</DialogTitle>
-            <DialogDescription>سيتم إفراج مبلغ Escrow للناقل بعد خصم العمولة.</DialogDescription>
+            <DialogTitle>تأكيد اكتمال الخدمة</DialogTitle>
+            <DialogDescription>سيتم إفراج مبلغ Escrow للمزوّد بعد خصم العمولة.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="rounded-lg bg-success/10 border border-success/30 p-3 flex items-start gap-2 text-sm">
               <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
               <p className="text-muted-foreground leading-relaxed">
-                بتأكيدك الاستلام تُقرّ بأن البضاعة وصلت بحالة جيدة. لن يمكنك فتح نزاع بعد التأكيد إلا في حالة عيب خفي يظهر لاحقاً.
+                بتأكيدك الاكتمال تُقرّ بأن الخدمة أُنجزت على النحو المطلوب. لن يمكنك فتح نزاع بعد التأكيد إلا في حالة عيب خفي يظهر لاحقاً.
               </p>
             </div>
-            <p className="text-sm">سيُحوّل للناقل: <Currency amount={(order.agreedPrice ?? 0) * 0.92} /> (بعد خصم 8% عمولة)</p>
+            <p className="text-sm">سيُحوّل للمزوّد: <Currency amount={(order.agreedPrice ?? 0) * 0.92} /> (بعد خصم 8% عمولة)</p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDeliveryOpen(false)}>إلغاء</Button>
@@ -613,7 +613,7 @@ export default function ClientOrderDetail() {
                   // POST /orders/:id/complete → order COMPLETED + Payment RELEASED
                   await api.post(`/orders/${order.id}/complete`, {});
                   playSoundIfEnabled('orderCompleted');
-                  notify.success('تم تأكيد الاستلام', 'سيُفرَج المبلغ للناقل خلال لحظات');
+                  notify.success('تم تأكيد الاكتمال', 'سيُفرَج المبلغ للمزوّد خلال لحظات');
                   await refetchOrder();
                   setConfirmDeliveryOpen(false);
                 } catch (err: unknown) {
@@ -621,7 +621,7 @@ export default function ClientOrderDetail() {
                 }
               }}
             >
-              <CheckCircle2 className="h-4 w-4" /> تأكيد الاستلام
+              <CheckCircle2 className="h-4 w-4" /> تأكيد الاكتمال
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -668,11 +668,11 @@ function OrderActionButtons({
 // ─── Cancel dialog with rule-based fees ──────────────────────────────
 
 const CANCEL_REASONS = [
-  'لم أعد بحاجة للنقل',
+  'لم أعد بحاجة للخدمة',
   'وجدت بديلاً أرخص',
   'تغيّر الموعد أو الوجهة',
-  'مشكلة في البضاعة',
-  'الناقل لا يستجيب',
+  'مشكلة في الخدمة',
+  'المزوّد لا يستجيب',
   'أخرى',
 ];
 
@@ -712,7 +712,7 @@ function CancelOrderDialog({
               <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold">إلغاء مجاني</p>
-                <p className="mt-1 text-xs text-muted-foreground">لا تُطبَّق رسوم — الطلب لم يُسند لناقل بعد.</p>
+                <p className="mt-1 text-xs text-muted-foreground">لا تُطبَّق رسوم — الطلب لم يُسند لمزوّد بعد.</p>
               </div>
             </div>
           )}
@@ -723,7 +723,7 @@ function CancelOrderDialog({
               <div className="flex-1">
                 <p className="font-semibold">رسوم إلغاء 10%</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  تُخصم رسوم تعويضاً للناقل الذي خصّص شاحنته وسائقه لهذا الطلب.
+                  تُخصم رسوم تعويضاً للمزوّد الذي خصّص موارده لهذا الطلب.
                 </p>
                 <dl className="mt-2 pt-2 border-t border-warning/30 text-xs space-y-1">
                   <div className="flex justify-between">
@@ -822,8 +822,8 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
   const events = timelineFor(order.id);
   // Map status → (helper text, which of the 3 steps is the current focus).
   const meta: Record<string, { text: string; step: 1 | 2 | 3; tone: 'info' | 'warning' | 'success' }> = {
-    ASSIGNED:   { text: 'تم إسناد الطلب — الناقل يحضّر للتحميل',  step: 1, tone: 'info' },
-    CONFIRMED:  { text: 'الناقل أكّد الموعد — جارٍ التحرّك للاستلام', step: 1, tone: 'info' },
+    ASSIGNED:   { text: 'تم إسناد الطلب — المزوّد يحضّر للتنفيذ',  step: 1, tone: 'info' },
+    CONFIRMED:  { text: 'المزوّد أكّد الموعد — جارٍ البدء بالتنفيذ', step: 1, tone: 'info' },
     IN_TRANSIT: { text: 'الخدمة قيد التنفيذ',                        step: 2, tone: 'warning' },
     DELIVERED:  { text: 'تم التسليم — يرجى تأكيد الاستلام',         step: 3, tone: 'warning' },
     COMPLETED:  { text: 'الطلب مكتمل ✓',                          step: 3, tone: 'success' },
@@ -838,7 +838,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <CardTitle className="flex items-center gap-2">حالة الشحنة <StatusBadge status={order.status} /></CardTitle>
+            <CardTitle className="flex items-center gap-2">حالة الطلب <StatusBadge status={order.status} /></CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">{m.text}</p>
           </div>
         </div>
@@ -848,7 +848,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
         <div className="flex items-center gap-2">
           {[
             { s: 1 as const, label: 'الاستلام',  icon: MapPin },
-            { s: 2 as const, label: 'قيد التنفيذ', icon: Truck },
+            { s: 2 as const, label: 'قيد التنفيذ', icon: Briefcase },
             { s: 3 as const, label: 'التسليم',  icon: CheckCircle2 },
           ].map((step, i, arr) => (
             <div key={step.s} className="flex items-center gap-2 flex-1">
@@ -869,7 +869,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
               {effectivePickup ? formatDate(effectivePickup, 'EEEE d MMM') : '—'}
             </div>
             {accepted?.proposedPickupDate && accepted.proposedPickupDate !== order.pickupDate && (
-              <Badge variant="warning" className="mt-1 h-4 text-[10px]">موعد بديل من الناقل</Badge>
+              <Badge variant="warning" className="mt-1 h-4 text-[10px]">موعد بديل من المزوّد</Badge>
             )}
           </div>
           <div className="rounded-lg border bg-muted/30 p-3">
@@ -878,7 +878,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
               {effectiveDelivery ? formatDate(effectiveDelivery, 'EEEE d MMM') : 'سيُحدَّد لاحقاً'}
             </div>
             {accepted?.proposedDeliveryDate && order.deliveryDate && accepted.proposedDeliveryDate !== order.deliveryDate && (
-              <Badge variant="warning" className="mt-1 h-4 text-[10px]">موعد بديل من الناقل</Badge>
+              <Badge variant="warning" className="mt-1 h-4 text-[10px]">موعد بديل من المزوّد</Badge>
             )}
           </div>
         </div>
@@ -886,7 +886,7 @@ function ShipmentProgressCard({ order, bids }: { order: Order; bids: typeof BIDS
         {/* Tracking events */}
         {events.length > 0 && (
           <div>
-            <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">تتبّع الشحنة</div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">تتبّع الطلب</div>
             <ol className="relative space-y-3">
               {events.map((ev, i) => (
                 <li key={i} className="relative ps-7">
@@ -970,7 +970,7 @@ function ProviderInfoCard({ order }: { order: Order }) {
                   <Star className="h-3 w-3 fill-warning text-warning" />
                   <span className="num">{provider.rating.toFixed(1)}</span>
                   {(provider as { completedTrips?: number }).completedTrips != null && (
-                    <span>({(provider as { completedTrips?: number }).completedTrips} رحلة)</span>
+                    <span>({(provider as { completedTrips?: number }).completedTrips} طلب)</span>
                   )}
                 </span>
               )}
@@ -1003,7 +1003,7 @@ function ProviderInfoCard({ order }: { order: Order }) {
           {/* Service */}
           <div className="rounded-lg border bg-card p-4">
             <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase mb-3">
-              <Truck className="h-3.5 w-3.5" />
+              <Briefcase className="h-3.5 w-3.5" />
               الخدمة المخصّصة
             </div>
             {assignedService ? (
@@ -1110,7 +1110,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
           <div className="h-14 w-14 rounded-2xl bg-warning/15 text-warning mx-auto grid place-items-center mb-4 animate-pulse">
             <UserSearch className="h-7 w-7" />
           </div>
-          <h3 className="font-semibold text-lg">بانتظار رد الناقل</h3>
+          <h3 className="font-semibold text-lg">بانتظار رد المزوّد</h3>
           <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
             أُرسل الطلب مباشرة إلى <strong>{provider?.nameAr}</strong>. سيتم إخطارك فور الرد بالقبول أو السعر.
           </p>
@@ -1128,18 +1128,18 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
     try {
       if (action === 'ACCEPT' && activeBidId) {
         await api.post(`/orders/${order.id}/bids/${activeBidId}/accept`, {});
-        notify.success('تم قبول السعر', `الطلب أُسند لـ ${provider?.nameAr ?? 'الناقل'}`);
+        notify.success('تم قبول السعر', `الطلب أُسند لـ ${provider?.nameAr ?? 'المزوّد'}`);
         onRefetch();
       } else if (action === 'COUNTER') {
         await api.post(`/orders/${order.id}/bids`, {
           amount: counterPrice,
           notes: counterNote || undefined,
         });
-        notify.success('تم إرسال سعرك المقابل', `${counterPrice.toLocaleString('en-US')} ر.س — بانتظار رد الناقل`);
+        notify.success('تم إرسال سعرك المقابل', `${counterPrice.toLocaleString('en-US')} ر.س — بانتظار رد المزوّد`);
         onRefetch();
       } else if (action === 'REJECT' && activeBidId) {
         await api.post(`/orders/${order.id}/bids/${activeBidId}/reject`, {});
-        notify.success('تم رفض العرض', 'يمكنك اختيار ناقل آخر أو تحويل الطلب للسوق المفتوح');
+        notify.success('تم رفض العرض', 'يمكنك اختيار مزوّد آخر أو تحويل الطلب للسوق المفتوح');
         onRefetch();
       }
       setAction(null);
@@ -1193,7 +1193,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
         <Card>
           <CardHeader>
             <CardTitle>الإجراءات المتاحة</CardTitle>
-            <CardDescription>اختر ما يناسبك — يصل ردّك للناقل فوراً</CardDescription>
+            <CardDescription>اختر ما يناسبك — يصل ردّك للمزوّد فوراً</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <ProposalAction
@@ -1206,7 +1206,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
             <ProposalAction
               icon={MessageSquare}
               title="اقتراح سعر مقابل"
-              subtitle="إرسال سعرك للناقل"
+              subtitle="إرسال سعرك للمزوّد"
               tone="warning"
               onClick={() => {
                 setAction('COUNTER');
@@ -1216,7 +1216,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
             <ProposalAction
               icon={X}
               title="رفض العرض"
-              subtitle="اختيار ناقل آخر"
+              subtitle="اختيار مزوّد آخر"
               tone="destructive"
               onClick={() => setAction('REJECT')}
             />
@@ -1230,7 +1230,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
             <div className="h-12 w-12 rounded-2xl bg-info/15 text-info mx-auto grid place-items-center mb-3 animate-pulse">
               <MessageSquare className="h-6 w-6" />
             </div>
-            <p className="text-sm font-medium">سعرك المقابل أُرسل للناقل</p>
+            <p className="text-sm font-medium">سعرك المقابل أُرسل للمزوّد</p>
             <p className="mt-1 text-xs text-muted-foreground">بانتظار قبوله، رفضه، أو سعر مقابل آخر</p>
           </CardContent>
         </Card>
@@ -1255,9 +1255,9 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
             <X className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <div className="flex-1">
               <h3 className="font-semibold text-destructive">انتهى التفاوض</h3>
-              <p className="mt-1 text-sm text-muted-foreground">يمكنك اختيار ناقل آخر أو تحويل الطلب للسوق المفتوح.</p>
+              <p className="mt-1 text-sm text-muted-foreground">يمكنك اختيار مزوّد آخر أو تحويل الطلب للسوق المفتوح.</p>
               <div className="mt-3 flex items-center gap-2 flex-wrap">
-                <Button size="sm" variant="outline">اختيار ناقل آخر</Button>
+                <Button size="sm" variant="outline">اختيار مزوّد آخر</Button>
                 <Button size="sm">تحويل للسوق المفتوح</Button>
               </div>
             </div>
@@ -1321,7 +1321,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
         <DialogContent>
           <DialogHeader>
             <DialogTitle>اقتراح سعر مقابل</DialogTitle>
-            <DialogDescription>سيراجعه الناقل ويختار: قبول، اعتذار، أو سعر آخر</DialogDescription>
+            <DialogDescription>سيراجعه المزوّد ويختار: قبول، اعتذار، أو سعر آخر</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-2">
@@ -1329,7 +1329,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
               <Input type="number" value={counterPrice || ''} onChange={(e) => setCounterPrice(Number(e.target.value))} />
             </div>
             <div className="space-y-2">
-              <Label>ملاحظة للناقل (اختياري)</Label>
+              <Label>ملاحظة للمزوّد (اختياري)</Label>
               <textarea
                 rows={3}
                 value={counterNote}
@@ -1350,7 +1350,7 @@ function DirectProposalView({ order, onRefetch }: { order: Order; onRefetch: () 
         <DialogContent>
           <DialogHeader>
             <DialogTitle>رفض العرض</DialogTitle>
-            <DialogDescription>سيُعلَم الناقل وستتمكّن من اختيار ناقل آخر أو تحويل الطلب للسوق المفتوح</DialogDescription>
+            <DialogDescription>سيُعلَم المزوّد وستتمكّن من اختيار مزوّد آخر أو تحويل الطلب للسوق المفتوح</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAction(null)}>تراجع</Button>

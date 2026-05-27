@@ -20,8 +20,8 @@ interface DocRequirement {
 
 /**
  * KYC requirements panel with two scopes:
- *   1. Company carriers (شركات الناقل) — CR, VAT, Zakat, transport license, insurance, ...
- *   2. Individual carriers (الناقل الفرد) — national ID, driver license, vehicle reg, insurance, ...
+ *   1. Company providers (شركات المزوّدين) — CR, VAT, Zakat, service license, insurance, ...
+ *   2. Individual providers (المزوّد الفرد) — national ID, specialty cert, insurance, ...
  *
  * Admin can add/edit/delete entries in each list. Backing store is local
  * useState here; production wires this to `Setting` rows under
@@ -33,34 +33,32 @@ export function CompliancePanel() {
     { id: 'ZAKAT',     label: 'شهادة الزكاة والدخل',         required: true },
     { id: 'VAT',       label: 'شهادة الضريبة (VAT)',         required: true },
     { id: 'INSURANCE', label: 'بوليصة التأمين',                required: true },
-    { id: 'TRANSPORT', label: 'رخصة نقل البضائع (TGA)',       required: true },
+    { id: 'LICENSE',   label: 'ترخيص مزاولة النشاط',           required: true },
     { id: 'ARTICLES',  label: 'عقد التأسيس',                   required: false },
     { id: 'BANK',      label: 'كشف حساب البنك',                required: false },
   ]);
 
   const [individualDocs, setIndividualDocs] = useState<DocRequirement[]>([
     { id: 'NATIONAL_ID',     label: 'الهوية الوطنية/الإقامة',         required: true },
-    { id: 'DRIVING_LICENSE', label: 'رخصة قيادة سارية',                required: true },
     { id: 'SELFIE',          label: 'صورة شخصية',                       required: true },
-    { id: 'ISTIMARA',        label: 'استمارة المركبة (الملكية)',        required: true },
-    { id: 'INSURANCE',       label: 'وثيقة تأمين المركبة',              required: true },
-    { id: 'INSPECTION',      label: 'الفحص الدوري',                    required: true },
-    { id: 'TGA_PERMIT',      label: 'تصريح TGA للأفراد',                required: false },
+    { id: 'SPECIALTY_CERT',  label: 'شهادة التخصص / الكفاءة',          required: true },
+    { id: 'INSURANCE',       label: 'وثيقة التأمين المهني',             required: true },
+    { id: 'BANK',            label: 'رقم IBAN للتحويلات',               required: false },
   ]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <DocsSection
-        title="متطلبات الشركات الناقلة"
-        subtitle="المستندات المطلوبة من شركة لاعتماد تسجيلها"
+        title="متطلبات شركات المزودين"
+        subtitle="المستندات المطلوبة من شركة مزوّدة لاعتماد تسجيلها"
         icon={<Building2 className="h-5 w-5" />}
         docs={companyDocs}
         onChange={setCompanyDocs}
         emptyMsg="لا توجد متطلبات — أضف واحداً للبدء"
       />
       <DocsSection
-        title="متطلبات الناقل الفرد"
-        subtitle="المستندات المطلوبة من سائق فرد (غير منتمي لشركة)"
+        title="متطلبات المزوّد الفرد"
+        subtitle="المستندات المطلوبة من مزوّد فرد مستقل"
         icon={<User className="h-5 w-5" />}
         docs={individualDocs}
         onChange={setIndividualDocs}

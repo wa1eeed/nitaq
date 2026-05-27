@@ -39,7 +39,7 @@ export default function AdminDisputesPage() {
 
   return (
     <>
-      <PageHeader title="النزاعات" subtitle="إدارة النزاعات بين العملاء والناقلين" />
+      <PageHeader title="النزاعات" subtitle="إدارة النزاعات بين العملاء والمزودين" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatsCard label="مفتوحة" value={open} hint="تحتاج تعيين" icon={AlertTriangle} tone="danger" />
@@ -83,7 +83,7 @@ export default function AdminDisputesPage() {
                       <h3 className="font-semibold">{d.reason}</h3>
                       <StatusBadge status={d.status} />
                       <Badge variant={d.raisedBy === 'CLIENT' ? 'default' : 'warning'}>
-                        {d.raisedBy === 'CLIENT' ? 'من العميل' : 'من الناقل'}
+                        {d.raisedBy === 'CLIENT' ? 'من العميل' : 'من المزوّد'}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">{d.description}</p>

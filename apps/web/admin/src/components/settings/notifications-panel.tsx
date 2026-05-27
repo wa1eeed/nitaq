@@ -31,9 +31,9 @@ const CATEGORY_META: Record<NotificationCategory, { label: string; tone: 'defaul
 
 const AUDIENCE_META: Record<NotificationAudience, { label: string; icon: any }> = {
   CLIENT:  { label: 'العميل',   icon: User },
-  CARRIER: { label: 'الناقل',    icon: Building2 },
+  CARRIER: { label: 'المزوّد',   icon: Building2 },
   ADMIN:   { label: 'الأدمن',    icon: ShieldCheck },
-  DRIVER:  { label: 'السائق',    icon: Users },
+  DRIVER:  { label: 'الموظف',   icon: Users },
 };
 
 export function NotificationsPanel() {

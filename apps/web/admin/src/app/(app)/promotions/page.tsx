@@ -25,7 +25,7 @@ const KIND_LABEL: Record<Promotion['kind'], string> = {
   COMMISSION_WAIVER: 'إعفاء عمولة',
 };
 const AUDIENCE_LABEL: Record<Promotion['audience'], string> = {
-  CLIENT: 'العملاء', CARRIER: 'الناقلون', ALL: 'الجميع',
+  CLIENT: 'العملاء', CARRIER: 'المزودون', ALL: 'الجميع',
 };
 
 export default function PromotionsPage() {
@@ -43,7 +43,7 @@ export default function PromotionsPage() {
     <>
       <PageHeader
         title="الترويج والعروض"
-        subtitle="إدارة أكواد الخصم والحملات الترويجية للعملاء والناقلين"
+        subtitle="إدارة أكواد الخصم والحملات الترويجية للعملاء والمزودين"
         actions={
           <Button>
             <Plus className="h-4 w-4" /> حملة جديدة

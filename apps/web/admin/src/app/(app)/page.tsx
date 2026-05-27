@@ -3,8 +3,8 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
 import {
-  Building2, FileText, Wallet, AlertTriangle, ArrowLeft, ArrowUpRight,
-  Coins, Loader2, RefreshCw, Inbox, Users,
+  Building2, FileText, Wallet, AlertTriangle, ArrowLeft,
+  Coins, Loader2, RefreshCw, Inbox, Briefcase,
 } from 'lucide-react';
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
@@ -75,11 +75,6 @@ export default function AdminDashboard() {
       <PageHeader
         title="لوحة التحكم 👋"
         subtitle="نظرة شاملة على نشاط منصة نِطاق"
-        actions={
-          <Button variant="outline">
-            <ArrowUpRight className="h-4 w-4" /> تصدير
-          </Button>
-        }
       />
 
       {/* KPIs */}
@@ -99,7 +94,7 @@ export default function AdminDashboard() {
           tone="success"
         />
         <StatsCard
-          label="شركات نشطة"
+          label="مزودون نشيطون"
           value={activeCompanies}
           hint={`${pendingKyc} بانتظار KYC`}
           icon={Building2}
@@ -113,10 +108,10 @@ export default function AdminDashboard() {
           tone="danger"
         />
         <StatsCard
-          label="سائقون نشطون الآن"
+          label="مزودون نشيطون الآن"
           value={activeDrivers}
-          hint="بحالة في رحلة"
-          icon={Users}
+          hint="قيد التنفيذ"
+          icon={Briefcase}
           tone="warning"
         />
       </div>
@@ -145,7 +140,7 @@ export default function AdminDashboard() {
                 <TableRow>
                   <TableHead>رقم</TableHead>
                   <TableHead>العميل</TableHead>
-                  <TableHead>المسار</TableHead>
+                  <TableHead>المدينة</TableHead>
                   <TableHead>الحالة</TableHead>
                   <TableHead className="text-end">المبلغ</TableHead>
                 </TableRow>
@@ -159,7 +154,7 @@ export default function AdminDashboard() {
                   >
                     <TableCell className="font-mono text-xs text-muted-foreground">{o.orderNumber}</TableCell>
                     <TableCell>{companyById(o.clientId)?.nameAr ?? '—'}</TableCell>
-                    <TableCell>{o.originCity} ← {o.destinationCity}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-[120px] truncate">{o.originCity}</TableCell>
                     <TableCell><StatusBadge status={o.status} /></TableCell>
                     <TableCell className="text-end"><Currency amount={o.agreedPrice ?? o.clientBudget} /></TableCell>
                   </TableRow>

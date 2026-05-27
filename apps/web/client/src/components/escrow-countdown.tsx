@@ -52,7 +52,7 @@ export function EscrowCountdown({ deliveredAt, total, onConfirmEarly }: EscrowCo
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold">إفراج تلقائي عن المبلغ</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              المبلغ مُحتجَز في Escrow وسيُحوَّل للناقل تلقائياً بعد 72 ساعة من التسليم
+              المبلغ مُحتجَز في Escrow وسيُحوَّل للمزوّد تلقائياً بعد 72 ساعة من الإنجاز
               إذا لم تفتح نزاعاً.
             </p>
           </div>
@@ -101,7 +101,7 @@ export function EscrowCountdown({ deliveredAt, total, onConfirmEarly }: EscrowCo
               <dd className="font-medium text-muted-foreground">−<Currency amount={breakdown.commission} /></dd>
             </div>
             <div className="flex justify-between pt-2 mt-1 border-t font-semibold">
-              <dt>صافي للناقل</dt>
+              <dt>صافي للمزوّد</dt>
               <dd className="text-success"><Currency amount={breakdown.providerAmount} /></dd>
             </div>
           </dl>

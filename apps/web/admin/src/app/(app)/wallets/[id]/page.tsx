@@ -158,7 +158,7 @@ export default function AdminWalletDetailPage() {
           </Avatar>
           <div className="flex-1 min-w-0">
             <Badge variant={company.kind === 'CLIENT' ? 'default' : 'success'} className="mb-2">
-              {company.kind === 'CLIENT' ? 'عميل' : 'ناقل'}
+              {company.kind === 'CLIENT' ? 'عميل' : 'مزوّد'}
             </Badge>
             <div className="text-sm text-muted-foreground">الرصيد المتاح</div>
             <div className="mt-1 text-4xl font-bold tracking-tight num">
@@ -193,7 +193,7 @@ export default function AdminWalletDetailPage() {
                       <SelectContent>
                         <SelectItem value="CREDIT">إيداع (Credit)</SelectItem>
                         <SelectItem value="DEBIT">خصم (Debit)</SelectItem>
-                        <SelectItem value="ESCROW_RELEASE">إفراج للناقل</SelectItem>
+                        <SelectItem value="ESCROW_RELEASE">إفراج للمزوّد</SelectItem>
                         <SelectItem value="REFUND">استرداد للعميل</SelectItem>
                         <SelectItem value="COMMISSION">عمولة المنصة</SelectItem>
                         <SelectItem value="PAYOUT">تحويل بنكي</SelectItem>

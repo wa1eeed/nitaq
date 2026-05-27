@@ -53,7 +53,7 @@ export default function AdminOrdersPage() {
     { key: 'ALL',        label: 'الكل' },
     { key: 'PUBLISHED',  label: 'منشور' },
     { key: 'BIDDING',    label: 'قيد العروض' },
-    { key: 'IN_TRANSIT', label: 'في الطريق' },
+    { key: 'IN_TRANSIT', label: 'قيد التنفيذ' },
     { key: 'COMPLETED',  label: 'مكتمل' },
     { key: 'CANCELLED',  label: 'ملغى' },
   ];
@@ -99,8 +99,8 @@ export default function AdminOrdersPage() {
               <TableRow>
                 <TableHead>رقم</TableHead>
                 <TableHead>العميل</TableHead>
-                <TableHead>الناقل</TableHead>
-                <TableHead>المسار</TableHead>
+                <TableHead>المزوّد</TableHead>
+                <TableHead>المدينة</TableHead>
                 <TableHead>النوع</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead className="text-center">عروض</TableHead>
@@ -123,7 +123,7 @@ export default function AdminOrdersPage() {
                     </TableCell>
                     <TableCell>{companyById(o.clientId)?.nameAr ?? '—'}</TableCell>
                     <TableCell>{companyById(o.carrierId)?.nameAr ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell>{o.originCity} ← {o.destinationCity}</TableCell>
+                    <TableCell>{o.originCity}</TableCell>
                     <TableCell>
                       <Badge variant={o.mode === 'DIRECT' ? 'warning' : 'secondary'}>
                         {o.mode === 'OPEN' ? 'مفتوح' : 'مباشر'}

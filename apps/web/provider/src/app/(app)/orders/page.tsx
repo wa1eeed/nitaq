@@ -68,17 +68,17 @@ export default function CarrierOrdersPage() {
               <EmptyState
                 icon={Package}
                 title="لا توجد طلبات"
-                description="لم تُعيَّن لك أي طلبات نقل بعد في هذه الفئة"
+                description="لم تُعيَّن لك أي طلبات خدمة بعد في هذه الفئة"
               />
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>رقم</TableHead>
-                    <TableHead>المسار</TableHead>
-                    <TableHead>الاستلام</TableHead>
+                    <TableHead>وصف الخدمة</TableHead>
+                    <TableHead>تاريخ البدء</TableHead>
                     <TableHead>الحالة</TableHead>
-                    <TableHead className="text-end">صافي الأجرة</TableHead>
+                    <TableHead className="text-end">المبلغ الصافي</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -101,7 +101,7 @@ export default function CarrierOrdersPage() {
                           <TableCell className="font-mono text-xs font-medium">{o.orderNumber}</TableCell>
                           <TableCell>
                             <div>
-                              <div className="text-sm">{o.originCity} ← {o.destinationCity}</div>
+                              <div className="text-sm font-medium">{o.originCity}</div>
                               <div className="text-xs text-muted-foreground truncate max-w-[280px]">{o.cargoDescription}</div>
                             </div>
                           </TableCell>

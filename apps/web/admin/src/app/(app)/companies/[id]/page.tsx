@@ -48,7 +48,7 @@ export default function AdminCompanyDetail() {
     <>
       <PageHeader
         title={company.nameAr}
-        subtitle={`${company.kind === 'CLIENT' ? 'عميل' : 'ناقل'} · ${company.city}`}
+        subtitle={`${company.kind === 'CLIENT' ? 'عميل' : 'مزوّد'} · ${company.city}`}
         actions={
           <>
             <StatusBadge status={company.kycStatus} />
@@ -164,8 +164,8 @@ export default function AdminCompanyDetail() {
               <CardContent>
                 <dl className="divide-y">
                   <Row label="التقييم" value={<span className="num font-medium">{company.rating?.toFixed(1)} ⭐</span>} />
-                  <Row label="رحلات منجزة" icon={Truck} value={<span className="num font-medium">{(company.completedTrips ?? 0).toLocaleString('en-US')}</span>} />
-                  <Row label="حجم الأسطول" value={<span className="num font-medium">{company.fleetSize} شاحنة</span>} />
+                  <Row label="طلبات منجزة" icon={Truck} value={<span className="num font-medium">{(company.completedTrips ?? 0).toLocaleString('en-US')}</span>} />
+                  <Row label="حجم الموارد" value={<span className="num font-medium">{company.fleetSize}</span>} />
                   <Row label="متوسط الاستجابة" value={<span className="num font-medium">{company.responseTimeMins} دقيقة</span>} />
                   <Row label="تأمين شامل" value={<Badge variant={company.insurance ? 'success' : 'secondary'}>{company.insurance ? 'متوفر' : 'غير متوفر'}</Badge>} />
                 </dl>
@@ -270,7 +270,7 @@ function AdminTeamSection({ companyId, companyKind }: { companyId: string; compa
     OWNER: '👑 المالك',
     ADMIN: '👑 مدير',
     STAFF: '📦 مشرف عمليات',
-    DISPATCH: '🚚 مشرف أسطول',
+    DISPATCH: '🗂️ مشرف خدمات',
     FINANCE: '💰 محاسب',
   };
 

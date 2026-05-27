@@ -65,15 +65,15 @@ export default function AdminDriversPage() {
   return (
     <>
       <PageHeader
-        title="كل السائقين في المنصة"
-        subtitle="قائمة موحّدة للسائقين عبر جميع شركات النقل"
+        title="كل الموظفين في المنصة"
+        subtitle="قائمة موحّدة للموظفين عبر جميع شركات المزودين"
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatsCard label="إجمالي السائقين" value={total.toLocaleString('en-US')}   icon={Users} />
-        <StatsCard label="في رحلة"          value={onTrip.toLocaleString('en-US')}  icon={Users} tone="warning" />
-        <StatsCard label="متاحون"            value={available.toLocaleString('en-US')} icon={Users} tone="success" />
-        <StatsCard label="خارج الخدمة"       value={offDuty.toLocaleString('en-US')} icon={Users} />
+        <StatsCard label="إجمالي الموظفين"  value={total.toLocaleString('en-US')}    icon={Users} />
+        <StatsCard label="قيد التنفيذ"       value={onTrip.toLocaleString('en-US')}  icon={Users} tone="warning" />
+        <StatsCard label="متاحون"             value={available.toLocaleString('en-US')} icon={Users} tone="success" />
+        <StatsCard label="خارج الخدمة"        value={offDuty.toLocaleString('en-US')} icon={Users} />
       </div>
 
       <Card>
@@ -84,7 +84,7 @@ export default function AdminDriversPage() {
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="ابحث باسم، هوية، جوال، أو ناقل..."
+                placeholder="ابحث باسم، هوية، جوال، أو مزوّد..."
                 className="pe-10"
               />
             </div>
@@ -93,7 +93,7 @@ export default function AdminDriversPage() {
               <SelectContent>
                 <SelectItem value="ALL">كل الحالات</SelectItem>
                 <SelectItem value="AVAILABLE">متاح</SelectItem>
-                <SelectItem value="ON_TRIP">في رحلة</SelectItem>
+                <SelectItem value="ON_TRIP">قيد التنفيذ</SelectItem>
                 <SelectItem value="OFF_DUTY">خارج الخدمة</SelectItem>
               </SelectContent>
             </Select>
@@ -102,12 +102,12 @@ export default function AdminDriversPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>السائق</TableHead>
-                <TableHead>الناقل</TableHead>
+                <TableHead>الموظف</TableHead>
+                <TableHead>المزوّد</TableHead>
                 <TableHead>هوية</TableHead>
-                <TableHead>فئة الرخصة</TableHead>
-                <TableHead>صلاحية الرخصة</TableHead>
-                <TableHead>الرحلات</TableHead>
+                <TableHead>التخصص</TableHead>
+                <TableHead>تاريخ الانضمام</TableHead>
+                <TableHead>المهام</TableHead>
                 <TableHead>الجوال</TableHead>
                 <TableHead>الطلب الحالي</TableHead>
                 <TableHead>الحالة</TableHead>
@@ -145,9 +145,9 @@ export default function AdminDriversPage() {
                         </Link>
                       </TableCell>
                       <TableCell className="num text-xs">{d.user.nationalId ?? '—'}</TableCell>
-                      <TableCell className="text-xs">{d.licenseType}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{formatDate(d.licenseExpiry, 'd MMM yyyy')}</TableCell>
-                      <TableCell className="num text-sm">{d.totalTrips.toLocaleString('en-US')}</TableCell>
+                      <TableCell className="text-xs">{d.licenseType || '—'}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{formatDate(d.createdAt, 'd MMM yyyy')}</TableCell>
+                      <TableCell className="num text-sm">{d.totalTrips.toLocaleString('en-US')} مهمة</TableCell>
                       <TableCell>
                         <a href={`tel:${d.user.phone}`} className="text-xs num inline-flex items-center gap-1 hover:text-primary" dir="ltr">
                           <Phone className="h-3 w-3" /> {d.user.phone}

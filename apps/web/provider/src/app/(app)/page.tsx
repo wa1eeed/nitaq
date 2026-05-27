@@ -4,8 +4,8 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, BarChart2, Clock, Compass, FileText, Package,
-  Star, TrendingUp, Truck, Wallet,
+  ArrowLeft, BarChart2, Briefcase, Clock, Compass, FileText, Package,
+  Star, TrendingUp, Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,14 +24,14 @@ import {
 const STATUS_EVENT: Record<string, { label: string; color: string }> = {
   ASSIGNED:   { label: 'تم تعيينك على طلب',      color: 'bg-success/10 text-success' },
   CONFIRMED:  { label: 'تم تأكيد الطلب',          color: 'bg-primary/10 text-primary' },
-  IN_TRANSIT: { label: 'طلب قيد التوصيل',         color: 'bg-warning/10 text-warning' },
+  IN_TRANSIT: { label: 'طلب قيد التنفيذ',          color: 'bg-warning/10 text-warning' },
   COMPLETED:  { label: 'تم إتمام الطلب',          color: 'bg-success/10 text-success' },
   DELIVERED:  { label: 'تم التسليم والاستلام',    color: 'bg-success/10 text-success' },
 };
 
 const QUICK_ACTIONS = [
   { label: 'استكشف الفرص',  href: '/opportunities',    Icon: Compass,   color: 'bg-primary/10 text-primary' },
-  { label: 'أسطولي',         href: '/fleet/trucks',     Icon: Truck,     color: 'bg-success/10 text-success' },
+  { label: 'خدماتي',         href: '/fleet/trucks',     Icon: Briefcase, color: 'bg-success/10 text-success' },
   { label: 'المستندات',      href: '/documents',        Icon: FileText,  color: 'bg-warning/10 text-warning' },
   { label: 'التقارير',       href: '/reports',          Icon: BarChart2, color: 'bg-muted text-muted-foreground' },
 ];
@@ -86,7 +86,7 @@ export default function CarrierDashboard() {
         href:  `/orders/${o.id}`,
         label: STATUS_EVENT[o.status].label,
         color: STATUS_EVENT[o.status].color,
-        sub:   `${o.orderNumber} · ${o.originCity} ← ${o.destinationCity}`,
+        sub:   `${o.orderNumber} · ${o.originCity}`,
         time:  formatRelative(o.createdAt),
       }));
   }, [myOrders]);
@@ -126,7 +126,7 @@ export default function CarrierDashboard() {
       <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatsCard label="فرص متاحة"      value={opps.length}        hint="مفتوحة + موجّهة لشركتك"  icon={Compass} tone="default" />
         <StatsCard label="طلباتي النشطة"  value={activeOrders.length} hint="قيد التنفيذ"             icon={Package} tone="warning" />
-        <StatsCard label="شاحنات متاحة"   value={`${available}/${trucks.length}`} hint={`${DRIVERS.length} سائق`} icon={Truck} tone="default" />
+        <StatsCard label="موارد متاحة"     value={`${available}/${trucks.length}`} hint={`${DRIVERS.length} موظف`} icon={Briefcase} tone="default" />
         <StatsCard label="أرباح الشهر"    value={<Currency amount={monthlyNet} />} hint="صافي بعد العمولة" icon={Wallet} tone="success" />
       </motion.div>
 
@@ -134,8 +134,8 @@ export default function CarrierDashboard() {
       <motion.div variants={item}>
         <Card>
           <CardContent className="pt-6 grid grid-cols-1 sm:grid-cols-3 gap-5 divide-y sm:divide-y-0 sm:divide-x rtl:divide-x-reverse">
-            <Kpi icon={Star}       label="تقييم الشركة"       value={`${me.rating?.toFixed(1)} ⭐`}                          hint={`${(me.completedTrips ?? 0).toLocaleString('en-US')} رحلة`} />
-            <Kpi icon={TrendingUp} label="رحلات منجزة"        value={(me.completedTrips ?? 0).toLocaleString('en-US')}       hint="على المنصة" />
+            <Kpi icon={Star}       label="تقييم الشركة"       value={`${me.rating?.toFixed(1)} ⭐`}                          hint={`${(me.completedTrips ?? 0).toLocaleString('en-US')} طلب`} />
+            <Kpi icon={TrendingUp} label="طلبات منجزة"        value={(me.completedTrips ?? 0).toLocaleString('en-US')}       hint="على المنصة" />
             <Kpi icon={Clock}      label="متوسّط الاستجابة"   value={`${me.responseTimeMins} دقيقة`}                         hint="من نشر الطلب" />
           </CardContent>
         </Card>
@@ -170,7 +170,7 @@ export default function CarrierDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>فرص نقل جديدة</CardTitle>
+                <CardTitle>فرص خدمات جديدة</CardTitle>
                 <CardDescription className="mt-1">{opps.length} فرصة متاحة الآن</CardDescription>
               </div>
               <Link href="/opportunities">
@@ -185,9 +185,9 @@ export default function CarrierDashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>المسار</TableHead>
-                  <TableHead>الاستلام</TableHead>
-                  <TableHead className="text-end">الوزن</TableHead>
+                  <TableHead>المدينة</TableHead>
+                  <TableHead>تاريخ البدء</TableHead>
+                  <TableHead className="text-end">الميزانية</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -195,12 +195,14 @@ export default function CarrierDashboard() {
                   <TableRow key={o.id} className="cursor-pointer" onClick={() => (window.location.href = `/opportunities/${o.id}`)}>
                     <TableCell>
                       <div>
-                        <div className="text-sm">{o.originCity} ← {o.destinationCity}</div>
+                        <div className="text-sm">{o.originCity}</div>
                         <div className="text-xs text-muted-foreground truncate max-w-[180px]">{o.cargoDescription}</div>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{formatDate(o.pickupDate)}</TableCell>
-                    <TableCell className="text-end num text-sm">{o.weightKg.toLocaleString('en-US')} كجم</TableCell>
+                    <TableCell className="text-end num text-sm">
+                      {o.clientBudget ? `${o.clientBudget.toLocaleString('en-US')} ر.س.` : '—'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -229,16 +231,16 @@ export default function CarrierDashboard() {
               <TableHeader>
                 <TableRow>
                   <TableHead>رقم</TableHead>
-                  <TableHead>المسار</TableHead>
+                  <TableHead>المدينة</TableHead>
                   <TableHead>الحالة</TableHead>
-                  <TableHead className="text-end">الأجرة</TableHead>
+                  <TableHead className="text-end">المبلغ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {myOrders.slice(0, 5).map((o) => (
                   <TableRow key={o.id} className="cursor-pointer" onClick={() => (window.location.href = `/orders/${o.id}`)}>
                     <TableCell className="font-mono text-xs text-muted-foreground">{o.orderNumber}</TableCell>
-                    <TableCell>{o.originCity} ← {o.destinationCity}</TableCell>
+                    <TableCell>{o.originCity}</TableCell>
                     <TableCell><StatusBadge status={o.status} /></TableCell>
                     <TableCell className="text-end"><Currency amount={o.providerAmount ?? o.agreedPrice} /></TableCell>
                   </TableRow>

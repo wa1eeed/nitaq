@@ -3,9 +3,9 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowLeft, ArrowRight, BadgeCheck, Building2, Check, CheckCircle2,
-  Eye, EyeOff, FileCheck2, Mail, MapPin, Phone, ShieldCheck, Snowflake,
-  Sparkles, Truck, Upload, User, X,
+  ArrowLeft, ArrowRight, BadgeCheck, Briefcase, Building2, Check, CheckCircle2,
+  Eye, EyeOff, FileCheck2, Mail, MapPin, Phone, ShieldCheck,
+  Sparkles, Upload, User, X,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -73,9 +73,9 @@ interface Form {
 const CITIES = ['الرياض', 'جدة', 'الدمام', 'الخبر', 'مكة المكرمة', 'المدينة', 'الطائف', 'تبوك', 'حائل', 'بريدة', 'الجبيل', 'ينبع', 'أبها'];
 const REGIONS = ['الوسطى', 'الغربية', 'الشرقية', 'الشمالية', 'الجنوبية'];
 const FLEET_SIZES = [
-  { v: '1-5',   l: '1 – 5 شاحنات' },
-  { v: '6-15',  l: '6 – 15 شاحنة' },
-  { v: '16-50', l: '16 – 50 شاحنة' },
+  { v: '1-5',   l: '1 – 5 موارد' },
+  { v: '6-15',  l: '6 – 15 مورد' },
+  { v: '16-50', l: '16 – 50 مورد' },
   { v: '50+',   l: 'أكثر من 50' },
 ];
 const YEARS_OPTS = [
@@ -105,7 +105,7 @@ const YEARS_OPTS = [
 const COMPANY_DOCS = [
   { id: 'CR',        label: 'السجل التجاري',          required: true },
   { id: 'ZAKAT',     label: 'شهادة الزكاة والدخل',    required: true },
-  { id: 'TRANSPORT', label: 'رخصة نقل البضائع (TGA)', required: true },
+  { id: 'TRANSPORT', label: 'ترخيص مزاولة النشاط', required: true },
   { id: 'INSURANCE', label: 'بوليصة التأمين',          required: true },
   { id: 'VAT',       label: 'شهادة الضريبة (VAT)',     required: false, vatOnly: true },
   { id: 'BANK',      label: 'خطاب IBAN من البنك',     required: false },
@@ -114,9 +114,9 @@ const COMPANY_DOCS = [
 const INDIVIDUAL_DOCS = [
   { id: 'NATIONAL_ID',     label: 'صورة الهوية الوطنية',                       required: true },
   { id: 'DRIVING_LICENSE', label: 'رخصة القيادة (فئة مناسبة)',                  required: true },
-  { id: 'ISTIMARA',        label: 'استمارة الشاحنة (الملكية)',                  required: true },
-  { id: 'INSURANCE',       label: 'تأمين الشاحنة',                              required: true },
-  { id: 'TGA_PERMIT',      label: 'تصريح نقل الأفراد من TGA',                  required: false },
+  { id: 'PROFESSIONAL_CERT', label: 'شهادة الكفاءة المهنية',                    required: true },
+  { id: 'INSURANCE',         label: 'تأمين ضد المسؤولية المهنية',               required: true },
+  { id: 'ACTIVITY_PERMIT',   label: 'تصريح مزاولة النشاط',                      required: false },
   { id: 'VAT',             label: 'شهادة الضريبة (VAT)',                         required: false, vatOnly: true },
   { id: 'BANK',            label: 'خطاب IBAN من البنك',                          required: false },
 ];
@@ -134,7 +134,7 @@ const STEPS_META = [
   { title: 'نوع الحساب',        icon: User },
   { title: 'الحساب',             icon: User },
   { title: 'المعلومات',          icon: Building2 },
-  { title: 'الأسطول',             icon: Truck },
+  { title: 'الخدمات',              icon: Briefcase },
   { title: 'المستندات',           icon: FileCheck2 },
   { title: 'الحساب البنكي',      icon: Building2 },
   { title: 'التحقّق',             icon: ShieldCheck },
@@ -222,9 +222,9 @@ export default function CarrierRegisterPage() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Truck className="h-5 w-5" />
+              <Briefcase className="h-5 w-5" />
             </div>
-            <span className="font-bold tracking-tight">نِطاق · الناقل</span>
+            <span className="font-bold tracking-tight">نِطاق · المزوّد</span>
           </Link>
           <Link href="/login" className="text-sm text-muted-foreground hover:text-primary">
             لديك حساب؟ <span className="text-primary font-semibold">تسجيل الدخول</span>
@@ -295,12 +295,12 @@ export default function CarrierRegisterPage() {
               <CardContent className="pt-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5" />
-                  <h3 className="font-bold">انضم كناقل على نِطاق</h3>
+                  <h3 className="font-bold">انضم كمزوّد على نِطاق</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <Benefit text="آلاف الطلبات شهرياً عبر المنصة" />
-                  <Benefit text="دفع مضمون عبر Escrow بعد التسليم" />
-                  <Benefit text="إدارة كاملة لأسطولك وسائقيك" />
+                  <Benefit text="دفع مضمون عبر Escrow بعد الإنجاز" />
+                  <Benefit text="إدارة كاملة لخدماتك وموظفيك" />
                   <Benefit text="تقارير وإحصاءات أداء مفصّلة" />
                   <Benefit text="عمولة 8% فقط — بدون رسوم خفية" />
                 </ul>
@@ -361,19 +361,19 @@ function StepAccountType({
           selected={form.accountType === 'COMPANY'}
           onClick={() => set('accountType', 'COMPANY')}
           icon={Building2}
-          title="شركة نقل"
+          title="شركة خدمات"
           subtitle="مؤسسة أو شركة مرخّصة لها سجل تجاري ساري"
-          bullets={['سجل تجاري إلزامي', 'رخصة نقل بضائع من TGA', 'مناسب للأساطيل المتوسطة والكبيرة', 'إمكانية تسجيل ضريبي']}
+          bullets={['سجل تجاري إلزامي', 'ترخيص مزاولة النشاط', 'مناسب للشركات المتوسطة والكبيرة', 'إمكانية تسجيل ضريبي']}
           tag="للشركات"
         />
         <KindCard
           selected={form.accountType === 'INDIVIDUAL'}
           onClick={() => set('accountType', 'INDIVIDUAL')}
           icon={User}
-          title="ناقل فرد"
-          subtitle="صاحب شاحنة/شاحنات يعمل بشكل فردي على هويته الشخصية"
-          bullets={['الهوية الوطنية تكفي (لا سجل تجاري)', 'رخصة قيادة بفئة مناسبة', 'استمارة الشاحنة + التأمين', 'الضريبة اختيارية']}
-          tag="للأفراد أصحاب الشاحنات"
+          title="مزوّد فرد"
+          subtitle="فرد يقدّم خدماته بشكل مستقل على هويته الشخصية"
+          bullets={['الهوية الوطنية تكفي (لا سجل تجاري)', 'شهادة كفاءة مهنية', 'تأمين مهني', 'الضريبة اختيارية']}
+          tag="للأفراد المستقلين"
         />
       </div>
 
@@ -381,7 +381,7 @@ function StepAccountType({
         <ShieldCheck className="h-4 w-4 text-info shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground leading-relaxed">
           متطلبات التسجيل تختلف حسب النوع. الأفراد لا يحتاجون سجلاً تجارياً، لكن يجب توفير الهوية الوطنية،
-          رخصة القيادة المناسبة، استمارة الشاحنة، والتأمين — وفق أنظمة هيئة النقل العام (TGA).
+          شهادة الكفاءة المهنية، والتأمين المهني — وفق أنظمة مزاولة النشاط.
         </p>
       </div>
     </>
@@ -434,7 +434,7 @@ function StepBasics({
       <StepHeader
         icon={User}
         title={isIndividual ? 'بياناتك الشخصية' : 'بيانات المسؤول'}
-        subtitle={isIndividual ? 'معلوماتك كناقل فرد' : 'معلومات الشخص المخوّل في الشركة'}
+        subtitle={isIndividual ? 'معلوماتك كمزوّد فرد' : 'معلومات الشخص المخوّل في الشركة'}
       />
       <div className="space-y-4">
         <div className={cn('grid grid-cols-1 gap-4', !isIndividual && 'sm:grid-cols-2')}>
@@ -451,7 +451,7 @@ function StepBasics({
                   <SelectItem value="OWNER">المالك</SelectItem>
                   <SelectItem value="GM">المدير العام</SelectItem>
                   <SelectItem value="OPS_MANAGER">مدير العمليات</SelectItem>
-                  <SelectItem value="FLEET_MANAGER">مدير الأسطول</SelectItem>
+                  <SelectItem value="FLEET_MANAGER">مدير الخدمات</SelectItem>
                   <SelectItem value="AUTHORIZED">مفوّض</SelectItem>
                 </SelectContent>
               </Select>
@@ -507,7 +507,7 @@ function StepCompany({
     <>
       <StepHeader
         icon={Building2}
-        title={isIndividual ? 'معلوماتك كناقل فرد' : 'بيانات الشركة'}
+        title={isIndividual ? 'معلوماتك كمزوّد فرد' : 'بيانات الشركة'}
         subtitle={isIndividual ? 'الهوية والعنوان وحالة الضريبة' : 'السجل التجاري وعنوان النشاط'}
       />
       <div className="space-y-4">
@@ -529,11 +529,11 @@ function StepCompany({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>اسم الشركة (عربي)</Label>
-                <Input value={form.companyNameAr} onChange={(e) => set('companyNameAr', e.target.value)} placeholder="مثال: الجزيرة لشحن البضائع" />
+                <Input value={form.companyNameAr} onChange={(e) => set('companyNameAr', e.target.value)} placeholder="مثال: الجزيرة للخدمات المتكاملة" />
               </div>
               <div className="space-y-2">
                 <Label>اسم الشركة (English) <span className="text-muted-foreground">— اختياري</span></Label>
-                <Input dir="ltr" value={form.companyNameEn} onChange={(e) => set('companyNameEn', e.target.value)} placeholder="Al Jazirah Cargo" />
+                <Input dir="ltr" value={form.companyNameEn} onChange={(e) => set('companyNameEn', e.target.value)} placeholder="Al Jazirah Services" />
               </div>
             </div>
             <div className="space-y-2">
@@ -633,10 +633,10 @@ function StepFleet({
   const truckTypes = useTruckTypesStore((s) => s.types.filter((t) => t.active));
   return (
     <>
-      <StepHeader icon={Truck} title="معلومات الأسطول" subtitle="ما هي قدراتك على النقل؟" />
+      <StepHeader icon={Briefcase} title="معلومات الخدمات" subtitle="ما هي قدراتك وتخصصاتك؟" />
       <div className="space-y-5">
         <div className="space-y-2">
-          <Label>حجم الأسطول</Label>
+          <Label>حجم الموارد</Label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {FLEET_SIZES.map((s) => (
               <button
@@ -655,8 +655,8 @@ function StepFleet({
         </div>
 
         <div className="space-y-2">
-          <Label>أنواع الشاحنات المتوفرة</Label>
-          <p className="text-xs text-muted-foreground">اختر كل الأنواع التي تملكها (السعات وفق كاتالوج المنصة)</p>
+          <Label>أنواع الخدمات المتوفرة</Label>
+          <p className="text-xs text-muted-foreground">اختر كل الخدمات التي تقدمها (وفق كاتالوج المنصة)</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {truckTypes.map((t) => {
               const on = form.truckTypes.includes(t.id);
@@ -842,7 +842,7 @@ function StepBank({
 }: { form: Form; set: <K extends keyof Form>(k: K, v: Form[K]) => void }) {
   return (
     <>
-      <StepHeader icon={Building2} title="الحساب البنكي" subtitle="حتى نتمكن من تحويل أرباحك بعد كل رحلة" />
+      <StepHeader icon={Building2} title="الحساب البنكي" subtitle="حتى نتمكن من تحويل أرباحك بعد كل طلب" />
       <div className="space-y-4">
         <div className="space-y-2">
           <Label>اسم صاحب الحساب</Label>

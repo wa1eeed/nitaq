@@ -28,7 +28,7 @@ const PRIORITY_LABELS: Record<TicketPriority, string> = {
 };
 const CATEGORY_LABELS: Record<TicketCategory, string> = {
   ACCOUNT: 'حساب', BILLING: 'فواتير', ORDER: 'طلب',
-  TECHNICAL: 'تقني', KYC: 'KYC', DRIVER: 'سائق', OTHER: 'أخرى',
+  TECHNICAL: 'تقني', KYC: 'KYC', DRIVER: 'موظف', OTHER: 'أخرى',
 };
 
 const STATUS_BADGE: Record<TicketStatus, 'default' | 'success' | 'warning' | 'destructive' | 'outline'> = {
@@ -66,7 +66,7 @@ export default function AdminSupportPage() {
     <>
       <PageHeader
         title="الدعم الفني"
-        subtitle="تذاكر الدعم الواردة من العملاء والناقلين"
+        subtitle="تذاكر الدعم الواردة من العملاء والمزودين"
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -139,7 +139,7 @@ export default function AdminSupportPage() {
                         </TableCell>
                         <TableCell>
                           <div className="text-sm truncate max-w-[140px]">{c?.nameAr ?? '—'}</div>
-                          <div className="text-xs text-muted-foreground">{t.raisedBy === 'CLIENT' ? 'عميل' : 'ناقل'}</div>
+                          <div className="text-xs text-muted-foreground">{t.raisedBy === 'CLIENT' ? 'عميل' : 'مزوّد'}</div>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{CATEGORY_LABELS[t.category]}</Badge>

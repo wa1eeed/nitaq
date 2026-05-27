@@ -47,7 +47,7 @@ export default function ClientOrdersPage() {
     { key: 'ALL',        label: 'الكل',         count: all.length },
     { key: 'ACTIVE',     label: 'نشطة',         count: all.filter((o) => ['PUBLISHED', 'BIDDING', 'ASSIGNED', 'CONFIRMED', 'IN_TRANSIT'].includes(o.status)).length },
     { key: 'BIDDING',    label: 'قيد العروض',   count: all.filter((o) => o.status === 'BIDDING').length },
-    { key: 'IN_TRANSIT', label: 'في الطريق',    count: all.filter((o) => o.status === 'IN_TRANSIT').length },
+    { key: 'IN_TRANSIT', label: 'قيد التنفيذ',   count: all.filter((o) => o.status === 'IN_TRANSIT').length },
     { key: 'COMPLETED',  label: 'مكتملة',       count: all.filter((o) => o.status === 'COMPLETED').length },
     { key: 'CANCELLED',  label: 'ملغاة',        count: all.filter((o) => o.status === 'CANCELLED').length },
   ];
@@ -57,7 +57,7 @@ export default function ClientOrdersPage() {
       <FadeItem>
         <PageHeader
           title="طلباتي"
-          subtitle="جميع طلبات النقل التي أنشأتها"
+          subtitle="جميع طلبات الخدمة التي أنشأتها"
           actions={
             <Link href="/orders/new">
               <Button>
@@ -89,7 +89,7 @@ export default function ClientOrdersPage() {
               <EmptyState
                 icon={Package}
                 title="لا توجد طلبات"
-                description="لم تنشئ أي طلبات نقل بعد في هذه الفئة"
+                description="لم تنشئ أي طلبات خدمة بعد في هذه الفئة"
                 action={{ label: 'إنشاء طلب جديد', href: '/orders/new' }}
               />
             ) : (
@@ -97,9 +97,9 @@ export default function ClientOrdersPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>رقم</TableHead>
-                    <TableHead>المسار</TableHead>
+                    <TableHead>وصف الخدمة</TableHead>
                     <TableHead>النوع</TableHead>
-                    <TableHead>الاستلام</TableHead>
+                    <TableHead>تاريخ البدء</TableHead>
                     <TableHead>الحالة</TableHead>
                     <TableHead className="text-center">عروض</TableHead>
                     <TableHead className="text-end">السعر</TableHead>
@@ -128,7 +128,7 @@ export default function ClientOrdersPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="text-sm">{o.originCity} ← {o.destinationCity}</span>
+                            <span className="text-sm font-medium">{o.originCity}</span>
                             <span className="text-xs text-muted-foreground truncate max-w-[280px]">{o.cargoDescription}</span>
                           </div>
                         </TableCell>

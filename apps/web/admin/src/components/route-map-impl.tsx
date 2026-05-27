@@ -96,7 +96,7 @@ export function RouteMapImpl({ origin, destination, progress, height = 300 }: Ro
         </Marker>
         {truckPos && (
           <Marker position={truckPos} icon={TRUCK_ICON}>
-            <Popup>الشاحنة في الطريق</Popup>
+            <Popup>قيد التنفيذ</Popup>
           </Marker>
         )}
       </MapContainer>

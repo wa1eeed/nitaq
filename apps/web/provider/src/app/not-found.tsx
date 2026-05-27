@@ -12,7 +12,7 @@ export default function NotFound() {
         <h1 className="text-6xl font-bold tracking-tight num mb-2">404</h1>
         <h2 className="text-xl font-semibold mb-2">الصفحة غير موجودة</h2>
         <p className="text-muted-foreground mb-6 leading-relaxed">
-          الرابط الذي طلبته غير موجود في منصة الناقل. ربما تم نقله أو أن الرابط غير صحيح.
+          الرابط الذي طلبته غير موجود في منصة المزوّد. ربما تم نقله أو أن الرابط غير صحيح.
         </p>
         <div className="flex items-center justify-center gap-2 flex-wrap">
           <Button asChild>

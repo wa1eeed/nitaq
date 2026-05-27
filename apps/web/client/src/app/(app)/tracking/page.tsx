@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  Clock, MapPin, Navigation, Package, Phone, Truck,
+  Briefcase, Clock, MapPin, Navigation, Package, Phone,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -25,12 +25,12 @@ export default function TrackingPage() {
   if (inTransit.length === 0) {
     return (
       <>
-        <PageHeader title="التتبع المباشر" subtitle="تابع موقع شحناتك في الوقت الفعلي" />
+        <PageHeader title="التتبع المباشر" subtitle="تابع تقدّم طلباتك في الوقت الفعلي" />
         <Card>
           <CardContent className="py-20 text-center">
-            <Truck className="h-14 w-14 mx-auto mb-4 text-muted-foreground/40" />
-            <h3 className="font-semibold">لا توجد شحنات نشطة حالياً</h3>
-            <p className="mt-2 text-sm text-muted-foreground">سيظهر هنا التتبع المباشر فور انطلاق أي شاحنة</p>
+            <Briefcase className="h-14 w-14 mx-auto mb-4 text-muted-foreground/40" />
+            <h3 className="font-semibold">لا توجد طلبات نشطة حالياً</h3>
+            <p className="mt-2 text-sm text-muted-foreground">سيظهر هنا التتبع المباشر فور بدء تنفيذ أي طلب</p>
             <Button asChild className="mt-4">
               <Link href="/orders/new">إنشاء طلب جديد</Link>
             </Button>
@@ -44,7 +44,7 @@ export default function TrackingPage() {
     <>
       <PageHeader
         title="التتبع المباشر"
-        subtitle={`${inTransit.length} شحنة قيد التنفيذ`}
+        subtitle={`${inTransit.length} طلب قيد التنفيذ`}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
@@ -122,7 +122,7 @@ function TrackingDetail({ order }: { order: any }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Truck className="h-4 w-4" /> الناقل
+              <Briefcase className="h-4 w-4" /> المزوّد
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -132,7 +132,7 @@ function TrackingDetail({ order }: { order: any }) {
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="font-semibold truncate">{provider?.nameAr ?? '—'}</div>
-                <div className="text-xs text-muted-foreground">{provider?.completedTrips} رحلة · ⭐ {provider?.rating?.toFixed(1)}</div>
+                <div className="text-xs text-muted-foreground">{provider?.completedTrips} طلب · ⭐ {provider?.rating?.toFixed(1)}</div>
               </div>
               <Button size="sm" variant="outline"><Phone className="h-3.5 w-3.5" /></Button>
             </div>
@@ -142,16 +142,12 @@ function TrackingDetail({ order }: { order: any }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Package className="h-4 w-4" /> تفاصيل الشحنة
+              <Package className="h-4 w-4" /> تفاصيل الطلب
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-1.5 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">الوزن</span>
-              <span className="font-medium num">{order.weightKg.toLocaleString('en-US')} كجم</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">الاستلام</span>
+              <span className="text-muted-foreground">تاريخ البدء</span>
               <span className="font-medium text-xs">{formatDateTime(order.pickupDate)}</span>
             </div>
             <div className="flex justify-between">
@@ -171,7 +167,7 @@ function TrackingDetail({ order }: { order: any }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-sm font-semibold">الموقع الحالي للشاحنة</span>
+                <span className="text-sm font-semibold">الموقع الحالي للمزوّد</span>
                 <Badge variant="success" className="flex items-center gap-1">
                   <span className="inline-block h-1.5 w-1.5 bg-success rounded-full animate-pulse" />
                   مباشر
@@ -179,7 +175,7 @@ function TrackingDetail({ order }: { order: any }) {
               </div>
               <p className="text-sm text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5 inline me-1" />
-                على الطريق الرئيسي بين <strong>{order.originCity}</strong> و <strong>{order.destinationCity}</strong>
+                قيد التنفيذ في <strong>{order.originCity}</strong>
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 <Clock className="h-3.5 w-3.5 inline me-1" />

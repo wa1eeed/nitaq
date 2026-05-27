@@ -1,61 +1,47 @@
 {
-  "title": "الأسطول",
-  "trucks": "الشاحنات",
-  "drivers": "السائقون",
-  "addTruck": "إضافة شاحنة",
-  "addDriver": "إضافة سائق",
-  "plateNumber": "رقم اللوحة",
-  "registrationType": {
-    "label": "نوع التسجيل",
-    "light": "نقل خفيف",
-    "public": "نقل عام"
-  },
-  "truckType": {
-    "label": "نوع الشاحنة",
-    "smallVan": "فان صغير",
-    "smallFlatbed": "مسطح صغير",
-    "mediumFlatbed": "مسطح متوسط",
-    "largeFlatbed": "مسطح كبير",
-    "refrigerated": "مبرّد",
-    "container20": "حاوية 20 قدم",
-    "container40": "حاوية 40 قدم",
-    "containerTrailer": "حاوية",
-    "tanker": "صهريج",
-    "boxTruck": "صندوقي",
-    "lowbed": "لوبد"
-  },
-  "truckStatus": {
-    "available": "متاحة",
-    "onTrip": "في رحلة",
+  "title": "الخدمات",
+  "trucks": "الخدمات",
+  "drivers": "الموظفون",
+  "addTruck": "إضافة خدمة",
+  "addDriver": "إضافة موظف",
+  "serviceCode": "كود الخدمة",
+  "serviceType": {
+    "label": "نوع الخدمة",
+    "consulting": "استشارات",
+    "design": "تصميم",
+    "development": "تطوير",
     "maintenance": "صيانة",
-    "offDuty": "خارج الخدمة"
+    "cleaning": "تنظيف",
+    "security": "أمن وحراسة",
+    "catering": "تقديم طعام",
+    "other": "أخرى"
   },
-  "driverStatus": {
+  "serviceStatus": {
+    "available": "متاحة",
+    "onAssignment": "قيد التنفيذ",
+    "maintenance": "غير متاحة",
+    "offDuty": "موقوفة"
+  },
+  "employeeStatus": {
     "available": "متاح",
-    "onTrip": "في رحلة",
+    "onAssignment": "في مهمة",
     "offDuty": "خارج الخدمة"
   },
   "capacity": "الطاقة الاستيعابية",
-  "tons": "طن",
-  "kg": "كجم",
-  "make": "البراند",
+  "make": "المورّد",
   "model": "الموديل",
-  "year": "سنة الصنع",
-  "hasGPS": "مجهّز بـ GPS",
-  "hasRefrigeration": "مجهّز بتبريد",
+  "year": "سنة",
   "specifications": "المواصفات",
   "documents": "الوثائق",
-  "tripsHistory": "سجل الرحلات",
-  "totalTrips": "إجمالي الرحلات",
-  "totalDistance": "إجمالي المسافة",
-  "currentDriver": "السائق الحالي",
-  "noDriverAssigned": "لا يوجد سائق مُخصّص",
-  "driver": {
+  "assignmentHistory": "سجل المهام",
+  "totalAssignments": "إجمالي المهام",
+  "currentEmployee": "الموظف الحالي",
+  "noEmployeeAssigned": "لا يوجد موظف مُخصّص",
+  "employee": {
     "fullName": "الاسم الكامل",
     "nationalId": "رقم الهوية",
-    "licenseClass": "فئة الرخصة",
-    "licenseExpiry": "صلاحية الرخصة",
+    "specialty": "التخصص",
     "phone": "الجوال",
-    "totalTrips": "الرحلات المنجزة"
+    "totalAssignments": "المهام المنجزة"
   }
 }

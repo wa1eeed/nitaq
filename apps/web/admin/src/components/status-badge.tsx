@@ -8,7 +8,7 @@ const MAP: Record<string, { variant: Variant; label: string }> = {
   BIDDING:      { variant: 'warning',     label: 'قيد العروض' },
   ASSIGNED:     { variant: 'warning',     label: 'مُسند' },
   CONFIRMED:    { variant: 'default',     label: 'مؤكد' },
-  IN_TRANSIT:   { variant: 'success',     label: 'في الطريق' },
+  IN_TRANSIT:   { variant: 'success',     label: 'قيد التنفيذ' },
   DELIVERED:    { variant: 'success',     label: 'تم التسليم' },
   COMPLETED:    { variant: 'success',     label: 'مكتمل' },
   CANCELLED:    { variant: 'destructive', label: 'ملغى' },

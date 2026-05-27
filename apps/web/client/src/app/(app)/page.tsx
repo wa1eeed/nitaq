@@ -23,14 +23,14 @@ import {
 const STATUS_EVENT: Record<string, { label: string; color: string }> = {
   PUBLISHED:  { label: 'تم نشر طلب جديد',       color: 'bg-primary/10 text-primary' },
   BIDDING:    { label: 'وصلت عروض جديدة',        color: 'bg-warning/10 text-warning' },
-  ASSIGNED:   { label: 'تم تعيين ناقل',          color: 'bg-success/10 text-success' },
-  IN_TRANSIT: { label: 'الطلب قيد التوصيل',      color: 'bg-primary/10 text-primary' },
+  ASSIGNED:   { label: 'تم تعيين مزوّد',         color: 'bg-success/10 text-success' },
+  IN_TRANSIT: { label: 'الطلب قيد التنفيذ',      color: 'bg-primary/10 text-primary' },
   COMPLETED:  { label: 'تم إتمام الطلب',         color: 'bg-success/10 text-success' },
   DELIVERED:  { label: 'تم التسليم',             color: 'bg-success/10 text-success' },
 };
 
 const QUICK_ACTIONS = [
-  { label: 'طلب نقل جديد',  href: '/orders/new',  Icon: Plus,        color: 'bg-primary/10 text-primary' },
+  { label: 'طلب خدمة جديد',  href: '/orders/new',  Icon: Plus,        color: 'bg-primary/10 text-primary' },
   { label: 'تتبع طلباتي',   href: '/tracking',    Icon: MapPin,      color: 'bg-success/10 text-success' },
   { label: 'فواتيري',        href: '/invoices',    Icon: FileText,    color: 'bg-warning/10 text-warning' },
   { label: 'الدعم',          href: '/support',     Icon: Headphones,  color: 'bg-muted text-muted-foreground' },
@@ -69,7 +69,7 @@ export default function ClientDashboard() {
         href:  `/orders/${o.id}`,
         label: STATUS_EVENT[o.status].label,
         color: STATUS_EVENT[o.status].color,
-        sub:   `${o.orderNumber} · ${o.originCity} ← ${o.destinationCity}`,
+        sub:   `${o.orderNumber} · ${o.originCity}`,
         time:  formatRelative(o.createdAt),
       }));
   }, [all]);
@@ -94,7 +94,7 @@ export default function ClientDashboard() {
             <Link href="/orders/new">
               <Button className="mt-4 sm:mt-0 bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur-sm shadow-none">
                 <Plus className="h-4 w-4" />
-                طلب نقل جديد
+                طلب خدمة جديد
               </Button>
             </Link>
           </div>
@@ -159,7 +159,7 @@ export default function ClientDashboard() {
               <TableHeader>
                 <TableRow>
                   <TableHead>رقم</TableHead>
-                  <TableHead>المسار</TableHead>
+                  <TableHead>المدينة</TableHead>
                   <TableHead>النوع</TableHead>
                   <TableHead>الحالة</TableHead>
                   <TableHead className="text-center">عروض</TableHead>
@@ -170,7 +170,7 @@ export default function ClientDashboard() {
                 {all.slice(0, 7).map((o) => (
                   <TableRow key={o.id} className="cursor-pointer" onClick={() => (window.location.href = `/orders/${o.id}`)}>
                     <TableCell className="font-mono text-xs text-muted-foreground">{o.orderNumber}</TableCell>
-                    <TableCell>{o.originCity} ← {o.destinationCity}</TableCell>
+                    <TableCell>{o.originCity}</TableCell>
                     <TableCell>
                       <Badge variant={o.mode === 'DIRECT' ? 'warning' : 'secondary'}>
                         {o.mode === 'OPEN' ? 'مفتوح' : 'مباشر'}

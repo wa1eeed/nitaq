@@ -170,7 +170,7 @@ export function TruckTypesPanel({ onPersist }: { onPersist?: (types: TruckTypeOp
             <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/30 border">
               <div>
                 <Label>نشط</Label>
-                <p className="mt-0.5 text-xs text-muted-foreground">يظهر للناقلين فقط إذا كان نشطاً</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">يظهر للمزودين فقط إذا كان نشطاً</p>
               </div>
               <Switch checked={draft.active} onCheckedChange={(v) => setDraft({ ...draft, active: v })} />
             </div>

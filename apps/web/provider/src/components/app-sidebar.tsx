@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import {
-  AlertCircle, BarChart3, Bell, Compass, FileCheck2, Gavel, LayoutDashboard,
-  LifeBuoy, Package, Settings, Shield, Truck, Users, Wallet,
+  AlertCircle, BarChart3, Bell, Briefcase, Compass, FileCheck2, Gavel, LayoutDashboard,
+  LifeBuoy, Package, Settings, Shield, Users, Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -34,7 +34,7 @@ const NAV: NavGroup[] = [
   {
     titleKey: 'fleet',
     items: [
-      { href: '/fleet/trucks',  labelKey: 'trucks',  icon: Truck },
+      { href: '/fleet/trucks',  labelKey: 'trucks',  icon: Briefcase },
       { href: '/fleet/drivers', labelKey: 'drivers', icon: Users },
     ],
   },
@@ -103,7 +103,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground overflow-hidden">
           {logoUrl
             ? <Image src={logoUrl} alt={nameAr} width={36} height={36} className="object-contain" unoptimized />
-            : <Truck className="h-5 w-5" />
+            : <Briefcase className="h-5 w-5" />
           }
         </div>
         <div className="flex flex-col leading-tight">

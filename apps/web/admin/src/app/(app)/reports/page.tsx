@@ -230,7 +230,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
       ['التسليم في الوقت', fmtPct(onTimeRate), onTimeRate >= 95 ? '✓' : '⚠'],
       ['معدل النزاعات', fmtPct(disputeRate), disputeRate <= 2 ? '✓' : '⚠'],
       ['عملاء جدد', fmt(newClients), ''],
-      ['ناقلون جدد', fmt(newProviders), ''],
+      ['مزودون جدد', fmt(newProviders), ''],
     ],
     styles: { font: 'helvetica', fontSize: 10, halign: 'right' },
     headStyles: { fillColor: [10, 61, 58], textColor: [255, 255, 255] },
@@ -263,7 +263,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
     body: [
       ['Take Rate', fmtPct(takeRate), '8%', Math.abs(takeRate - 8) <= 1 ? '✓' : '⚠'],
       ['أعلى مسار', topRoutes[0]?.route ?? '—', '—', ''],
-      ['أعلى ناقل', topProviders[0]?.name ?? '—', '—', ''],
+      ['أعلى مزوّد', topProviders[0]?.name ?? '—', '—', ''],
     ],
     styles: { halign: 'right', fontSize: 10 },
     headStyles: { fillColor: [10, 61, 58], textColor: [255, 255, 255] },
@@ -283,7 +283,7 @@ async function exportPDF(summary: Record<string, unknown> | undefined, period: s
       ['نمو الطلبات MoM', fmtPct(Number(summary?.ordersMoM ?? 0))],
       ['نمو GMV MoM',     fmtPct(gmvMoM)],
       ['عملاء جدد',       fmt(newClients)],
-      ['ناقلون جدد',      fmt(newProviders)],
+      ['مزودون جدد',      fmt(newProviders)],
     ],
     styles: { halign: 'right', fontSize: 10 },
     headStyles: { fillColor: [13, 92, 87], textColor: [255, 255, 255] },
@@ -303,7 +303,7 @@ function MarketTab({ period }: { period: Period }) {
   const statusData = useMemo(() => {
     if (!d?.ordersByStatus) return [];
     const labels: Record<string, string> = {
-      COMPLETED: 'مكتملة', IN_TRANSIT: 'في الطريق', BIDDING: 'قيد العروض',
+      COMPLETED: 'مكتملة', IN_TRANSIT: 'قيد التنفيذ', BIDDING: 'قيد العروض',
       PUBLISHED: 'منشورة', ASSIGNED: 'مُسندة', CONFIRMED: 'مؤكدة',
       CANCELLED: 'ملغاة', DRAFT: 'مسودة', DELIVERED: 'مُسلَّمة',
     };
@@ -330,7 +330,7 @@ function MarketTab({ period }: { period: Period }) {
         <KpiCard label="متوسط وقت المطابقة" value={`${(d?.avgMatchingHours ?? 0).toFixed(1)} ساعة`} icon={Clock} accent={GOLD} />
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="استخدام الناقلين" value={fmtPct(d?.carrierUtilization)} icon={Truck} accent={BLUE} />
+        <KpiCard label="استخدام المزودين" value={fmtPct(d?.carrierUtilization)} icon={Truck} accent={BLUE} />
         <KpiCard label="سيولة العروض" value={`${(d?.supplyLiquidity ?? 0).toFixed(1)} عرض/طلب`} icon={Activity} accent={GREEN} />
         <KpiCard label="معدل التكرار" value={fmtPct(d?.repeatRate)} sub="عملاء بطلب ثانٍ" icon={RefreshCw} accent={TEAL} />
         <KpiCard label="العمولات" value={fmtSAR(d?.commission)} icon={Wallet} accent={GOLD} />
@@ -357,7 +357,7 @@ function MarketTab({ period }: { period: Period }) {
             </PieChart>
           </ResponsiveContainer>
         </ChartCard>
-        <ChartCard title="أكثر المسارات طلباً">
+        <ChartCard title="أكثر المدن طلباً">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={(d?.topRoutes ?? []).slice(0, 6)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
@@ -371,12 +371,12 @@ function MarketTab({ period }: { period: Period }) {
       </div>
       <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
         <div className="px-5 py-3" style={{ background: CARD }}>
-          <span style={{ color: MUTED, fontSize: 12 }}>أعلى الناقلين إيراداً</span>
+          <span style={{ color: MUTED, fontSize: 12 }}>أعلى المزودين إيراداً</span>
         </div>
         <table className="w-full text-sm">
           <thead>
             <tr style={{ borderBottom: `1px solid ${BORDER}`, background: CARD }}>
-              {['#', 'الناقل', 'الطلبات', 'الإيراد'].map((h) => (
+              {['#', 'المزوّد', 'الطلبات', 'الإيراد'].map((h) => (
                 <th key={h} className="px-5 py-3 text-right" style={{ color: MUTED, fontSize: 11 }}>{h}</th>
               ))}
             </tr>
@@ -461,18 +461,18 @@ function OpsTab({ period }: { period: Period }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <KpiCard label="التسليم في الوقت" value={fmtPct(d?.onTimeDeliveryRate)} sub="الهدف: >95%" icon={CheckCircle} accent={onTimeColor} />
+        <KpiCard label="الإنجاز في الوقت" value={fmtPct(d?.onTimeDeliveryRate)} sub="الهدف: >95%" icon={CheckCircle} accent={onTimeColor} />
         <KpiCard label="معدل النزاعات" value={fmtPct(d?.disputeRate)} sub="الهدف: <2%" icon={AlertTriangle} accent={trafficLight(100 - (d?.disputeRate ?? 100), 98, 90)} />
-        <KpiCard label="توفر الأسطول" value={fmtPct(d?.fleetAvailability)} icon={Truck} accent={BLUE} />
-        <KpiCard label="متوسط وقت التوصيل" value={`${(d?.avgDeliveryDays ?? 0).toFixed(1)} يوم`} icon={Clock} accent={TEAL} />
+        <KpiCard label="توفر الموارد" value={fmtPct(d?.fleetAvailability)} icon={Truck} accent={BLUE} />
+        <KpiCard label="متوسط وقت الإنجاز" value={`${(d?.avgDeliveryDays ?? 0).toFixed(1)} يوم`} icon={Clock} accent={TEAL} />
         <KpiCard label="معدل اعتماد KYC" value={fmtPct(d?.kycApprovalRate)} icon={Shield} accent={GREEN} />
         <KpiCard label="نزاعات مفتوحة" value={fmt(d?.openDisputes)} icon={AlertTriangle} accent={(d?.openDisputes ?? 0) > 5 ? RED : GOLD} />
       </div>
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'التسليم في الوقت', val: d?.onTimeDeliveryRate, good: 95, ok: 85 },
+          { label: 'الإنجاز في الوقت', val: d?.onTimeDeliveryRate, good: 95, ok: 85 },
           { label: 'معدل النزاعات',    val: 100 - (d?.disputeRate ?? 0), good: 98, ok: 95 },
-          { label: 'توفر الأسطول',     val: d?.fleetAvailability, good: 70, ok: 50 },
+          { label: 'توفر الموارد',     val: d?.fleetAvailability, good: 70, ok: 50 },
         ].map(({ label, val, good, ok }) => {
           const color = trafficLight(val ?? 0, good, ok);
           return (
@@ -516,7 +516,7 @@ function GrowthTab({ period }: { period: Period }) {
         <KpiCard label="نمو الطلبات MoM" value={fmtPct(d?.ordersMoM)} change={d?.ordersMoM} icon={Package} accent={(d?.ordersMoM ?? 0) >= 0 ? GREEN : RED} />
         <KpiCard label="نمو GMV MoM" value={fmtPct(d?.gmvMoM)} change={d?.gmvMoM} icon={Wallet} accent={(d?.gmvMoM ?? 0) >= 0 ? GREEN : RED} />
         <KpiCard label="عملاء جدد" value={fmt(d?.newClients)} sub={`vs ${fmt(d?.prevClients)} الفترة السابقة`} change={d?.clientsMoM} icon={Users} accent={GREEN} />
-        <KpiCard label="ناقلون جدد" value={fmt(d?.newCarriers)} change={d?.carriersMoM} icon={Truck} accent={TEAL} />
+        <KpiCard label="مزودون جدد" value={fmt(d?.newCarriers)} change={d?.carriersMoM} icon={Truck} accent={TEAL} />
         <KpiCard label="التغطية الجغرافية" value={`${fmt(d?.geographicCoverage)} مدينة`} icon={Globe} accent={BLUE} />
         <KpiCard label="إجمالي الطلبات" value={fmt(d?.ordersNow)} sub={`vs ${fmt(d?.ordersPrev)}`} icon={Package} accent={GOLD} />
       </div>
@@ -525,7 +525,7 @@ function GrowthTab({ period }: { period: Period }) {
           <BarChart data={[
             { name: 'الطلبات',        current: d?.ordersNow   ?? 0, prev: d?.ordersPrev   ?? 0 },
             { name: 'العملاء الجدد',  current: d?.newClients  ?? 0, prev: d?.prevClients  ?? 0 },
-            { name: 'الناقلون الجدد', current: d?.newCarriers ?? 0, prev: d?.prevCarriers ?? 0 },
+            { name: 'المزودون الجدد', current: d?.newCarriers ?? 0, prev: d?.prevCarriers ?? 0 },
           ]}>
             <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
             <XAxis dataKey="name" tick={{ fill: MUTED, fontSize: 11 }} />
@@ -562,7 +562,7 @@ function InvestorTab({ period, summary }: { period: Period; summary: Record<stri
     const clients   = Number(summary.newClients ?? 0);
     const providers = Number(summary.newCarriers ?? 0);
     return growth > 0
-      ? `حققت المنصة نمواً بنسبة ${growth.toFixed(1)}% في GMV مقارنة بالفترة السابقة. معدل الإكمال ${cr.toFixed(1)}% ومعدل التسليم في الوقت ${ot.toFixed(1)}%. تم استقطاب ${clients} عميل و${providers} ناقل جديد خلال الفترة.`
+      ? `حققت المنصة نمواً بنسبة ${growth.toFixed(1)}% في GMV مقارنة بالفترة السابقة. معدل الإكمال ${cr.toFixed(1)}% ومعدل الإنجاز في الوقت ${ot.toFixed(1)}%. تم استقطاب ${clients} عميل و${providers} مزوّد جديد خلال الفترة.`
       : `أداء المنصة مستقر خلال الفترة. GMV: ${fmtSAR(gmv)}. معدل إكمال الطلبات: ${cr.toFixed(1)}%. ${clients} عميل جديد.`;
   }, [summary]);
 
@@ -571,7 +571,7 @@ function InvestorTab({ period, summary }: { period: Period; summary: Record<stri
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <KpiCard label="LTV (متوسط قيمة العميل)" value={fmtSAR(d?.ltv)} icon={Star} accent={GOLD} />
         <KpiCard label="Cohort Retention" value={fmtPct(d?.cohortRetention)} sub="عملاء عادوا الفترة التالية" icon={RefreshCw} accent={GREEN} />
-        <KpiCard label="Network Effect Score" value={(d?.networkEffectScore ?? 0).toFixed(2)} sub="نسبة نمو الطلبات/الناقلين" icon={Activity} accent={BLUE} />
+        <KpiCard label="Network Effect Score" value={(d?.networkEffectScore ?? 0).toFixed(2)} sub="نسبة نمو الطلبات/المزودين" icon={Activity} accent={BLUE} />
         <KpiCard label="اختراق السوق" value={fmtPct(d?.marketPenetration)} sub="مدن نشطة من 20" icon={Globe} accent={TEAL} />
         <KpiCard label="عملاء نشطون" value={fmt(d?.activeClientsCount)} icon={Users} accent={GREEN} />
         <KpiCard label="Unit Economics" value={(d?.ltv ?? 0) > 0 ? `LTV: ${fmtSAR(d?.ltv)}` : '—'} sub="CAC: 0 (تقدير)" icon={TrendingUp} accent={GOLD} />

@@ -125,7 +125,7 @@ export default function CarrierOpportunitiesPage() {
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="ابحث عن مدينة، نوع بضاعة، رقم طلب..." value={search} onChange={(e) => setSearch(e.target.value)} className="ps-9" />
+          <Input placeholder="ابحث عن مدينة، نوع خدمة، رقم طلب..." value={search} onChange={(e) => setSearch(e.target.value)} className="ps-9" />
         </div>
         <Select value={city} onValueChange={setCity}>
           <SelectTrigger className="w-full sm:w-[180px]"><SelectValue placeholder="كل المدن" /></SelectTrigger>

@@ -76,8 +76,8 @@ export default function ClientLoginPage() {
 
           <div className="space-y-4">
             {[
-              { icon: CheckCircle, text: 'أسعار تنافسية من عشرات الناقلين' },
-              { icon: CheckCircle, text: 'تتبع شحنتك لحظة بلحظة' },
+              { icon: CheckCircle, text: 'أسعار تنافسية من عشرات المزودين' },
+              { icon: CheckCircle, text: 'تتبع طلبك لحظة بلحظة' },
               { icon: CheckCircle, text: 'دفع آمن عبر نظام Escrow' },
             ].map(({ icon: Icon, text }, i) => (
               <motion.div

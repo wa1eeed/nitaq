@@ -75,7 +75,7 @@ export default function AdminWalletsPage() {
           <TabsList>
             <TabsTrigger value="ALL">الكل ({WALLETS.length})</TabsTrigger>
             <TabsTrigger value="CLIENT">العملاء ({WALLETS.filter((w) => companyById(w.companyId)?.kind === 'CLIENT').length})</TabsTrigger>
-            <TabsTrigger value="CARRIER">الناقلون ({WALLETS.filter((w) => companyById(w.companyId)?.kind === 'CARRIER').length})</TabsTrigger>
+            <TabsTrigger value="CARRIER">المزودون ({WALLETS.filter((w) => companyById(w.companyId)?.kind === 'CARRIER').length})</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="relative w-full md:w-80">
@@ -113,7 +113,7 @@ export default function AdminWalletsPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={company.kind === 'CLIENT' ? 'default' : 'success'}>
-                      {company.kind === 'CLIENT' ? 'عميل' : 'ناقل'}
+                      {company.kind === 'CLIENT' ? 'عميل' : 'مزوّد'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-end"><Currency amount={wallet.balance} /></TableCell>

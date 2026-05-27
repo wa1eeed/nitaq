@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  ArrowRight, Building2, Calendar, CheckCircle2, Clock, MapPin, Package, Phone,
-  ShieldCheck, Snowflake, Truck, User, Wallet, Weight,
+  ArrowRight, Briefcase, Building2, Calendar, CheckCircle2, Clock, MapPin, Package, Phone,
+  ShieldCheck, User, Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +27,7 @@ import {
 const TITLES: Record<string, string> = {
   CREATED: 'إنشاء الطلب', PUBLISHED: 'نشر الطلب', BID_RECEIVED: 'استلام عرض',
   BID_ACCEPTED: 'قبول عرض', CONFIRMED: 'تأكيد التحميل', PICKED_UP: 'تم الاستلام',
-  IN_TRANSIT: 'في الطريق', DELIVERED: 'تم التسليم',
+  IN_TRANSIT: 'قيد التنفيذ', DELIVERED: 'تم التسليم',
   PAYMENT_RELEASED: 'إفراج Escrow', COMPLETED: 'إغلاق الطلب', CANCELLED: 'إلغاء',
 };
 
@@ -186,16 +186,16 @@ export default function AdminOrderDetail() {
         {/* Sidebar col */}
         <div className="space-y-6">
           {client && <PartyCard kind="العميل" company={client} onClick={() => router.push(`/companies/${client.id}`)} />}
-          {provider && <PartyCard kind="الناقل" company={provider} onClick={() => router.push(`/companies/${provider.id}`)} />}
+          {provider && <PartyCard kind="المزوّد" company={provider} onClick={() => router.push(`/companies/${provider.id}`)} />}
 
           {/* Assigned driver */}
           <Card>
-            <CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">السائق المُكلَّف</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">الموظف المُكلَّف</CardTitle></CardHeader>
             <CardContent>
               {orderDrivers.length === 0 ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <User className="h-4 w-4 shrink-0" />
-                  لم يُسند سائق بعد
+                  لم يُسند موظف بعد
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -226,7 +226,7 @@ export default function AdminOrderDetail() {
                               <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium
                                 ${isOnTrip ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success'}`}>
                                 <span className={`h-1.5 w-1.5 rounded-full ${isOnTrip ? 'bg-warning' : 'bg-success'}`} />
-                                {isOnTrip ? 'في رحلة' : 'متاح'}
+                                {isOnTrip ? 'قيد التنفيذ' : 'متاح'}
                               </span>
                             </dd>
                           </div>
@@ -240,20 +240,18 @@ export default function AdminOrderDetail() {
           </Card>
 
           <Card>
-            <CardHeader><CardTitle>تفاصيل الشحنة</CardTitle></CardHeader>
+            <CardHeader><CardTitle>تفاصيل الخدمة</CardTitle></CardHeader>
             <CardContent>
               <dl className="divide-y">
                 <Row label="الوصف" value={order.cargoDescription} />
-                <Row label="الوزن" icon={Weight} value={<span className="num">{order.weightKg.toLocaleString('en-US')} كجم</span>} />
-                <Row label="نوع الشاحنة" icon={Truck} value={order.truckType} />
+                <Row label="نوع الخدمة" icon={Briefcase} value={order.truckType} />
                 <Row label="تأمين" icon={ShieldCheck} value={order.requiresInsurance ? 'مطلوب' : '—'} />
-                <Row label="تبريد" icon={Snowflake} value={order.requiresRefrigeration ? 'مطلوب' : '—'} />
               </dl>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader><CardTitle>المسار والمواعيد</CardTitle></CardHeader>
+            <CardHeader><CardTitle>الموقع والمواعيد</CardTitle></CardHeader>
             <CardContent>
               <dl className="divide-y">
                 <Row label="من" icon={MapPin} value={order.originCity} />
@@ -270,7 +268,7 @@ export default function AdminOrderDetail() {
                 <Row label="ميزانية العميل" value={<Currency amount={order.clientBudget} />} />
                 <Row label="السعر المتفق" value={<Currency amount={order.agreedPrice} />} />
                 <Row label="عمولة المنصة" value={<Currency amount={order.commission ?? 0} />} />
-                <Row label="صافي للناقل" value={<Currency amount={order.providerAmount ?? order.carrierAmount} />} />
+                <Row label="صافي للمزوّد" value={<Currency amount={order.providerAmount ?? order.carrierAmount} />} />
               </dl>
             </CardContent>
           </Card>
@@ -354,9 +352,9 @@ function AdminShipmentStatus({
   fromProviderBid: boolean;
 }) {
   const meta: Record<string, { text: string; step: 1 | 2 | 3; tone: 'info' | 'warning' | 'success' }> = {
-    ASSIGNED:   { text: 'الطلب مُسند للناقل — قبل الاستلام',           step: 1, tone: 'info' },
-    CONFIRMED:  { text: 'الناقل أكّد الموعد',                          step: 1, tone: 'info' },
-    IN_TRANSIT: { text: 'الشحنة قيد التوصيل',                            step: 2, tone: 'warning' },
+    ASSIGNED:   { text: 'الطلب مُسند للمزوّد — قبل البدء',              step: 1, tone: 'info' },
+    CONFIRMED:  { text: 'المزوّد أكّد الموعد',                          step: 1, tone: 'info' },
+    IN_TRANSIT: { text: 'الخدمة قيد التنفيذ',                           step: 2, tone: 'warning' },
     DELIVERED:  { text: 'تم التسليم — Escrow في انتظار تأكيد العميل',   step: 3, tone: 'warning' },
     COMPLETED:  { text: 'مكتمل ✓',                                      step: 3, tone: 'success' },
   };
@@ -370,7 +368,7 @@ function AdminShipmentStatus({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <CardTitle className="flex items-center gap-2">حالة الشحنة <StatusBadge status={order.status} /></CardTitle>
+            <CardTitle className="flex items-center gap-2">حالة الطلب <StatusBadge status={order.status} /></CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">{m.text}</p>
           </div>
         </div>
@@ -378,9 +376,9 @@ function AdminShipmentStatus({
       <CardContent className="space-y-5">
         <div className="flex items-center gap-2">
           {[
-            { s: 1 as const, label: 'الاستلام',  icon: MapPin },
-            { s: 2 as const, label: 'في الطريق', icon: Truck },
-            { s: 3 as const, label: 'التسليم',  icon: CheckCircle2 },
+            { s: 1 as const, label: 'البدء',      icon: MapPin },
+            { s: 2 as const, label: 'قيد التنفيذ', icon: Briefcase },
+            { s: 3 as const, label: 'الإنجاز',   icon: CheckCircle2 },
           ].map((step, i, arr) => (
             <div key={step.s} className="flex items-center gap-2 flex-1">
               <div className={`h-9 w-9 rounded-full grid place-items-center shrink-0 ${stepClass(step.s)}`}>
@@ -405,7 +403,7 @@ function AdminShipmentStatus({
               {effectiveDelivery ? formatDate(effectiveDelivery, 'EEEE d MMM') : 'سيُحدَّد لاحقاً'}
             </div>
             {fromProviderBid && (
-              <Badge variant="outline" className="mt-1 h-4 text-[10px]">من عرض الناقل</Badge>
+              <Badge variant="outline" className="mt-1 h-4 text-[10px]">من عرض المزوّد</Badge>
             )}
           </div>
         </div>
@@ -480,7 +478,7 @@ function AdminEscrowSummary({ deliveredAt, total }: { deliveredAt: Date | string
               <dd className="font-medium text-muted-foreground">−<Currency amount={breakdown.commission} /></dd>
             </div>
             <div className="flex justify-between pt-2 mt-1 border-t font-bold">
-              <dt>صافي للناقل</dt>
+              <dt>صافي للمزوّد</dt>
               <dd className="text-success"><Currency amount={breakdown.providerAmount} /></dd>
             </div>
           </dl>

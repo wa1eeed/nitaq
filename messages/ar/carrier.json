@@ -1,13 +1,13 @@
 {
-  "appName": "نقلة لوجيستك",
-  "appSubtitle": "منصة الناقل",
+  "appName": "نِطاق",
+  "appSubtitle": "منصة المزوّد",
   "nav": {
     "dashboard": "لوحة التحكم",
-    "opportunities": "فرص النقل",
+    "opportunities": "فرص الخدمات",
     "orders": "طلباتي",
     "bids": "سجل العروض",
-    "trucks": "الشاحنات",
-    "drivers": "السائقون",
+    "trucks": "خدماتي",
+    "drivers": "الموظفون",
     "earnings": "الأرباح",
     "finance": "الشؤون المالية",
     "reports": "التقارير",
@@ -19,24 +19,24 @@
     "settings": "إعدادات الشركة"
   },
   "groups": {
-    "carrier": "الناقل",
-    "fleet": "الأسطول",
+    "carrier": "المزوّد",
+    "fleet": "الخدمات",
     "finance": "المالية",
     "complianceSupport": "الامتثال والدعم",
     "settings": "الإعدادات"
   },
   "dashboard": {
     "welcome": "مرحباً بك",
-    "activeTrips": "رحلات نشطة",
+    "activeTrips": "طلبات نشطة",
     "earnings": "الأرباح",
-    "fleetSize": "حجم الأسطول",
+    "fleetSize": "الخدمات المتاحة",
     "rating": "التقييم",
     "openOpportunities": "فرص متاحة",
     "viewAll": "الكل"
   },
   "opportunities": {
     "title": "سوق الفرص",
-    "subtitle": "جميع طلبات النقل المتاحة",
+    "subtitle": "جميع طلبات الخدمة المتاحة",
     "openMarket": "سوق مفتوح",
     "direct": "موجّه لشركتي",
     "submitBid": "قدّم عرضاً",

@@ -195,7 +195,7 @@ export default function ClientRegisterPage() {
                   <h3 className="font-bold">لماذا نِطاق؟</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
-                  <Benefit text="أسعار تنافسية من عشرات الناقلين المعتمدين" />
+                  <Benefit text="أسعار تنافسية من عشرات المزودين المعتمدين" />
                   <Benefit text="تأمين شامل على كل شحنة" />
                   <Benefit text="تتبع لحظي على الخريطة" />
                   <Benefit text="دفع آمن عبر Escrow" />
@@ -531,7 +531,7 @@ function StepPreferences({
 
         <div className="space-y-2">
           <Label>المسارات الأكثر استخداماً (اختياري)</Label>
-          <p className="text-xs text-muted-foreground">سنُظهر لك أفضل الناقلين على هذه المسارات</p>
+          <p className="text-xs text-muted-foreground">سنُظهر لك أفضل المزودين في هذه المناطق</p>
           <div className="flex flex-wrap gap-2">
             {ROUTES.map((r) => {
               const on = form.primaryRoutes.includes(r);
