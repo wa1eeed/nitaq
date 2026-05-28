@@ -25,6 +25,7 @@ RUN pnpm install --frozen-lockfile=false
 # ── Layer 2: source + build ────────────────────────────────────────────────────
 COPY . .
 RUN pnpm --filter @naqla/shared-utils run build
+ENV NODE_ENV=production
 RUN pnpm --filter @naqla/client run build
 
 # ── Arrange standalone output into /app ───────────────────────────────────────
