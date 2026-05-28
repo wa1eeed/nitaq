@@ -36,11 +36,13 @@ const TITLES: Record<string, string> = {
 export default function CarrierOrderDetail() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { data: orderData, mutate: refetchOrder } = useSWR<typeof ORDERS[number]>(
+  const { data: orderData, isLoading: orderLoading, mutate: refetchOrder } = useSWR<typeof ORDERS[number]>(
     params?.id ? `/orders/${params.id}` : null,
     fetcher,
   );
-  const order = normalizeOrder(orderData) ?? ORDERS.find((o) => o.id === params.id);
+  // Never fall back to mock data — mock has wrong status (PUBLISHED) which hides
+  // the action buttons even when the real order is ASSIGNED/CONFIRMED/IN_TRANSIT.
+  const order = normalizeOrder(orderData);
   const [confirmPickupOpen, setConfirmPickupOpen] = useState(false);
   const [startTripOpen, setStartTripOpen] = useState(false);
   const [markDeliveredOpen, setMarkDeliveredOpen] = useState(false);
@@ -58,6 +60,17 @@ export default function CarrierOrderDetail() {
     assignDriverOpen ? '/fleet/drivers/available' : null,
     fetcher,
   );
+
+  if (orderLoading) {
+    return (
+      <Card>
+        <CardContent className="py-16 text-center">
+          <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">جارٍ تحميل الطلب…</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!order) {
     return (

@@ -6,7 +6,7 @@ import { fetcher, api } from '@/lib/api';
 import { notify } from '@/lib/notify';
 import { useAuthStore } from '@/lib/auth-store';
 import {
-  ArrowRight, Briefcase, Building2, Calendar, CheckCircle2, Clock, History, MapPin, MessageSquare, Package,
+  ArrowRight, Briefcase, Building2, Calendar, CheckCircle2, Clock, History, MapPin, MessageSquare, Navigation, Package,
   Send, ShieldCheck, UserSearch, X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -91,6 +91,9 @@ export default function CarrierOpportunityDetail() {
   // backend allows upsert from REJECTED → PENDING.
   const [retrying, setRetrying] = useState(false);
 
+  // If order is already in active execution phase, redirect to orders page
+  const activeStatuses = ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'];
+
   if (!order) {
     return (
       <Card>
@@ -107,6 +110,22 @@ export default function CarrierOpportunityDetail() {
   const commission = Math.round(price * 0.08);
   const vat = Math.round(commission * 0.15);
   const net = price - commission - vat;
+
+  if (activeStatuses.includes(order.status) && (!myBid || myBid.status === 'ACCEPTED')) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center space-y-4">
+          <CheckCircle2 className="h-12 w-12 text-success mx-auto" />
+          <h3 className="font-semibold text-lg">تم قبول عرضك — الطلب قيد التنفيذ</h3>
+          <p className="text-sm text-muted-foreground">يمكنك متابعة الطلب وإدارة مراحل التنفيذ من صفحة الطلبات</p>
+          <Button onClick={() => router.push(`/orders/${order.id}`)}>
+            <Navigation className="h-4 w-4" />
+            الانتقال لتفاصيل الطلب والتحكم بالتنفيذ
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // DIRECT orders use a private negotiation flow with 3 actions instead of
   // the open-market bid form. Branch on mode and render a different page.
@@ -203,6 +222,16 @@ export default function CarrierOpportunityDetail() {
                   <div className="text-xs text-muted-foreground mb-1">ملاحظتك</div>
                   {myBid.notes}
                 </div>
+              )}
+              {myBid.status === 'ACCEPTED' && (
+                <Button
+                  className="w-full"
+                  variant="default"
+                  onClick={() => router.push(`/orders/${order.id}`)}
+                >
+                  <Navigation className="h-4 w-4" />
+                  عرض تفاصيل الطلب والبدء بالتنفيذ
+                </Button>
               )}
               {myBid.status === 'PENDING' && (
                 <div className="rounded-md bg-info/10 border border-info/30 p-3 flex items-start justify-between gap-3 flex-wrap text-xs">
