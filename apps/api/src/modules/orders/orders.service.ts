@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import type { EmployeeStatus } from '@prisma/client';
@@ -22,9 +23,72 @@ import type { OrderStatus, Prisma } from '@prisma/client';
 
 const orderNumberGen = customAlphabet('0123456789', 6);
 
+const SERVICE_TYPES_SET = new Set([
+  'CONSULTING', 'DESIGN', 'INSTALLATION', 'MAINTENANCE', 'TECHNICAL_SUPPORT',
+  'TRAINING', 'IT_SERVICES', 'LOGISTICS', 'PROJECT_MANAGEMENT', 'OTHER',
+] as const);
+
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(private prisma: PrismaService) {}
+
+  // ── Shared helpers ──────────────────────────────────────────────────────────
+
+  /**
+   * Resolve the caller's company ID, always verifying against the live DB.
+   * The JWT's `companyId` can be stale after a DB reseed or schema change, so
+   * we double-check that the company still exists and fall back to a user-level
+   * lookup when the JWT value is missing or outdated.
+   */
+  private async resolveCompanyId(actor: AuthUser): Promise<string | null> {
+    let companyId = actor.companyId ?? null;
+
+    if (companyId) {
+      const exists = await this.prisma.company.findUnique({
+        where: { id: companyId },
+        select: { id: true },
+      });
+      if (!exists) companyId = null;
+    }
+
+    if (!companyId) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: actor.id },
+        select: { companyId: true },
+      });
+      companyId = user?.companyId ?? null;
+    }
+
+    return companyId;
+  }
+
+  private async requireOrder(id: string) {
+    const order = await this.prisma.order.findUnique({ where: { id } });
+    if (!order) throw new NotFoundException({ code: 'ORDER_NOT_FOUND', message: 'الطلب غير موجود' });
+    return order;
+  }
+
+  private assertViewAccess(
+    order: { clientId: string; providerId: string | null; status: string },
+    actor: AuthUser,
+  ) {
+    if (this.isAdmin(actor)) return;
+    if (order.clientId === actor.companyId) return;
+    if (order.providerId === actor.companyId) return;
+    if (
+      (actor.role === 'PROVIDER_ADMIN' || actor.role === 'PROVIDER_USER') &&
+      ['PUBLISHED', 'BIDDING'].includes(order.status)
+    ) return;
+    throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
+  }
+
+  private isAdmin(actor: AuthUser): boolean {
+    return actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN';
+  }
+
+  // ── List / Find ─────────────────────────────────────────────────────────────
 
   async list(query: PaginationDto & { status?: OrderStatus; mine?: boolean }, actor: AuthUser) {
     const { page = 1, limit = 20, sort = 'createdAt', order = 'desc', search, status, mine } = query;
@@ -47,10 +111,6 @@ export class OrdersService {
       if (mine) {
         where.providerId = myId;
       } else {
-        // Providers see three buckets simultaneously:
-        //   1. OPEN marketplace orders (PUBLISHED/BIDDING + mode=OPEN)
-        //   2. DIRECT orders targeted at them (any status pre-assignment)
-        //   3. Orders already assigned to them (any status)
         where.OR = [
           { AND: [{ mode: 'OPEN' }, { status: { in: ['PUBLISHED', 'BIDDING'] } }] },
           { AND: [{ mode: 'DIRECT' }, { targetProviderId: myId }] },
@@ -69,10 +129,6 @@ export class OrdersService {
           client: { select: { id: true, nameAr: true, logo: true } },
           provider: { select: { id: true, nameAr: true, logo: true } },
           _count: { select: { bids: true } },
-          // Lean bid subset so the provider list can answer "did I already bid
-          // on this order?" without a second round-trip. We only need the
-          // providerId + status to drive the row CTA (تفاصيل / إعادة تقديم /
-          // قدّم عرضاً) — full bid bodies are still fetched in the detail page.
           bids: { select: { id: true, providerId: true, status: true, amount: true } },
         },
       }),
@@ -87,7 +143,14 @@ export class OrdersService {
       include: {
         client: true,
         provider: true,
-        bids: { include: { provider: { select: { id: true, nameAr: true, nameEn: true, logo: true, city: true, region: true, contactPhone: true } } }, orderBy: { amount: 'asc' } },
+        bids: {
+          include: {
+            provider: {
+              select: { id: true, nameAr: true, nameEn: true, logo: true, city: true, region: true, contactPhone: true },
+            },
+          },
+          orderBy: { amount: 'asc' },
+        },
         trackingEvents: { orderBy: { createdAt: 'desc' } },
         payment: true,
         invoice: true,
@@ -108,81 +171,67 @@ export class OrdersService {
     return order;
   }
 
+  // ── Create ──────────────────────────────────────────────────────────────────
+
   async create(dto: CreateOrderDto, actor: AuthUser) {
-    // ── Resolve company ID ─────────────────────────────────────────────────
-    // JWT companyId can be stale after a DB reseed. Fall back to a live DB
-    // lookup by user ID so the order never fails due to a stale token alone.
-    let companyId = actor.companyId;
-
-    if (companyId) {
-      const exists = await this.prisma.company.findUnique({ where: { id: companyId }, select: { id: true } });
-      if (!exists) companyId = null;
-    }
-
+    const companyId = await this.resolveCompanyId(actor);
     if (!companyId) {
-      const user = await this.prisma.user.findUnique({ where: { id: actor.id }, select: { companyId: true } });
-      companyId = user?.companyId ?? null;
+      throw new BadRequestException({
+        code: 'NO_COMPANY',
+        message: 'حسابك غير مرتبط بشركة. يرجى تسجيل الخروج وإعادة الدخول أو التواصل مع الدعم',
+      });
     }
 
-    if (!companyId) {
-      throw new BadRequestException({ code: 'NO_COMPANY', message: 'حسابك غير مرتبط بشركة. يرجى تسجيل الخروج وإعادة الدخول أو التواصل مع الدعم' });
-    }
-
-    // ── Resolve requiredServiceType ────────────────────────────────────────
-    // Fall back to cargoType so the order is never rejected for a missing
-    // or unknown service type value.
-    const SERVICE_TYPES_SET = new Set([
-      'CONSULTING','DESIGN','INSTALLATION','MAINTENANCE','TECHNICAL_SUPPORT',
-      'TRAINING','IT_SERVICES','LOGISTICS','PROJECT_MANAGEMENT','OTHER',
-    ]);
-    const serviceType = (dto.requiredServiceType && SERVICE_TYPES_SET.has(dto.requiredServiceType))
-      ? dto.requiredServiceType
+    const serviceType = SERVICE_TYPES_SET.has(dto.requiredServiceType as never)
+      ? dto.requiredServiceType!
       : dto.cargoType;
 
     const orderNumber = `ORD-${new Date().getFullYear()}-${orderNumberGen()}`;
+
     try {
       return await this.prisma.order.create({
         data: {
           orderNumber,
           clientId: companyId,
           mode: dto.mode ?? 'OPEN',
-          targetProviderId: dto.mode === 'DIRECT' ? dto.targetProviderId : null,
+          targetProviderId: dto.mode === 'DIRECT' ? (dto.targetProviderId ?? null) : null,
           ...(dto.mode === 'DIRECT' && dto.agreedPriceUpfront ? {
             agreedPrice:      dto.agreedPriceUpfront,
             commissionAmount: +(dto.agreedPriceUpfront * 0.08).toFixed(2),
             providerAmount:   +(dto.agreedPriceUpfront * 0.92).toFixed(2),
           } : {}),
-          tripType: dto.tripType ?? (dto.originCity === dto.destinationCity ? 'SAME_CITY' : 'INTER_CITY'),
+          tripType:    dto.tripType ?? (dto.originCity === dto.destinationCity ? 'SAME_CITY' : 'INTER_CITY'),
           pickupWindow: dto.pickupWindow ?? 'ALL_DAY',
-          cargoType: dto.cargoType,
-          cargoDescription: dto.cargoDescription,
-          weight: dto.weight,
-          pallets: dto.pallets,
-          volume: dto.volume,
-          originCity: dto.originCity,
-          originRegion: dto.originRegion,
-          originAddress: dto.originAddress,
-          originLat: dto.originLat,
-          originLng: dto.originLng,
-          destinationCity: dto.destinationCity,
-          destinationRegion: dto.destinationRegion,
-          destinationAddress: dto.destinationAddress,
-          destinationLat: dto.destinationLat,
-          destinationLng: dto.destinationLng,
-          requiredServiceType: serviceType,
+          cargoType:            dto.cargoType as never,
+          cargoDescription:     dto.cargoDescription,
+          weight:               dto.weight ?? null,
+          pallets:              dto.pallets ?? null,
+          volume:               dto.volume ?? null,
+          originCity:           dto.originCity,
+          originRegion:         dto.originRegion,
+          originAddress:        dto.originAddress,
+          originLat:            dto.originLat ?? null,
+          originLng:            dto.originLng ?? null,
+          destinationCity:      dto.destinationCity,
+          destinationRegion:    dto.destinationRegion,
+          destinationAddress:   dto.destinationAddress,
+          destinationLat:       dto.destinationLat ?? null,
+          destinationLng:       dto.destinationLng ?? null,
+          requiredServiceType:  serviceType as never,
           requiresRefrigeration: dto.requiresRefrigeration ?? false,
-          requiresInsurance: dto.requiresInsurance ?? false,
-          specialInstructions: dto.specialInstructions,
-          pickupDate: new Date(dto.pickupDate),
-          deliveryDate: dto.deliveryDate ? new Date(dto.deliveryDate) : null,
-          bidDeadline: dto.bidDeadline ? new Date(dto.bidDeadline) : null,
-          clientBudget: dto.clientBudget,
-          poNumber: dto.poNumber,
-          notes: dto.notes,
-          documents: dto.documents ?? [],
+          requiresInsurance:    dto.requiresInsurance ?? false,
+          specialInstructions:  dto.specialInstructions ?? null,
+          pickupDate:           new Date(dto.pickupDate),
+          deliveryDate:         dto.deliveryDate ? new Date(dto.deliveryDate) : null,
+          bidDeadline:          dto.bidDeadline ? new Date(dto.bidDeadline) : null,
+          clientBudget:         dto.clientBudget ?? null,
+          poNumber:             dto.poNumber ?? null,
+          notes:                dto.notes ?? null,
+          documents:            dto.documents ?? [],
         },
       });
     } catch (err: unknown) {
+      this.logger.error('order.create failed', err);
       const code = (err as { code?: string })?.code;
       if (code === 'P2003') {
         throw new BadRequestException({ code: 'FK_VIOLATION', message: 'بيانات الحساب قديمة، يرجى تسجيل الخروج وإعادة الدخول' });
@@ -193,6 +242,8 @@ export class OrdersService {
       throw new InternalServerErrorException({ code: 'ORDER_CREATE_FAILED', message: 'فشل إنشاء الطلب، حاول مرة أخرى' });
     }
   }
+
+  // ── Update ──────────────────────────────────────────────────────────────────
 
   async update(id: string, dto: UpdateOrderDto, actor: AuthUser) {
     const order = await this.requireOrder(id);
@@ -211,15 +262,21 @@ export class OrdersService {
     });
   }
 
+  // ── Publish ─────────────────────────────────────────────────────────────────
+
   async publish(id: string, actor: AuthUser) {
-    const order = await this.requireOrder(id);
-    if (order.clientId !== actor.companyId) {
-      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
+    const [order, companyId] = await Promise.all([
+      this.requireOrder(id),
+      this.resolveCompanyId(actor),
+    ]);
+
+    if (!companyId || order.clientId !== companyId) {
+      throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية نشر هذا الطلب' });
     }
     if (order.status !== 'DRAFT') {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'الطلب منشور بالفعل' });
     }
-    // DIRECT + pre-agreed price: skip negotiation, assign immediately.
+
     if (order.mode === 'DIRECT' && order.agreedPrice && order.targetProviderId) {
       return this.prisma.order.update({
         where: { id },
@@ -232,6 +289,8 @@ export class OrdersService {
     });
   }
 
+  // ── Assign / Confirm / Cancel / Deliver / Complete ──────────────────────────
+
   async assign(id: string, dto: AssignOrderDto, actor: AuthUser) {
     const order = await this.requireOrder(id);
     if (order.clientId !== actor.companyId && !this.isAdmin(actor)) {
@@ -240,16 +299,15 @@ export class OrdersService {
     if (!['PUBLISHED', 'BIDDING'].includes(order.status)) {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'حالة الطلب غير مناسبة' });
     }
-    const commissionRate = 0.08;
-    const commission = +(dto.agreedPrice * commissionRate).toFixed(2);
+    const commission = +(dto.agreedPrice * 0.08).toFixed(2);
     return this.prisma.order.update({
       where: { id },
       data: {
-        providerId: dto.providerId,
-        agreedPrice: dto.agreedPrice,
+        providerId:       dto.providerId,
+        agreedPrice:      dto.agreedPrice,
         commissionAmount: commission,
-        providerAmount: dto.agreedPrice - commission,
-        status: 'ASSIGNED',
+        providerAmount:   dto.agreedPrice - commission,
+        status:           'ASSIGNED',
       },
     });
   }
@@ -267,7 +325,8 @@ export class OrdersService {
 
   async cancel(id: string, dto: CancelOrderDto, actor: AuthUser) {
     const order = await this.requireOrder(id);
-    const canCancel = order.clientId === actor.companyId || this.isAdmin(actor);
+    const companyId = await this.resolveCompanyId(actor);
+    const canCancel = companyId === order.clientId || this.isAdmin(actor);
     if (!canCancel) throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     if (['COMPLETED', 'CANCELLED'].includes(order.status)) {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'لا يمكن إلغاء الطلب' });
@@ -278,12 +337,6 @@ export class OrdersService {
     });
   }
 
-  /**
-   * Provider marks the order as delivered. Transition is allowed from
-   * CONFIRMED or IN_TRANSIT — the latter being the typical path after the
-   * provider has been emitting tracking events. Sets `actualDeliveryAt` so the
-   * 72-hour escrow auto-release clock starts ticking.
-   */
   async deliver(id: string, actor: AuthUser) {
     const order = await this.requireOrder(id);
     if (order.providerId !== actor.companyId && !this.isAdmin(actor)) {
@@ -298,16 +351,10 @@ export class OrdersService {
     });
   }
 
-  /**
-   * Client confirms receipt (or the 72-hour auto-release fires from a cron).
-   * Atomic: order → COMPLETED + Payment → RELEASED + releasedAt timestamped.
-   * Wallet credit + invoice generation should listen on the `order.complete`
-   * audit event (out of scope for this slice).
-   */
   async complete(id: string, actor: AuthUser) {
     const order = await this.requireOrder(id);
-    const isClient = order.clientId === actor.companyId;
-    if (!isClient && !this.isAdmin(actor)) {
+    const companyId = await this.resolveCompanyId(actor);
+    if (companyId !== order.clientId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
     if (order.status !== 'DELIVERED') {
@@ -322,7 +369,6 @@ export class OrdersService {
         where: { orderId: id, status: 'HELD' },
         data: { status: 'RELEASED', releasedAt: new Date() },
       });
-      // Set assigned employees back to AVAILABLE once order completes.
       const assigned = await tx.orderEmployee.findMany({ where: { orderId: id }, select: { employeeId: true } });
       if (assigned.length > 0) {
         await tx.employeeProfile.updateMany({
@@ -333,6 +379,8 @@ export class OrdersService {
       return updatedOrder;
     });
   }
+
+  // ── Employee / Driver ────────────────────────────────────────────────────────
 
   async assignDriver(orderId: string, dto: AssignEmployeeDto, actor: AuthUser) {
     const order = await this.requireOrder(orderId);
@@ -361,9 +409,12 @@ export class OrdersService {
     });
   }
 
+  // ── Delete / Decline ────────────────────────────────────────────────────────
+
   async remove(id: string, actor: AuthUser) {
     const order = await this.requireOrder(id);
-    if (order.clientId !== actor.companyId && !this.isAdmin(actor)) {
+    const companyId = await this.resolveCompanyId(actor);
+    if (companyId !== order.clientId && !this.isAdmin(actor)) {
       throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
     }
     if (order.status !== 'DRAFT') {
@@ -384,12 +435,13 @@ export class OrdersService {
     if (!['PUBLISHED', 'BIDDING'].includes(order.status)) {
       throw new BadRequestException({ code: 'INVALID_TRANSITION', message: 'الطلب لم يعد في مرحلة التفاوض' });
     }
-    // Move order back to PUBLISHED so client can reassign or open to marketplace.
     return this.prisma.order.update({
       where: { id },
       data: { status: 'PUBLISHED', targetProviderId: null },
     });
   }
+
+  // ── Tracking ─────────────────────────────────────────────────────────────────
 
   async getTracking(id: string) {
     return this.prisma.trackingEvent.findMany({
@@ -422,28 +474,5 @@ export class OrdersService {
       });
     }
     return event;
-  }
-
-  private async requireOrder(id: string) {
-    const order = await this.prisma.order.findUnique({ where: { id } });
-    if (!order) throw new NotFoundException({ code: 'ORDER_NOT_FOUND', message: 'الطلب غير موجود' });
-    return order;
-  }
-
-  private assertViewAccess(order: { clientId: string; providerId: string | null; status: string }, actor: AuthUser) {
-    if (this.isAdmin(actor)) return;
-    if (order.clientId === actor.companyId) return;
-    if (order.providerId === actor.companyId) return;
-    if (
-      (actor.role === 'PROVIDER_ADMIN' || actor.role === 'PROVIDER_USER') &&
-      ['PUBLISHED', 'BIDDING'].includes(order.status)
-    ) {
-      return;
-    }
-    throw new ForbiddenException({ code: 'FORBIDDEN', message: 'لا تملك صلاحية' });
-  }
-
-  private isAdmin(actor: AuthUser): boolean {
-    return actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN';
   }
 }
