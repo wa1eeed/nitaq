@@ -182,11 +182,41 @@ export class OrdersService {
       });
     }
 
-    const serviceType = SERVICE_TYPES_SET.has(dto.requiredServiceType as never)
-      ? dto.requiredServiceType!
-      : dto.cargoType;
+    const serviceType = (
+      dto.requiredServiceType && SERVICE_TYPES_SET.has(dto.requiredServiceType as never)
+        ? dto.requiredServiceType
+        : dto.cargoType
+    ) ?? 'OTHER';
+
+    // Guard: catch any null/undefined on required fields before Prisma sees them
+    const required: Record<string, unknown> = {
+      cargoType: dto.cargoType,
+      cargoDescription: dto.cargoDescription,
+      originCity: dto.originCity,
+      originRegion: dto.originRegion,
+      originAddress: dto.originAddress,
+      destinationCity: dto.destinationCity,
+      destinationRegion: dto.destinationRegion,
+      destinationAddress: dto.destinationAddress,
+      requiredServiceType: serviceType,
+      pickupDate: dto.pickupDate,
+      clientId: companyId,
+    };
+    const missing = Object.entries(required)
+      .filter(([, v]) => v == null || v === '')
+      .map(([k]) => k);
+    if (missing.length > 0) {
+      throw new BadRequestException({
+        code: 'MISSING_FIELDS',
+        message: `الحقول المطلوبة ناقصة أو فارغة: ${missing.join(', ')}`,
+      });
+    }
 
     const orderNumber = `ORD-${new Date().getFullYear()}-${orderNumberGen()}`;
+    const pickupDateObj = new Date(dto.pickupDate);
+    if (isNaN(pickupDateObj.getTime())) {
+      throw new BadRequestException({ code: 'INVALID_DATE', message: 'تاريخ الاستلام غير صالح' });
+    }
 
     try {
       return await this.prisma.order.create({
@@ -200,7 +230,7 @@ export class OrdersService {
             commissionAmount: +(dto.agreedPriceUpfront * 0.08).toFixed(2),
             providerAmount:   +(dto.agreedPriceUpfront * 0.92).toFixed(2),
           } : {}),
-          tripType:    dto.tripType ?? (dto.originCity === dto.destinationCity ? 'SAME_CITY' : 'INTER_CITY'),
+          tripType:    dto.tripType ?? 'INTER_CITY',
           pickupWindow: dto.pickupWindow ?? 'ALL_DAY',
           cargoType:            dto.cargoType as never,
           cargoDescription:     dto.cargoDescription,
@@ -221,20 +251,21 @@ export class OrdersService {
           requiresRefrigeration: dto.requiresRefrigeration ?? false,
           requiresInsurance:    dto.requiresInsurance ?? false,
           specialInstructions:  dto.specialInstructions ?? null,
-          pickupDate:           new Date(dto.pickupDate),
-          deliveryDate:         dto.deliveryDate ? new Date(dto.deliveryDate) : null,
-          bidDeadline:          dto.bidDeadline ? new Date(dto.bidDeadline) : null,
-          clientBudget:         dto.clientBudget ?? null,
-          poNumber:             dto.poNumber ?? null,
-          notes:                dto.notes ?? null,
-          documents:            dto.documents ?? [],
+          pickupDate:           pickupDateObj,
+          deliveryDate:         null,
+          bidDeadline:          null,
+          clientBudget:         null,
+          poNumber:             null,
+          notes:                null,
+          documents:            [],
         },
       });
     } catch (err: unknown) {
       this.logger.error('order.create failed', err);
-      const e = err as { code?: string; message?: string; meta?: unknown };
+      const e = err as { code?: string; message?: string; meta?: Record<string, unknown> };
       const prismaCode = e?.code ?? 'NO_CODE';
-      const prismaMsg = (e?.message ?? 'unknown').replace(/\n/g, ' ').slice(0, 300);
+      const rawMsg = (e?.message ?? 'unknown').replace(/\n/g, ' ').slice(0, 400);
+      const metaStr = e?.meta ? JSON.stringify(e.meta).slice(0, 200) : '';
       if (prismaCode === 'P2003') {
         throw new BadRequestException({ code: 'FK_VIOLATION', message: 'بيانات الحساب قديمة، يرجى تسجيل الخروج وإعادة الدخول' });
       }
@@ -243,7 +274,7 @@ export class OrdersService {
       }
       throw new InternalServerErrorException({
         code: 'ORDER_CREATE_FAILED',
-        message: `[${prismaCode}] ${prismaMsg}`,
+        message: `[${prismaCode}] ${rawMsg} | meta: ${metaStr}`,
       });
     }
   }
