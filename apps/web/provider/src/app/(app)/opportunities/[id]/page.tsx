@@ -78,8 +78,6 @@ export default function CarrierOpportunityDetail() {
   const [price, setPrice] = useState<number>(0);
   const [submitErr, setSubmitErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [pickupConfirm, setPickupConfirm] = useState<'CONFIRM' | 'PROPOSE'>('CONFIRM');
-  const [proposedPickup, setProposedPickup] = useState<string>('');
   // Concrete proposed delivery date — replaces the older "days + hours"
   // duration fields. Required by the form so the client sees a real date
   // instead of doing mental math.
@@ -337,55 +335,16 @@ export default function CarrierOpportunityDetail() {
                 </div>
               )}
             </div>
-            {/* Pickup confirmation — confirm client's requested date or propose alternate */}
-            <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
-              <div className="text-xs font-semibold text-muted-foreground uppercase">
-                موعد الاستلام
-              </div>
-              <div className="text-sm">
-                طلب العميل:{' '}
-                <span className="font-medium">
+            {/* Pickup date — set by the client, read-only for providers */}
+            <div className="rounded-lg border bg-info/[0.04] border-info/30 p-4 flex items-center gap-3 text-sm">
+              <Calendar className="h-4 w-4 text-info shrink-0" />
+              <span className="text-muted-foreground">
+                موعد البدء المطلوب من العميل:{' '}
+                <span className="font-medium text-foreground">
                   {formatDate(order.pickupDate, 'EEEE d MMM')}
                   {order.pickupWindow && ` · ${pickupWindowLabel(order.pickupWindow)}`}
                 </span>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPickupConfirm('CONFIRM')}
-                  className={`flex-1 rounded-md border-2 p-3 text-sm text-start transition-colors ${
-                    pickupConfirm === 'CONFIRM' ? 'border-success bg-success/5' : 'border-border hover:border-success/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 font-medium">
-                    <CheckCircle2 className="h-4 w-4 text-success" />
-                    أؤكّد الموعد
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPickupConfirm('PROPOSE')}
-                  className={`flex-1 rounded-md border-2 p-3 text-sm text-start transition-colors ${
-                    pickupConfirm === 'PROPOSE' ? 'border-warning bg-warning/5' : 'border-border hover:border-warning/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 font-medium">
-                    <Calendar className="h-4 w-4 text-warning" />
-                    أقترح موعداً آخر
-                  </div>
-                </button>
-              </div>
-              {pickupConfirm === 'PROPOSE' && (
-                <Input
-                  type="date"
-                  /* Earliest sensible alternate = the client's original requested date.
-                     We don't allow proposing a date earlier than the client wanted. */
-                  min={order.pickupDate ? new Date(order.pickupDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)}
-                  value={proposedPickup}
-                  onChange={(e) => setProposedPickup(e.target.value)}
-                  className="mt-2"
-                />
-              )}
+              </span>
             </div>
 
             {/* Proposed delivery date — concrete date instead of "days + hours" math.
@@ -397,10 +356,7 @@ export default function CarrierOpportunityDetail() {
               <Input
                 id="proposedDeliveryDate"
                 type="date"
-                min={(() => {
-                  const pickup = pickupConfirm === 'PROPOSE' && proposedPickup ? proposedPickup : order.pickupDate;
-                  return pickup ? new Date(pickup).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
-                })()}
+                min={order.pickupDate ? new Date(order.pickupDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)}
                 value={proposedDeliveryDate}
                 onChange={(e) => setProposedDeliveryDate(e.target.value)}
               />
@@ -465,7 +421,6 @@ export default function CarrierOpportunityDetail() {
                     // the DTO so we don't need to send it.
                     await api.post(`/orders/${order.id}/bids`, {
                       amount: price,
-                      proposedPickupDate: pickupConfirm === 'PROPOSE' && proposedPickup ? proposedPickup : undefined,
                       proposedDeliveryDate: proposedDeliveryDate || undefined,
                       notes: notes || undefined,
                     });

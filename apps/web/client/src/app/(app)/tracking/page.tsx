@@ -9,12 +9,28 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/page-header';
-import { RouteMap } from '@/components/route-map';
 import { StatusBadge } from '@/components/status-badge';
 import {
-  CURRENT_CLIENT_ID, activeOrdersForClient, companyById, coordsFor, distanceKm,
-  estimatedDurationLabel, formatDateTime, primaryRoadFor,
+  CURRENT_CLIENT_ID, activeOrdersForClient, companyById, formatDateTime, formatDate,
+  timelineFor, serviceTypeLabels,
 } from '@naqla/shared-utils';
+
+const DELIVERY_MODE_LABELS: Record<string, string> = {
+  ON_SITE: 'في الموقع',
+  REMOTE: 'عن بُعد',
+  HYBRID: 'مختلط',
+};
+
+const TIMELINE_TITLES: Record<string, string> = {
+  CREATED: 'إنشاء الطلب',
+  PUBLISHED: 'نشر الطلب',
+  BID_ACCEPTED: 'قبول العرض',
+  CONFIRMED: 'تأكيد التنفيذ',
+  PICKED_UP: 'بدء التنفيذ',
+  IN_TRANSIT: 'قيد التنفيذ',
+  DELIVERED: 'تم الإتمام',
+  COMPLETED: 'مكتمل',
+};
 
 export default function TrackingPage() {
   const active = activeOrdersForClient(CURRENT_CLIENT_ID);
@@ -57,6 +73,7 @@ export default function TrackingPage() {
             {inTransit.map((o) => {
               const isSelected = selected?.id === o.id;
               const provider = companyById(o.carrierId);
+              const serviceLabel = serviceTypeLabels[o.truckType ?? '']?.ar ?? o.truckType ?? '—';
               return (
                 <button
                   key={o.id}
@@ -70,7 +87,7 @@ export default function TrackingPage() {
                     <span className="font-mono text-xs text-primary">{o.orderNumber}</span>
                     <StatusBadge status={o.status} />
                   </div>
-                  <div className="text-sm font-medium truncate">{o.originCity} ← {o.destinationCity}</div>
+                  <div className="text-sm font-medium truncate">{serviceLabel}</div>
                   <div className="text-xs text-muted-foreground mt-0.5 truncate">{provider?.nameAr ?? '—'}</div>
                 </button>
               );
@@ -78,7 +95,7 @@ export default function TrackingPage() {
           </CardContent>
         </Card>
 
-        {/* Right map+details */}
+        {/* Right details */}
         {selected && (
           <div className="space-y-6 lg:order-2 order-1">
             <TrackingDetail order={selected} />
@@ -90,75 +107,123 @@ export default function TrackingPage() {
 }
 
 function TrackingDetail({ order }: { order: any }) {
-  const o = coordsFor(order.originCity);
-  const d = coordsFor(order.destinationCity);
-  const km = distanceKm(o, d);
-  const duration = estimatedDurationLabel(km);
-  const road = primaryRoadFor(order.originCity, order.destinationCity);
   const progress = order.status === 'IN_TRANSIT' ? 0.55 : order.status === 'CONFIRMED' ? 0.1 : 0;
-  const remaining = Math.round(km * (1 - progress));
   const provider = companyById(order.carrierId);
-  const initials = provider?.nameAr.split(' ').slice(0, 2).map((w) => w[0]).join('') ?? '';
+  const initials = provider?.nameAr.split(' ').slice(0, 2).map((w: string) => w[0]).join('') ?? '';
+  const events = timelineFor(order.id);
+  const serviceLabel = serviceTypeLabels[order.cargoType ?? order.truckType ?? '']?.ar ?? order.cargoType ?? '—';
+  const deliveryModeLabel = DELIVERY_MODE_LABELS[(order as any).deliveryMode] ?? (order as any).deliveryMode ?? '—';
 
   return (
     <>
+      {/* Section 1: Order Info Card */}
       <Card>
-        <RouteMap
-          origin={{ ...o, label: order.originCity }}
-          destination={{ ...d, label: order.destinationCity }}
-          progress={progress}
-          height={420}
-          className="rounded-b-none border-b"
-        />
-        <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
-          <Stat icon="📍" label="إجمالي المسافة" value={<span className="num">{km.toLocaleString('en-US')} كم</span>} />
-          <Stat icon="🚚" label="متبقّي" value={<span className="num text-success font-bold">{remaining.toLocaleString('en-US')} كم</span>} />
-          <Stat icon="⏱" label="الوصول المتوقّع" value={duration} />
-          <Stat icon="🛣" label="الطريق" value={road} />
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Package className="h-4 w-4" /> تفاصيل الطلب
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <dl className="divide-y text-sm">
+            <div className="flex justify-between py-2.5">
+              <dt className="text-muted-foreground">رقم الطلب</dt>
+              <dd>
+                <Link href={`/orders/${order.id}`} className="font-mono text-primary hover:underline">
+                  {order.orderNumber}
+                </Link>
+              </dd>
+            </div>
+            <div className="flex justify-between py-2.5">
+              <dt className="text-muted-foreground">نوع الخدمة</dt>
+              <dd className="font-medium">{serviceLabel}</dd>
+            </div>
+            {order.cargoDescription && (
+              <div className="flex justify-between py-2.5">
+                <dt className="text-muted-foreground">وصف الطلب</dt>
+                <dd className="font-medium text-end max-w-[60%] line-clamp-2">{order.cargoDescription}</dd>
+              </div>
+            )}
+            <div className="flex justify-between py-2.5">
+              <dt className="text-muted-foreground">طريقة الخدمة</dt>
+              <dd className="font-medium">{deliveryModeLabel}</dd>
+            </div>
+            <div className="flex justify-between py-2.5 items-center">
+              <dt className="text-muted-foreground">موقع التنفيذ</dt>
+              <dd className="font-medium flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                {order.originCity}
+              </dd>
+            </div>
+            <div className="flex justify-between py-2.5">
+              <dt className="text-muted-foreground">تاريخ البدء</dt>
+              <dd className="font-medium">{formatDateTime(order.pickupDate)}</dd>
+            </div>
+            <div className="flex justify-between py-2.5 items-center">
+              <dt className="text-muted-foreground">الحالة</dt>
+              <dd><StatusBadge status={order.status} /></dd>
+            </div>
+          </dl>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Briefcase className="h-4 w-4" /> المزوّد
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback>{initials}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold truncate">{provider?.nameAr ?? '—'}</div>
-                <div className="text-xs text-muted-foreground">{provider?.completedTrips} طلب · ⭐ {provider?.rating?.toFixed(1)}</div>
-              </div>
-              <Button size="sm" variant="outline"><Phone className="h-3.5 w-3.5" /></Button>
+      {/* Section 2: Provider Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Briefcase className="h-4 w-4" /> المزوّد
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12">
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <div className="font-semibold truncate">{provider?.nameAr ?? '—'}</div>
+              <div className="text-xs text-muted-foreground">{provider?.completedTrips} طلب · ⭐ {provider?.rating?.toFixed(1)}</div>
             </div>
-          </CardContent>
-        </Card>
+            <Button size="sm" variant="outline"><Phone className="h-3.5 w-3.5" /></Button>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Package className="h-4 w-4" /> تفاصيل الطلب
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1.5 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">تاريخ البدء</span>
-              <span className="font-medium text-xs">{formatDateTime(order.pickupDate)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">الطلب</span>
-              <Link href={`/orders/${order.id}`} className="font-mono text-xs text-primary">{order.orderNumber}</Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Section 3: Timeline Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">سجل التتبع</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {events.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">لا توجد أحداث بعد</p>
+          ) : (
+            <ol className="relative">
+              {events.map((ev, i) => (
+                <li key={i} className="relative ps-8 pb-5 last:pb-0">
+                  {i < events.length - 1 && (
+                    <span aria-hidden className="absolute top-6 bottom-0 start-2.5 w-px bg-border" />
+                  )}
+                  <span className="absolute start-0 top-1 grid place-items-center h-5 w-5 rounded-full bg-primary border-2 border-background">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary-foreground" />
+                  </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium">{TIMELINE_TITLES[ev.kind] ?? ev.kind}</div>
+                      {(ev.note || ev.by) && (
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {ev.note} {ev.by && <span>· {ev.by}</span>}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">{formatDate(ev.at, 'd MMM · HH:mm')}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Live position indicator */}
+      {/* Section 4: Progress Card */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
@@ -195,17 +260,5 @@ function TrackingDetail({ order }: { order: any }) {
         </CardContent>
       </Card>
     </>
-  );
-}
-
-function Stat({ icon, label, value }: { icon: string; label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="text-2xl" aria-hidden>{icon}</span>
-      <div className="min-w-0">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="mt-0.5 text-sm font-semibold truncate">{value}</div>
-      </div>
-    </div>
   );
 }

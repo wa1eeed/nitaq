@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowRight, Briefcase, Building2, Calendar, CheckCircle2, Clock, MapPin, Package, Phone,
-  ShieldCheck, User, Wallet,
+  ShieldCheck, User, Wallet, Wifi,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,13 +16,23 @@ import { StatusBadge } from '@/components/status-badge';
 import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
 import { Currency } from '@/components/currency';
-import { RouteMap } from '@/components/route-map';
 import {
-  ORDERS, bidsForOrder, companyById, coordsFor, distanceKm, estimatedDurationLabel,
-  primaryRoadFor, timelineFor, formatDate, formatDateTime,
+  ORDERS, bidsForOrder, companyById, timelineFor, formatDate, formatDateTime,
   normalizeOrder, COMMISSION_RATE, ESCROW_AUTO_RELEASE_HOURS, escrowAutoReleaseAt,
-  escrowBreakdown, escrowMsRemaining,
+  escrowBreakdown, escrowMsRemaining, serviceTypeLabels,
 } from '@naqla/shared-utils';
+
+const DELIVERY_MODE_LABELS: Record<string, string> = {
+  ON_SITE: 'في الموقع',
+  REMOTE: 'عن بُعد',
+  HYBRID: 'مختلط',
+};
+
+const PICKUP_WINDOW_LABELS: Record<string, string> = {
+  MORNING: 'صباحاً',
+  AFTERNOON: 'مساءً',
+  ALL_DAY: 'طوال اليوم',
+};
 
 const TITLES: Record<string, string> = {
   CREATED: 'إنشاء الطلب', PUBLISHED: 'نشر الطلب', BID_RECEIVED: 'استلام عرض',
@@ -104,7 +114,37 @@ export default function AdminOrderDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main col */}
         <div className="lg:col-span-2 space-y-6">
-          <MapSection order={order} />
+          {/* Order Overview card */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xl font-bold tracking-tight">{order.orderNumber}</span>
+                    <Badge variant={order.mode === 'DIRECT' ? 'warning' : 'secondary'}>
+                      {order.mode === 'OPEN' ? 'سوق مفتوح' : 'إرسال مباشر'}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(order.createdAt)}</p>
+                </div>
+                <CardTitle className="text-base text-muted-foreground font-medium">نظرة عامة على الطلب</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-0 divide-y-0">
+                <OverviewRow label="نوع الخدمة" value={serviceTypeLabels[order.truckType ?? '']?.ar ?? order.truckType ?? '—'} />
+                <OverviewRow label="اسم العميل" value={client?.nameAr} />
+                <OverviewRow label="مدينة العميل" value={client?.city} />
+                <OverviewRow label="اسم المزوّد" value={provider?.nameAr} />
+                <OverviewRow label="موقع التنفيذ" value={[order.originCity, (order as any).originAddress].filter(Boolean).join(' — ')} />
+                <OverviewRow label="موعد البدء" value={effectivePickup ? formatDate(effectivePickup, 'EEEE d MMM yyyy') : '—'} />
+                <OverviewRow label="موعد الإنجاز المتوقع" value={effectiveDelivery ? formatDate(effectiveDelivery, 'EEEE d MMM yyyy') : 'سيُحدَّد لاحقاً'} />
+              </div>
+              {order.cargoDescription && (
+                <p className="text-sm text-muted-foreground italic border-t pt-3">{order.cargoDescription}</p>
+              )}
+            </CardContent>
+          </Card>
 
           {showShipmentCard && (
             <AdminShipmentStatus
@@ -254,9 +294,11 @@ export default function AdminOrderDetail() {
             <CardHeader><CardTitle>الموقع والمواعيد</CardTitle></CardHeader>
             <CardContent>
               <dl className="divide-y">
-                <Row label="من" icon={MapPin} value={order.originCity} />
-                <Row label="إلى" icon={MapPin} value={order.destinationCity} />
-                <Row label="موعد الاستلام" icon={Calendar} value={formatDate(order.pickupDate, 'd MMM · HH:mm')} />
+                <Row label="طريقة الخدمة" icon={Wifi} value={DELIVERY_MODE_LABELS[(order as any).deliveryMode] ?? (order as any).deliveryMode ?? '—'} />
+                <Row label="موقع التنفيذ" icon={MapPin} value={[order.originCity, (order as any).originAddress].filter(Boolean).join(' — ')} />
+                <Row label="تاريخ البدء" icon={Calendar} value={formatDate(effectivePickup ?? order.pickupDate, 'EEEE d MMM yyyy')} />
+                <Row label="الوقت المفضل" icon={Clock} value={PICKUP_WINDOW_LABELS[(order as any).pickupWindow] ?? (order as any).pickupWindow ?? '—'} />
+                <Row label="موعد الإنجاز المتوقع" icon={Calendar} value={effectiveDelivery ? formatDate(effectiveDelivery, 'EEEE d MMM yyyy') : 'سيُحدَّد'} />
               </dl>
             </CardContent>
           </Card>
@@ -313,28 +355,12 @@ function Row({ label, value, icon: Icon }: { label: string; value: React.ReactNo
   );
 }
 
-function MapSection({ order }: { order: any }) {
-  const o = coordsFor(order.originCity);
-  const d = coordsFor(order.destinationCity);
-  const km = distanceKm(o, d);
-  const duration = estimatedDurationLabel(km);
-  const road = primaryRoadFor(order.originCity, order.destinationCity);
-  const progress = order.status === 'IN_TRANSIT' ? 0.55 : order.status === 'DELIVERED' || order.status === 'COMPLETED' ? 1 : undefined;
+function OverviewRow({ label, value }: { label: string; value?: React.ReactNode }) {
   return (
-    <Card>
-      <RouteMap
-        origin={{ ...o, label: order.originCity }}
-        destination={{ ...d, label: order.destinationCity }}
-        progress={progress}
-        height={300}
-        className="rounded-b-none border-b"
-      />
-      <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
-        <RouteStat icon="📍" label="المسافة" value={<span className="num">{km.toLocaleString('en-US')} كم</span>} />
-        <RouteStat icon="⏱" label="المدة المتوقعة" value={duration} />
-        <RouteStat icon="🛣" label="الطريق الرئيسي" value={road} />
-      </CardContent>
-    </Card>
+    <div className="flex items-start justify-between gap-3 py-2.5 border-b last:border-0">
+      <dt className="text-sm text-muted-foreground shrink-0">{label}</dt>
+      <dd className="text-sm font-medium text-end">{value ?? '—'}</dd>
+    </div>
   );
 }
 
@@ -488,14 +514,3 @@ function AdminEscrowSummary({ deliveredAt, total }: { deliveredAt: Date | string
   );
 }
 
-function RouteStat({ icon, label, value }: { icon: string; label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="text-2xl" aria-hidden>{icon}</span>
-      <div className="min-w-0">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="mt-0.5 text-sm font-semibold truncate">{value}</div>
-      </div>
-    </div>
-  );
-}

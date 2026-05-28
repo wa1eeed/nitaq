@@ -4,8 +4,9 @@ import { useParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { fetcher, api } from '@/lib/api';
 import {
-  AlertTriangle, ArrowRight, BadgeCheck, Briefcase, CheckCircle2, MapPin, MessageSquare,
-  Package, Phone, ShieldCheck, Shield, Star, Timer, Truck, User, UserSearch, X,
+  AlertTriangle, ArrowRight, BadgeCheck, Briefcase, Building2, Calendar, CheckCircle2,
+  Clock, MapPin, MessageSquare, Package, Phone, ShieldCheck, Shield, Star, Timer, Truck,
+  User, UserSearch, Wifi, X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -354,20 +355,135 @@ export default function ClientOrderDetail() {
         </div>
 
         <div className="space-y-6">
+          {/* Card 1: معلومات الطلب */}
           <Card>
-            <CardHeader><CardTitle>تفاصيل الطلب</CardTitle></CardHeader>
-            <CardContent>
-              <dl className="divide-y">
-                <Row label="نوع الخدمة" icon={Package} value={(order.cargoType && CARGO_LABELS[order.cargoType]) || order.cargoType || '—'} />
-                <Row label="الوصف" value={order.cargoDescription || '—'} />
-                <Row label="نوع الخدمة المطلوبة" icon={Truck} value={(order.truckType && TRUCK_LABELS[order.truckType]) || order.truckType || '—'} />
-                <Row label="تأمين" icon={ShieldCheck} value={order.requiresInsurance ? 'مطلوب' : '—'} />
-                {order.originAddress && (
-                  <Row label="موقع التنفيذ" icon={MapPin} value={order.originAddress} />
+            <CardHeader><CardTitle>معلومات الطلب</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              {/* Order number */}
+              <div>
+                <div className="text-xs text-muted-foreground mb-0.5">رقم الطلب</div>
+                <div className="font-mono text-lg font-bold text-primary">{order.orderNumber}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{formatDateTime(order.createdAt)}</div>
+              </div>
+
+              {/* Order mode badge */}
+              <div>
+                <Badge variant={order.mode === 'OPEN' ? 'default' : 'secondary'}>
+                  {order.mode === 'OPEN' ? 'سوق مفتوح' : 'إرسال مباشر'}
+                </Badge>
+              </div>
+
+              <div className="border-t pt-4 space-y-3">
+                {/* Service type */}
+                <div className="flex items-start gap-2">
+                  <Package className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">نوع الخدمة</div>
+                    <div className="text-sm font-medium">
+                      {(order.cargoType && CARGO_LABELS[order.cargoType]) || order.cargoType || '—'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {order.cargoDescription && (
+                  <div className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                    {order.cargoDescription}
+                  </div>
                 )}
-              </dl>
+
+                {/* Insurance */}
+                {order.requiresInsurance && (
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-success shrink-0" />
+                    <Badge variant="success">تأمين مطلوب</Badge>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
+
+          {/* Card 2: الموقع والموعد */}
+          <Card>
+            <CardHeader><CardTitle>الموقع والموعد</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {/* Delivery mode */}
+              {(order as any).deliveryMode && (() => {
+                const dm = (order as any).deliveryMode as string;
+                const modeMap: Record<string, { label: string; Icon: typeof Wifi }> = {
+                  ON_SITE:     { label: 'في موقع شركتنا',        Icon: Building2 },
+                  REMOTE:      { label: 'عن بُعد / إلكترونياً',  Icon: Wifi },
+                  AT_PROVIDER: { label: 'في مقر المزوّد',         Icon: Briefcase },
+                };
+                const m = modeMap[dm];
+                if (!m) return null;
+                const ModeIcon = m.Icon;
+                return (
+                  <div className="flex items-start gap-2">
+                    <ModeIcon className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <div className="text-xs text-muted-foreground">طريقة الخدمة</div>
+                      <div className="text-sm font-medium">{m.label}</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Service location */}
+              {(order.originCity || order.originAddress) && (
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">موقع التنفيذ</div>
+                    <div className="text-sm font-medium">{order.originCity}</div>
+                    {order.originAddress && (
+                      <div className="text-xs text-muted-foreground">{order.originAddress}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Pickup date */}
+              {order.pickupDate && (
+                <div className="flex items-start gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">تاريخ البدء</div>
+                    <div className="text-sm font-medium">{formatDate(order.pickupDate, 'EEEE d MMM yyyy')}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Pickup window */}
+              {(order as any).pickupWindow && (
+                <div className="flex items-start gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="text-xs text-muted-foreground">وقت الاستلام</div>
+                    <div className="text-sm font-medium">{pickupWindowLabel((order as any).pickupWindow)}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Expected delivery/completion date */}
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">موعد الإنجاز المتوقع</div>
+                  <div className="text-sm font-medium">
+                    {order.deliveryDate
+                      ? formatDate(order.deliveryDate, 'EEEE d MMM yyyy')
+                      : 'سيُحدَّد لاحقاً'}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: مزوّد الخدمة (compact) — only when provider is assigned */}
+          {order.carrierId && ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'].includes(order.status) && (
+            <SidebarProviderCard order={order} />
+          )}
         </div>
       </div>
 
@@ -1068,6 +1184,82 @@ function ProviderInfoCard({ order }: { order: Order }) {
               <div>
                 <div className="text-xs text-muted-foreground">المدة المقدّرة</div>
                 <div className="mt-0.5 text-lg font-bold num">
+                  {acceptedBid.estimatedDays} {acceptedBid.estimatedDays === 1 ? 'يوم' : 'أيام'}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Compact sidebar provider card (sidebar only) ────────────────────
+// Shows a condensed provider summary in the right sidebar once the order
+// has been assigned. The full ProviderInfoCard in the main column stays.
+
+function SidebarProviderCard({ order }: { order: Order }) {
+  const apiOrder = order as ApiOrderFull;
+  const provider = apiOrder.provider ?? companyById(order.carrierId);
+  if (!provider) return null;
+
+  type ApiBid = { id: string; status: string; price?: number; amount?: number; estimatedDays?: number };
+  const apiBids = (order as Order & { bids?: ApiBid[] }).bids;
+  const acceptedBid = apiBids?.find((b) => b.status === 'ACCEPTED') ?? BIDS.find((b) => b.orderId === order.id && b.status === 'ACCEPTED');
+
+  const initials = (provider.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('');
+
+  return (
+    <Card className="border-success/30">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm">المزوّد المُعتمد</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Provider header */}
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="text-sm">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-sm truncate">{provider.nameAr}</div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap mt-0.5">
+              {provider.rating && (
+                <span className="inline-flex items-center gap-1">
+                  <Star className="h-3 w-3 fill-warning text-warning" />
+                  <span className="num">{provider.rating.toFixed(1)}</span>
+                  {(provider as { completedTrips?: number }).completedTrips != null && (
+                    <span>({(provider as { completedTrips?: number }).completedTrips} طلب)</span>
+                  )}
+                </span>
+              )}
+              {provider.city && <span>· {provider.city}</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Contact button */}
+        {(provider as { contactPhone?: string }).contactPhone && (
+          <Button size="sm" variant="outline" className="w-full" asChild>
+            <a href={`tel:${(provider as { contactPhone?: string }).contactPhone}`}>
+              <Phone className="h-3.5 w-3.5" /> اتصال بالمزوّد
+            </a>
+          </Button>
+        )}
+
+        {/* Agreed price + duration */}
+        {(order.agreedPrice || acceptedBid) && (
+          <div className="pt-3 border-t grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <div className="text-xs text-muted-foreground">السعر</div>
+              <div className="font-bold mt-0.5">
+                <Currency amount={order.agreedPrice ?? acceptedBid?.price ?? 0} />
+              </div>
+            </div>
+            {acceptedBid?.estimatedDays && (
+              <div>
+                <div className="text-xs text-muted-foreground">المدة</div>
+                <div className="font-bold num mt-0.5">
                   {acceptedBid.estimatedDays} {acceptedBid.estimatedDays === 1 ? 'يوم' : 'أيام'}
                 </div>
               </div>

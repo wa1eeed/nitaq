@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  ArrowRight, Building2, CheckCircle2, Mail, MapPin, Navigation, Package,
+  ArrowRight, Building2, Calendar, CheckCircle2, Mail, MapPin, Navigation, Package,
   Phone, Shield, ShieldCheck, Truck, Users, X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -23,8 +24,21 @@ import { StatusBadge } from '@/components/status-badge';
 import { Currency } from '@/components/currency';
 import { EscrowCountdown } from '@/components/escrow-countdown';
 import {
-  ORDERS, companyById, formatDate, formatDateTime, timelineFor, normalizeOrder,
+  ORDERS, companyById, formatDate, formatDateTime, timelineFor, normalizeOrder, pickupWindowLabel,
 } from '@naqla/shared-utils';
+
+const TRUCK_LABELS: Record<string, string> = {
+  CONSULTING: 'استشارات', DESIGN: 'تصميم', INSTALLATION: 'تركيب وتنصيب',
+  MAINTENANCE: 'صيانة', TECHNICAL_SUPPORT: 'دعم تقني', TRAINING: 'تدريب',
+  IT_SERVICES: 'خدمات تقنية', LOGISTICS: 'لوجستيات',
+  PROJECT_MANAGEMENT: 'إدارة مشاريع', OTHER: 'أخرى',
+};
+
+const DELIVERY_MODE_LABELS: Record<string, string> = {
+  ON_SITE: 'في موقع العميل',
+  REMOTE: 'عن بُعد',
+  AT_PROVIDER: 'في مقر المزوّد',
+};
 
 const TITLES: Record<string, string> = {
   CREATED: 'إنشاء الطلب', PUBLISHED: 'نشر الطلب', BID_ACCEPTED: 'قبول عرضك',
@@ -273,53 +287,170 @@ export default function CarrierOrderDetail() {
         </div>
 
         <div className="space-y-6">
-          {client && (
-            <Card>
-              <CardHeader><CardTitle>العميل</CardTitle></CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarFallback>{(client.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('')}</AvatarFallback>
-                  </Avatar>
+          {/* Card 1: معلومات الطلب — order header + client info */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">معلومات الطلب</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Order number + meta */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="font-mono text-sm font-semibold bg-muted px-2 py-0.5 rounded">
+                    {order.orderNumber}
+                  </span>
+                  <Badge variant={(order as { mode?: string }).mode === 'DIRECT' ? 'warning' : 'outline'} className="text-xs">
+                    {(order as { mode?: string }).mode === 'DIRECT' ? 'مباشر' : 'مفتوح'}
+                  </Badge>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatDateTime(order.createdAt)}
+                </div>
+              </div>
+
+              {/* Client info */}
+              {client && (
+                <>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10 shrink-0">
+                      <AvatarFallback>{(client.nameAr ?? '').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('')}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold truncate">{client.nameAr}</div>
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Building2 className="h-3 w-3 shrink-0" /> {client.city}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {client.contactPhone && (
+                      <a
+                        href={`tel:${client.contactPhone}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-md border text-xs py-1.5 hover:bg-muted transition-colors"
+                      >
+                        <Phone className="h-3 w-3" />
+                        <span className="num" dir="ltr">{client.contactPhone}</span>
+                      </a>
+                    )}
+                    {client.contactEmail && (
+                      <a
+                        href={`mailto:${client.contactEmail}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-md border text-xs py-1.5 hover:bg-muted transition-colors truncate"
+                      >
+                        <Mail className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{client.contactEmail}</span>
+                      </a>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <Separator />
+
+              {/* Service type + description + insurance */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Truck className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="font-medium">
+                    {(order.truckType && TRUCK_LABELS[order.truckType]) || order.truckType || '—'}
+                  </span>
+                </div>
+                {order.cargoDescription && (
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 ps-6">
+                    {order.cargoDescription}
+                  </p>
+                )}
+                {order.requiresInsurance && (
+                  <div className="ps-6">
+                    <Badge variant="outline" className="gap-1 text-xs">
+                      <ShieldCheck className="h-3 w-3" /> تأمين مطلوب
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 2: الموقع والموعد */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">الموقع والموعد</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Delivery mode */}
+              {(order as { deliveryMode?: string }).deliveryMode && (
+                <div className="space-y-0.5">
+                  <div className="text-xs text-muted-foreground">طريقة الخدمة</div>
+                  <div className="text-sm font-medium">
+                    {DELIVERY_MODE_LABELS[(order as { deliveryMode?: string }).deliveryMode!] ?? (order as { deliveryMode?: string }).deliveryMode}
+                  </div>
+                </div>
+              )}
+
+              {/* Service location */}
+              {(order.originCity || order.originAddress) && (
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <div className="font-semibold truncate">{client.nameAr}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Building2 className="h-3 w-3" /> {client.city}
+                    <div className="text-xs text-muted-foreground">موقع التنفيذ</div>
+                    <div className="text-sm font-medium">
+                      {[order.originCity, order.originAddress].filter(Boolean).join(' — ')}
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* Pickup / start date */}
+              <div className="flex items-start gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs text-muted-foreground">موعد البدء</div>
+                  <div className="text-sm font-medium">
+                    {effectivePickup
+                      ? formatDate(effectivePickup, 'EEEE d MMM yyyy · HH:mm')
+                      : '—'}
+                  </div>
+                  {(order as { pickupWindow?: string }).pickupWindow && (
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {pickupWindowLabel((order as { pickupWindow?: 'MORNING' | 'EVENING' | 'ALL_DAY' }).pickupWindow!)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Expected completion */}
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs text-muted-foreground">موعد الإتمام المتوقع</div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="text-sm font-medium">
+                      {effectiveDelivery
+                        ? formatDate(effectiveDelivery, 'EEEE d MMM yyyy · HH:mm')
+                        : 'سيُحدَّد لاحقاً'}
+                    </div>
+                    {myAcceptedBid?.proposedDeliveryDate && (
+                      <Badge variant="outline" className="text-[10px] h-4">حسب عرضك</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: المالية — only if financial data exists */}
+          {order.agreedPrice && (
+            <Card>
+              <CardHeader className="pb-3"><CardTitle className="text-base">المالية</CardTitle></CardHeader>
+              <CardContent>
                 <dl className="divide-y">
-                  <Row label="رقم التواصل" icon={Phone} value={<span className="num" dir="ltr">{client.contactPhone}</span>} />
-                  <Row label="البريد" icon={Mail} value={<span className="num text-xs">{client.contactEmail}</span>} />
+                  <Row label="السعر المتفق" value={<Currency amount={order.agreedPrice} />} />
+                  <Row label="العمولة" value={<Currency amount={order.commission ?? 0} />} />
+                  <Row label="صافي إلى حسابك" value={<Currency amount={order.providerAmount} />} />
                 </dl>
               </CardContent>
             </Card>
           )}
-
-          <Card>
-            <CardHeader><CardTitle>تفاصيل الطلب</CardTitle></CardHeader>
-            <CardContent>
-              <dl className="divide-y">
-                <Row label="الوصف" value={order.cargoDescription} />
-                <Row label="نوع الخدمة" icon={Truck} value={order.truckType} />
-                <Row label="تأمين" icon={ShieldCheck} value={order.requiresInsurance ? 'مطلوب' : '—'} />
-                {order.originAddress && (
-                  <Row label="موقع التنفيذ" icon={MapPin} value={order.originAddress} />
-                )}
-              </dl>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader><CardTitle>المالية</CardTitle></CardHeader>
-            <CardContent>
-              <dl className="divide-y">
-                <Row label="السعر المتفق" value={<Currency amount={order.agreedPrice} />} />
-                <Row label="العمولة" value={<Currency amount={order.commission ?? 0} />} />
-                <Row label="صافي إلى حسابك" value={<Currency amount={order.providerAmount} />} />
-              </dl>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
