@@ -19,6 +19,19 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
 import { ORDERS, companyById, formatDate, normalizeOrderList, SAUDI_CITIES, type Order } from '@naqla/shared-utils';
 
+const SERVICE_LABELS: Record<string, string> = {
+  CONSULTING:         'استشارات',
+  DESIGN:             'تصميم',
+  INSTALLATION:       'تركيب وتنصيب',
+  MAINTENANCE:        'صيانة',
+  TECHNICAL_SUPPORT:  'دعم تقني',
+  TRAINING:           'تدريب',
+  IT_SERVICES:        'خدمات تقنية',
+  LOGISTICS:          'لوجستيات',
+  PROJECT_MANAGEMENT: 'إدارة مشاريع',
+  OTHER:              'أخرى',
+};
+
 export default function AdminOrdersPage() {
   const [tab, setTab] = useState('ALL');
   const [city, setCity] = useState('ALL');
@@ -100,7 +113,7 @@ export default function AdminOrdersPage() {
                 <TableHead>رقم</TableHead>
                 <TableHead>العميل</TableHead>
                 <TableHead>المزوّد</TableHead>
-                <TableHead>المدينة</TableHead>
+                <TableHead>نوع الخدمة</TableHead>
                 <TableHead>النوع</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead className="text-center">عروض</TableHead>
@@ -123,7 +136,9 @@ export default function AdminOrdersPage() {
                     </TableCell>
                     <TableCell>{companyById(o.clientId)?.nameAr ?? '—'}</TableCell>
                     <TableCell>{companyById(o.carrierId)?.nameAr ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell>{o.originCity}</TableCell>
+                    <TableCell>
+                      {SERVICE_LABELS[(o as Order & { cargoType?: string }).cargoType ?? ''] ?? (o as Order & { cargoType?: string }).cargoType ?? '—'}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={o.mode === 'DIRECT' ? 'warning' : 'secondary'}>
                         {o.mode === 'OPEN' ? 'مفتوح' : 'مباشر'}

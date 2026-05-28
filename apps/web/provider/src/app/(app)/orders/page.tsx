@@ -18,6 +18,19 @@ import {
   normalizeOrderList, type Order,
 } from '@naqla/shared-utils';
 
+const SERVICE_LABELS: Record<string, string> = {
+  CONSULTING:         'استشارات',
+  DESIGN:             'تصميم',
+  INSTALLATION:       'تركيب وتنصيب',
+  MAINTENANCE:        'صيانة',
+  TECHNICAL_SUPPORT:  'دعم تقني',
+  TRAINING:           'تدريب',
+  IT_SERVICES:        'خدمات تقنية',
+  LOGISTICS:          'لوجستيات',
+  PROJECT_MANAGEMENT: 'إدارة مشاريع',
+  OTHER:              'أخرى',
+};
+
 export default function CarrierOrdersPage() {
   const [tab, setTab] = useState('ALL');
   // GET /orders?mine=true → only orders assigned to this carrier.
@@ -101,7 +114,9 @@ export default function CarrierOrdersPage() {
                           <TableCell className="font-mono text-xs font-medium">{o.orderNumber}</TableCell>
                           <TableCell>
                             <div>
-                              <div className="text-sm font-medium">{o.originCity}</div>
+                              <div className="text-sm font-medium">
+                                {SERVICE_LABELS[(o as Order & { cargoType?: string }).cargoType ?? ''] ?? (o as Order & { cargoType?: string }).cargoType ?? '—'}
+                              </div>
                               <div className="text-xs text-muted-foreground truncate max-w-[280px]">{o.cargoDescription}</div>
                             </div>
                           </TableCell>

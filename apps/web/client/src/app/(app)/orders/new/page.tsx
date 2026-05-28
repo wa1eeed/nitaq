@@ -1,7 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, Briefcase, Check, ChevronLeft, ChevronRight, Eye, Send, Shield, Wifi } from 'lucide-react';
+import {
+  Building2, Briefcase, Check, ChevronLeft, ChevronRight, Eye, Loader2,
+  MapPin, Plus, Send, Shield, Wifi, X,
+} from 'lucide-react';
+import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +16,8 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/page-header';
-import { api } from '@/lib/api';
+import { api, fetcher } from '@/lib/api';
+import { useAuthStore } from '@/lib/auth-store';
 import { cn } from '@/lib/utils';
 
 const SERVICE_OPTIONS = [
@@ -62,6 +67,16 @@ const PICKUP_WINDOW_OPTIONS = [
 
 const STEPS = ['الخدمة', 'الموعد والموقع', 'الإرسال', 'المراجعة'];
 
+type SavedAddress = {
+  id: string;
+  label: string;
+  city: string;
+  region?: string;
+  address: string;
+  kind: string;
+  isDefault?: boolean;
+};
+
 interface FormState {
   cargoType: string;
   cargoDescription: string;
@@ -76,6 +91,7 @@ interface FormState {
 
 export default function NewOrderPage() {
   const router = useRouter();
+  const companyId = useAuthStore((s) => s.user?.companyId);
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,13 +108,66 @@ export default function NewOrderPage() {
     requiresInsurance: false,
   });
 
+  // ── Saved addresses (for ON_SITE mode) ──────────────────────────────────────
+  const { data: addressesRaw, mutate: refetchAddresses, isLoading: addrLoading } =
+    useSWR<unknown>(companyId ? `/companies/${companyId}/addresses` : null, fetcher);
+
+  const savedAddresses: SavedAddress[] = (() => {
+    if (!addressesRaw) return [];
+    if (Array.isArray(addressesRaw)) return addressesRaw as SavedAddress[];
+    const inner = (addressesRaw as { data?: unknown }).data;
+    if (Array.isArray(inner)) return inner as SavedAddress[];
+    return [];
+  })();
+
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showInlineAddForm, setShowInlineAddForm] = useState(false);
+  const [addrForm, setAddrForm] = useState({ label: '', city: 'الرياض', address: '' });
+  const [addrSaving, setAddrSaving] = useState(false);
+
+  const saveAddress = async () => {
+    if (!companyId || !addrForm.label.trim()) return;
+    setAddrSaving(true);
+    try {
+      const res = await api.post(`/companies/${companyId}/addresses`, {
+        label: addrForm.label.trim(),
+        city: addrForm.city,
+        region: addrForm.city,
+        address: addrForm.address.trim() || addrForm.city,
+        kind: 'PICKUP',
+        contactName: '',
+        contactPhone: '',
+        isDefault: savedAddresses.length === 0,
+      });
+      await refetchAddresses();
+      const newAddr = ((res.data as { data?: SavedAddress })?.data ?? res.data) as SavedAddress;
+      if (newAddr?.id) {
+        setSelectedAddressId(newAddr.id);
+        set('city', newAddr.city);
+      }
+      setShowInlineAddForm(false);
+      setAddrForm({ label: '', city: 'الرياض', address: '' });
+    } catch {
+      // ignore — user can retry
+    } finally {
+      setAddrSaving(false);
+    }
+  };
+
+  const handleAddressSelect = (addr: SavedAddress) => {
+    setSelectedAddressId(addr.id);
+    set('city', addr.city);
+  };
+
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
   const step0Valid = !!form.cargoType && form.cargoDescription.trim().length >= 4;
-  const step1Valid = !!form.pickupDate; // city optional when REMOTE
-  const step2Valid = true; // orderMode always has a default
-  const step3Valid = true; // review step
+  const step1Valid =
+    !!form.pickupDate &&
+    (form.deliveryMode !== 'ON_SITE' || !!selectedAddressId);
+  const step2Valid = true;
+  const step3Valid = true;
 
   const canProceed =
     step === 0 ? step0Valid :
@@ -106,20 +175,25 @@ export default function NewOrderPage() {
     step === 2 ? step2Valid :
     step3Valid;
 
+  const selectedAddress = savedAddresses.find((a) => a.id === selectedAddressId);
+
   const submit = async () => {
     setError(null);
     setSubmitting(true);
     try {
+      const locationCity = selectedAddress?.city ?? form.city ?? 'الرياض';
+      const locationAddress = selectedAddress?.address ?? form.city ?? 'الرياض';
+
       const body = {
         mode: form.orderMode,
         cargoType: form.cargoType,
         cargoDescription: form.cargoDescription.trim(),
-        originCity: form.city || 'الرياض',
-        originRegion: form.city || 'الرياض',
-        originAddress: form.city || 'الرياض',
-        destinationCity: form.city || 'الرياض',
-        destinationRegion: form.city || 'الرياض',
-        destinationAddress: form.city || 'الرياض',
+        originCity: locationCity,
+        originRegion: locationCity,
+        originAddress: locationAddress,
+        destinationCity: locationCity,
+        destinationRegion: locationCity,
+        destinationAddress: locationAddress,
         requiredServiceType: form.cargoType,
         requiresInsurance: form.requiresInsurance,
         pickupDate: form.pickupDate,
@@ -246,7 +320,11 @@ export default function NewOrderPage() {
                   <button
                     key={value}
                     type="button"
-                    onClick={() => set('deliveryMode', value)}
+                    onClick={() => {
+                      set('deliveryMode', value);
+                      setSelectedAddressId(null);
+                      setShowInlineAddForm(false);
+                    }}
                     className={cn(
                       'flex flex-col items-start gap-2 rounded-lg border-2 p-3 text-start transition-colors',
                       form.deliveryMode === value
@@ -267,7 +345,144 @@ export default function NewOrderPage() {
               </div>
             </div>
 
-            {form.deliveryMode !== 'REMOTE' && (
+            {/* ── ON_SITE: saved address picker ── */}
+            {form.deliveryMode === 'ON_SITE' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>موقع الخدمة <span className="text-destructive">*</span></Label>
+                  {!showInlineAddForm && (
+                    <button
+                      type="button"
+                      onClick={() => setShowInlineAddForm(true)}
+                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      إضافة عنوان
+                    </button>
+                  )}
+                </div>
+
+                {addrLoading ? (
+                  <div className="flex items-center justify-center py-6 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin me-2" />
+                    <span className="text-sm">جارٍ تحميل العناوين...</span>
+                  </div>
+                ) : savedAddresses.length === 0 && !showInlineAddForm ? (
+                  <div className="rounded-lg border-2 border-dashed border-border p-5 text-center space-y-3">
+                    <MapPin className="h-8 w-8 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      يجب أولاً حفظ عنوان لمقرك أو أحد فروعك
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowInlineAddForm(true)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      إضافة عنوان
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {savedAddresses.map((addr) => (
+                      <button
+                        key={addr.id}
+                        type="button"
+                        onClick={() => handleAddressSelect(addr)}
+                        className={cn(
+                          'flex items-start gap-3 rounded-lg border-2 p-3 text-start transition-colors',
+                          selectedAddressId === addr.id
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/40',
+                        )}
+                      >
+                        <MapPin className={cn(
+                          'h-4 w-4 mt-0.5 shrink-0',
+                          selectedAddressId === addr.id ? 'text-primary' : 'text-muted-foreground',
+                        )} />
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold truncate">{addr.label}</div>
+                          <div className="text-xs text-muted-foreground truncate">{addr.city}</div>
+                          {addr.address && addr.address !== addr.city && (
+                            <div className="text-xs text-muted-foreground truncate">{addr.address}</div>
+                          )}
+                        </div>
+                        {selectedAddressId === addr.id && (
+                          <Check className="h-4 w-4 text-primary shrink-0 ms-auto mt-0.5" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Inline add address form */}
+                {showInlineAddForm && (
+                  <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold">إضافة عنوان جديد</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowInlineAddForm(false);
+                          setAddrForm({ label: '', city: 'الرياض', address: '' });
+                        }}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">
+                        تسمية العنوان <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        placeholder="مثال: المقر الرئيسي، الفرع الشمالي"
+                        value={addrForm.label}
+                        onChange={(e) => setAddrForm((p) => ({ ...p, label: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">المدينة</Label>
+                      <Select
+                        value={addrForm.city}
+                        onValueChange={(v) => setAddrForm((p) => ({ ...p, city: v }))}
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {CITY_OPTIONS.map((c) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">العنوان التفصيلي <span className="text-muted-foreground">(اختياري)</span></Label>
+                      <Input
+                        placeholder="مثال: شارع الملك فهد، مبنى 12"
+                        value={addrForm.address}
+                        onChange={(e) => setAddrForm((p) => ({ ...p, address: e.target.value }))}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={!addrForm.label.trim() || addrSaving}
+                      onClick={saveAddress}
+                    >
+                      {addrSaving ? (
+                        <><Loader2 className="h-3.5 w-3.5 animate-spin" /> حفظ...</>
+                      ) : (
+                        <><Check className="h-3.5 w-3.5" /> حفظ العنوان</>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* AT_PROVIDER: city select */}
+            {form.deliveryMode === 'AT_PROVIDER' && (
               <div className="space-y-2">
                 <Label>المدينة</Label>
                 <Select value={form.city} onValueChange={(v) => set('city', v)}>
@@ -444,7 +659,18 @@ export default function NewOrderPage() {
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">الموعد والموقع</p>
               <ReviewRow label="طريقة التقديم" value={deliveryModeOption?.title} />
-              {form.deliveryMode !== 'REMOTE' && (
+              {form.deliveryMode === 'ON_SITE' && selectedAddress && (
+                <ReviewRow
+                  label="موقع الخدمة"
+                  value={
+                    <span>
+                      <span className="font-semibold">{selectedAddress.label}</span>
+                      <span className="text-muted-foreground"> — {selectedAddress.city}</span>
+                    </span>
+                  }
+                />
+              )}
+              {form.deliveryMode === 'AT_PROVIDER' && (
                 <ReviewRow label="المدينة" value={form.city} />
               )}
               <ReviewRow label="تاريخ البدء" value={form.pickupDate} />

@@ -18,6 +18,19 @@ import {
   CURRENT_CLIENT_ID, formatDate, ordersForClient,
   normalizeOrderList, type Order,
 } from '@naqla/shared-utils';
+
+const SERVICE_LABELS: Record<string, string> = {
+  CONSULTING:         'استشارات',
+  DESIGN:             'تصميم',
+  INSTALLATION:       'تركيب وتنصيب',
+  MAINTENANCE:        'صيانة',
+  TECHNICAL_SUPPORT:  'دعم تقني',
+  TRAINING:           'تدريب',
+  IT_SERVICES:        'خدمات تقنية',
+  LOGISTICS:          'لوجستيات',
+  PROJECT_MANAGEMENT: 'إدارة مشاريع',
+  OTHER:              'أخرى',
+};
 import { fetcher } from '@/lib/api';
 
 export default function ClientOrdersPage() {
@@ -128,7 +141,9 @@ export default function ClientOrdersPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium">{o.originCity}</span>
+                            <span className="text-sm font-medium">
+                              {SERVICE_LABELS[(o as Order & { cargoType?: string }).cargoType ?? ''] ?? (o as Order & { cargoType?: string }).cargoType ?? '—'}
+                            </span>
                             <span className="text-xs text-muted-foreground truncate max-w-[280px]">{o.cargoDescription}</span>
                           </div>
                         </TableCell>

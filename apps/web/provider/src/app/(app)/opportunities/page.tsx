@@ -23,6 +23,19 @@ import {
   normalizeOrderList, type Order,
 } from '@naqla/shared-utils';
 
+const SERVICE_LABELS: Record<string, string> = {
+  CONSULTING:         'استشارات',
+  DESIGN:             'تصميم',
+  INSTALLATION:       'تركيب وتنصيب',
+  MAINTENANCE:        'صيانة',
+  TECHNICAL_SUPPORT:  'دعم تقني',
+  TRAINING:           'تدريب',
+  IT_SERVICES:        'خدمات تقنية',
+  LOGISTICS:          'لوجستيات',
+  PROJECT_MANAGEMENT: 'إدارة مشاريع',
+  OTHER:              'أخرى',
+};
+
 export default function CarrierOpportunitiesPage() {
   const [tab, setTab] = useState<'OPEN' | 'DIRECT'>('OPEN');
   const authedCompanyId = useAuthStore((s) => s.user?.companyId);
@@ -164,7 +177,9 @@ export default function CarrierOpportunitiesPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold">{o.originCity} ← {o.destinationCity}</h3>
+                        <h3 className="font-semibold">
+                          {SERVICE_LABELS[(o as Order & { cargoType?: string }).cargoType ?? ''] ?? (o as Order & { cargoType?: string }).cargoType ?? '—'}
+                        </h3>
                         <Badge variant={isDirect ? 'warning' : 'success'}>
                           {isDirect ? <><UserSearch className="h-3 w-3" /> موجّه لك</> : <><Radio className="h-3 w-3" /> سوق مفتوح</>}
                         </Badge>
