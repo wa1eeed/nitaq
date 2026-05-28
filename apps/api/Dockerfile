@@ -44,4 +44,6 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO /dev/null http://localhost:4000/health || exit 1
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "dist/src/main.js"]
+# Run pending migrations before starting the app so the DB schema is always
+# in sync with the codebase — safe to run on every restart (idempotent).
+CMD ["sh", "-c", "node ./node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
