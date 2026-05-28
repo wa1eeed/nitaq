@@ -37,5 +37,6 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO /dev/null http://localhost:4000/health || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-# Apply any pending DB migrations (idempotent), then start the API.
-CMD ["sh", "-c", "../../node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
+# prisma bin lives in apps/api/node_modules/.bin (pnpm per-package bin scope).
+# WORKDIR is /repo/apps/api so node_modules/.bin/prisma resolves correctly.
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
