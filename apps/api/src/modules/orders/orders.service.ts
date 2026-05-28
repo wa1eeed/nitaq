@@ -232,14 +232,19 @@ export class OrdersService {
       });
     } catch (err: unknown) {
       this.logger.error('order.create failed', err);
-      const code = (err as { code?: string })?.code;
-      if (code === 'P2003') {
+      const e = err as { code?: string; message?: string; meta?: unknown };
+      const prismaCode = e?.code ?? 'NO_CODE';
+      const prismaMsg = (e?.message ?? 'unknown').replace(/\n/g, ' ').slice(0, 300);
+      if (prismaCode === 'P2003') {
         throw new BadRequestException({ code: 'FK_VIOLATION', message: 'بيانات الحساب قديمة، يرجى تسجيل الخروج وإعادة الدخول' });
       }
-      if (code === 'P2002') {
+      if (prismaCode === 'P2002') {
         throw new BadRequestException({ code: 'DUPLICATE_ORDER', message: 'رقم الطلب مكرر، حاول مرة أخرى' });
       }
-      throw new InternalServerErrorException({ code: 'ORDER_CREATE_FAILED', message: 'فشل إنشاء الطلب، حاول مرة أخرى' });
+      throw new InternalServerErrorException({
+        code: 'ORDER_CREATE_FAILED',
+        message: `[${prismaCode}] ${prismaMsg}`,
+      });
     }
   }
 

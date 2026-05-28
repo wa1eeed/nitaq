@@ -1,814 +1,264 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import useSWR from 'swr';
-import {
-  Briefcase, Building2, Check, ChevronLeft, ChevronRight, Clock,
-  Eye, MapPin, Package, Plus, Radio, Search, Send, ShieldCheck,
-  UserSearch, Wallet, Wifi,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
 import { PageHeader } from '@/components/page-header';
-import { playSoundIfEnabled } from '@/lib/sound';
-import { DEFAULT_CITIES } from '@naqla/shared-utils';
-import { api, fetcher } from '@/lib/api';
-import { useAuthStore } from '@/lib/auth-store';
+import { api } from '@/lib/api';
 
-export type PickupWindow = 'MORNING' | 'EVENING' | 'ALL_DAY';
-type DeliveryMode = 'ON_SITE' | 'REMOTE' | 'AT_PROVIDER';
+const SERVICE_OPTIONS = [
+  { value: 'CONSULTING',        label: 'استشارات' },
+  { value: 'DESIGN',            label: 'تصميم' },
+  { value: 'INSTALLATION',      label: 'تركيب وتنصيب' },
+  { value: 'MAINTENANCE',       label: 'صيانة' },
+  { value: 'TECHNICAL_SUPPORT', label: 'دعم تقني' },
+  { value: 'TRAINING',          label: 'تدريب' },
+  { value: 'IT_SERVICES',       label: 'خدمات تقنية' },
+  { value: 'LOGISTICS',         label: 'لوجستيات' },
+  { value: 'PROJECT_MANAGEMENT',label: 'إدارة مشاريع' },
+  { value: 'OTHER',             label: 'أخرى' },
+];
 
-interface FormState {
+const CITY_OPTIONS = [
+  'الرياض','جدة','مكة المكرمة','المدينة المنورة','الدمام','الخبر','الأحساء',
+  'تبوك','بريدة','أبها','خميس مشيط','حائل','نجران','الطائف','ينبع',
+];
+
+interface FormData {
   cargoType: string;
   cargoDescription: string;
-  deliveryMode: DeliveryMode;
-  savedAddressId: string | null;
-  originAddress: string;
-  originCity: string;
+  city: string;
   pickupDate: string;
-  pickupWindow: PickupWindow;
-  mode: 'OPEN' | 'DIRECT' | null;
-  targetCarrierId: string | null;
-  hasPreAgreedPrice: boolean;
-  agreedPriceUpfront: number | null;
-  truckType: string;
-  requiresInsurance: boolean;
+  requiredServiceType: string;
   specialInstructions: string;
 }
 
-const STEPS = [
-  { id: 1, label: 'الخدمة',         icon: Package },
-  { id: 2, label: 'الموقع والموعد', icon: MapPin },
-  { id: 3, label: 'طريقة الإرسال', icon: Send },
-  { id: 4, label: 'المتطلبات',      icon: Wallet },
-  { id: 5, label: 'مراجعة',         icon: Eye },
-];
+const STEPS = ['تفاصيل الخدمة', 'الموقع والموعد', 'مراجعة وإرسال'];
 
-const SERVICE_CATEGORIES = [
-  { value: 'CONSULTING',         label: 'استشارات' },
-  { value: 'DESIGN',             label: 'تصميم' },
-  { value: 'INSTALLATION',       label: 'تركيب وتنصيب' },
-  { value: 'MAINTENANCE',        label: 'صيانة' },
-  { value: 'TECHNICAL_SUPPORT',  label: 'دعم تقني' },
-  { value: 'TRAINING',           label: 'تدريب' },
-  { value: 'IT_SERVICES',        label: 'خدمات تقنية' },
-  { value: 'LOGISTICS',          label: 'لوجستيات' },
-  { value: 'PROJECT_MANAGEMENT', label: 'إدارة مشاريع' },
-  { value: 'OTHER',              label: 'أخرى' },
-];
-
-const SERVICE_TYPES = [
-  { value: 'CONSULTING',         label: 'استشارات' },
-  { value: 'DESIGN',             label: 'تصميم' },
-  { value: 'INSTALLATION',       label: 'تركيب وتنصيب' },
-  { value: 'MAINTENANCE',        label: 'صيانة' },
-  { value: 'TECHNICAL_SUPPORT',  label: 'دعم تقني' },
-  { value: 'TRAINING',           label: 'تدريب' },
-  { value: 'IT_SERVICES',        label: 'خدمات تقنية' },
-  { value: 'LOGISTICS',          label: 'لوجستيات' },
-  { value: 'PROJECT_MANAGEMENT', label: 'إدارة مشاريع' },
-  { value: 'OTHER',              label: 'أخرى' },
-];
-
-const DELIVERY_MODE_OPTIONS: { value: DeliveryMode; icon: React.ElementType; title: string; description: string }[] = [
-  {
-    value: 'ON_SITE',
-    icon: Building2,
-    title: 'في موقعنا / مقرّنا',
-    description: 'المزوّد يحضر إلى موقعك لتقديم الخدمة — مثل التركيب والصيانة والتدريب الحضوري.',
-  },
-  {
-    value: 'REMOTE',
-    icon: Wifi,
-    title: 'عن بُعد / إلكترونياً',
-    description: 'الخدمة تُقدَّم عبر الإنترنت دون حضور مادي — مثل الاستشارات وخدمات IT والتصميم.',
-  },
-  {
-    value: 'AT_PROVIDER',
-    icon: Briefcase,
-    title: 'في مقر المزوّد',
-    description: 'تزور أنت مقر المزوّد للحصول على الخدمة — مثل الاختبارات المعملية والفحوصات.',
-  },
-];
-
-type CatalogCity = { id: string; nameAr: string; nameEn: string; region: string; lat: number; lng: number; active?: boolean };
-type CatalogTruckType = { id: string; nameAr: string; active?: boolean };
-type CatalogData = { cities: CatalogCity[] | null; cargoTypes: unknown; truckTypes: CatalogTruckType[] | null };
-type ApiCarrier = { id: string; nameAr: string; nameEn: string | null; city: string; status: string; kycStatus: string };
-type SavedAddress = { id: string; label: string; city: string; address: string; isDefault: boolean };
-
-export default function NewOrderWizard() {
+export default function NewOrderPage() {
   const router = useRouter();
-  const companyId = useAuthStore((s) => s.user?.companyId);
-  const { data: catalog } = useSWR<CatalogData>('/settings/catalogs', fetcher);
-  const { data: carriersRaw, isLoading: carriersLoading } =
-    useSWR<ApiCarrier[]>('/companies?type=PROVIDER&status=ACTIVE&limit=100', fetcher);
-  const { data: savedAddresses } = useSWR<SavedAddress[]>(
-    companyId ? `/companies/${companyId}/addresses` : null,
-    fetcher,
-  );
+  const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [step, setStep] = useState(1);
-  const [carrierSearch, setCarrierSearch] = useState('');
-  const [showManualAddress, setShowManualAddress] = useState(false);
-  const [form, setForm] = useState<FormState>({
+  const [form, setForm] = useState<FormData>({
     cargoType: 'CONSULTING',
     cargoDescription: '',
-    deliveryMode: 'ON_SITE',
-    savedAddressId: null,
-    originAddress: '',
-    originCity: 'الرياض',
+    city: 'الرياض',
     pickupDate: '',
-    pickupWindow: 'ALL_DAY',
-    mode: null,
-    targetCarrierId: null,
-    hasPreAgreedPrice: false,
-    agreedPriceUpfront: null,
-    truckType: 'CONSULTING',
-    requiresInsurance: false,
+    requiredServiceType: 'CONSULTING',
     specialInstructions: '',
   });
 
-  const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
-    setForm((s) => ({ ...s, [k]: v }));
+  const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
+    setForm((prev) => ({ ...prev, [k]: v }));
 
-  const carriers: ApiCarrier[] = useMemo(
-    () => (carriersRaw ?? []).filter(
-      (c) => !carrierSearch || c.nameAr.includes(carrierSearch) || c.city.includes(carrierSearch),
-    ),
-    [carriersRaw, carrierSearch],
-  );
-
-  const activeCities: CatalogCity[] = catalog?.cities
-    ? catalog.cities.filter((c) => c.active !== false)
-    : DEFAULT_CITIES.filter((c) => c.active);
-  // Always use static enum values for requiredServiceType — catalog truckTypes
-  // use UUID IDs which the DTO does not accept.
-  const serviceTypesList = SERVICE_TYPES;
-
-  const selectedSavedAddress = savedAddresses?.find((a) => a.id === form.savedAddressId);
-
-  const locationSummary = useMemo(() => {
-    if (form.deliveryMode === 'REMOTE') return 'عن بُعد / إلكترونياً';
-    if (form.deliveryMode === 'AT_PROVIDER') return `مقر المزوّد — ${form.originCity}`;
-    if (selectedSavedAddress) return `${selectedSavedAddress.label} — ${selectedSavedAddress.city}`;
-    if (form.originAddress) return `${form.originAddress}، ${form.originCity}`;
-    return form.originCity || '—';
-  }, [form.deliveryMode, form.originCity, form.originAddress, selectedSavedAddress]);
-
-  const step2Valid = useMemo(() => {
-    if (!form.pickupDate) return false;
-    if (form.deliveryMode === 'ON_SITE') {
-      return !!(form.savedAddressId || form.originAddress || form.originCity);
-    }
-    return !!form.originCity;
-  }, [form.pickupDate, form.deliveryMode, form.savedAddressId, form.originAddress, form.originCity]);
-
-  const canNext = useMemo(() => {
-    switch (step) {
-      case 1: return !!form.cargoType && form.cargoDescription.length > 3;
-      case 2: return step2Valid;
-      case 3: return form.mode === 'OPEN' || (
-        form.mode === 'DIRECT' && !!form.targetCarrierId &&
-        (!form.hasPreAgreedPrice || (form.agreedPriceUpfront != null && form.agreedPriceUpfront > 0))
-      );
-      case 4: return !!form.truckType;
-      default: return true;
-    }
-  }, [step, form, step2Valid]);
-
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const step0Valid = form.cargoType && form.cargoDescription.trim().length >= 4;
+  const step1Valid = form.city && form.pickupDate;
+  const canProceed = step === 0 ? step0Valid : step === 1 ? step1Valid : true;
 
   const submit = async () => {
-    setSubmitError(null);
+    setError(null);
     setSubmitting(true);
-    const effAddress = selectedSavedAddress?.address || form.originAddress || form.originCity;
-    const effCity = selectedSavedAddress?.city || form.originCity;
     try {
       const body = {
-        mode: form.mode ?? 'OPEN',
+        mode: 'OPEN',
         cargoType: form.cargoType,
-        cargoDescription: form.cargoDescription,
-        originCity: effCity,
-        originRegion: effCity,
-        originAddress: effAddress,
-        destinationCity: effCity,
-        destinationRegion: effCity,
-        destinationAddress: effAddress,
-        requiredServiceType: form.truckType,
-        requiresInsurance: form.requiresInsurance,
+        cargoDescription: form.cargoDescription.trim(),
+        originCity: form.city,
+        originRegion: form.city,
+        originAddress: form.city,
+        destinationCity: form.city,
+        destinationRegion: form.city,
+        destinationAddress: form.city,
+        requiredServiceType: form.requiredServiceType,
+        requiresInsurance: false,
         pickupDate: form.pickupDate,
-        pickupWindow: form.pickupWindow,
-        ...(form.specialInstructions ? { specialInstructions: form.specialInstructions } : {}),
-        ...(form.deliveryMode === 'REMOTE' ? { specialInstructions: `[عن بُعد] ${form.specialInstructions}`.trim() } : {}),
-        ...(form.mode === 'DIRECT' && form.targetCarrierId
-          ? { targetProviderId: form.targetCarrierId }
-          : {}),
-        ...(form.mode === 'DIRECT' && form.hasPreAgreedPrice && form.agreedPriceUpfront
-          ? { agreedPriceUpfront: form.agreedPriceUpfront }
+        pickupWindow: 'ALL_DAY',
+        ...(form.specialInstructions.trim()
+          ? { specialInstructions: form.specialInstructions.trim() }
           : {}),
       };
-      const res = await api.post('/orders', body);
-      const created = res.data?.data ?? res.data;
-      const orderId = created?.id;
-      if (!orderId) {
-        throw new Error('الـ API رجّع استجابة بدون orderId — تأكّد من حالة الـ Backend');
-      }
+
+      const createRes = await api.post('/orders', body);
+      const created = createRes.data?.data ?? createRes.data;
+      const orderId: string | undefined = created?.id;
+      if (!orderId) throw new Error('لم يُعَد orderId من الـ API');
+
       try {
         await api.post(`/orders/${orderId}/publish`, {});
       } catch (publishErr: unknown) {
         const msg = publishErr instanceof Error ? publishErr.message : String(publishErr);
-        setSubmitError(`الطلب أُنشئ (${created.orderNumber ?? orderId}) لكن فشل نشره: ${msg}`);
+        setError(`الطلب أُنشئ لكن فشل نشره: ${msg}`);
         setSubmitting(false);
         router.push(`/orders/${orderId}`);
         return;
       }
-      playSoundIfEnabled('orderSent');
+
       router.push(`/orders/${orderId}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setSubmitError(`فشل إنشاء الطلب: ${msg}`);
+      setError(msg);
       setSubmitting(false);
     }
   };
 
   return (
-    <>
-      <PageHeader title="طلب خدمة جديد" subtitle="املأ الخطوات التالية لنشر طلبك" />
+    <div className="max-w-2xl mx-auto space-y-6">
+      <PageHeader title="طلب خدمة جديد" subtitle="أكمل الخطوات لنشر طلبك" />
 
-      {/* Stepper */}
-      <Card>
-        <CardContent className="py-5 overflow-x-auto">
-          <ol className="flex items-center min-w-max">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon;
-              const isDone = s.id < step;
-              const isActive = s.id === step;
-              const clickable = isDone;
-              return (
-                <li key={s.id} className="flex items-center min-w-0">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={!clickable}
-                      onClick={() => clickable && setStep(s.id)}
-                      className={cn(
-                        'shrink-0 h-9 w-9 rounded-full grid place-items-center border transition-colors',
-                        isDone && 'bg-primary border-primary text-primary-foreground',
-                        isActive && 'bg-primary border-primary text-primary-foreground ring-4 ring-primary/15',
-                        !isDone && !isActive && 'bg-card border-border text-muted-foreground',
-                        clickable ? 'cursor-pointer' : 'cursor-default',
-                      )}
-                    >
-                      {isDone ? <Check className="h-4 w-4" strokeWidth={3} /> : <Icon className="h-4 w-4" />}
-                    </button>
-                    <span className={cn('text-sm font-medium whitespace-nowrap', isActive ? 'text-foreground' : 'text-muted-foreground')}>
-                      {s.label}
-                    </span>
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div className="flex-1 mx-3 h-px bg-border min-w-[20px]" />
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </CardContent>
-      </Card>
+      {/* Step indicator */}
+      <div className="flex items-center gap-2">
+        {STEPS.map((label, i) => (
+          <div key={i} className="flex items-center gap-2 flex-1 last:flex-none">
+            <div className={`h-7 w-7 rounded-full text-xs font-bold grid place-items-center shrink-0 ${
+              i < step ? 'bg-primary text-primary-foreground' :
+              i === step ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' :
+              'bg-muted text-muted-foreground'
+            }`}>
+              {i + 1}
+            </div>
+            <span className={`text-sm ${i === step ? 'font-medium' : 'text-muted-foreground'}`}>
+              {label}
+            </span>
+            {i < STEPS.length - 1 && <div className="flex-1 h-px bg-border" />}
+          </div>
+        ))}
+      </div>
 
-      {/* Step content */}
-      <Card>
-        <CardContent className="p-6">
-          {step === 1 && (
-            <Step title="تفاصيل الخدمة" description="ما الخدمة التي تحتاجها؟">
-              <div className="space-y-2">
-                <Label>نوع الخدمة</Label>
-                <Select value={form.cargoType} onValueChange={(v) => set('cargoType', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {SERVICE_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>وصف الطلب</Label>
-                <Textarea
-                  value={form.cargoDescription}
-                  onChange={(e) => set('cargoDescription', e.target.value)}
-                  placeholder="مثال: نحتاج تركيب منظومة كاميرات مراقبة في مستودع بالرياض"
-                />
-                <p className="text-xs text-muted-foreground">وصف مختصر يساعد مزود الخدمة على فهم المتطلبات</p>
-              </div>
-            </Step>
-          )}
-
-          {step === 2 && (
-            <Step title="الموقع والموعد" description="أين وكيف ستُقدَّم الخدمة؟">
-              {/* Delivery mode */}
-              <div className="space-y-3">
-                <Label>كيف سيتم تقديم الخدمة؟</Label>
-                <div className="grid grid-cols-1 gap-3">
-                  {DELIVERY_MODE_OPTIONS.map(({ value, icon: Icon, title, description }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => {
-                        set('deliveryMode', value);
-                        set('savedAddressId', null);
-                        set('originAddress', '');
-                        setShowManualAddress(false);
-                      }}
-                      className={cn(
-                        'text-start p-4 rounded-xl border-2 transition-all flex items-start gap-3',
-                        form.deliveryMode === value
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/40',
-                      )}
-                    >
-                      <div className={cn(
-                        'shrink-0 h-10 w-10 rounded-lg grid place-items-center',
-                        form.deliveryMode === value
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground',
-                      )}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm">{title}</span>
-                          {form.deliveryMode === value && (
-                            <Check className="h-4 w-4 text-primary" strokeWidth={3} />
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{description}</p>
-                      </div>
-                    </button>
+      {/* Step 0: Service details */}
+      {step === 0 && (
+        <Card>
+          <CardHeader><CardTitle>تفاصيل الخدمة</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>نوع الخدمة</Label>
+              <Select value={form.cargoType} onValueChange={(v) => { set('cargoType', v); set('requiredServiceType', v); }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {SERVICE_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
                   ))}
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* Location — only when ON_SITE */}
-              {form.deliveryMode === 'ON_SITE' && (
-                <div className="space-y-3">
-                  <Label>موقع التنفيذ</Label>
+            <div className="space-y-2">
+              <Label>وصف الطلب <span className="text-destructive">*</span></Label>
+              <Textarea
+                rows={4}
+                value={form.cargoDescription}
+                onChange={(e) => set('cargoDescription', e.target.value)}
+                placeholder="اشرح بالتفصيل ما تحتاجه — كلما كان الوصف واضحاً، زادت جودة العروض"
+              />
+              <p className="text-xs text-muted-foreground">{form.cargoDescription.length} حرف (4 على الأقل)</p>
+            </div>
 
-                  {/* Saved addresses */}
-                  {savedAddresses && savedAddresses.length > 0 && !showManualAddress && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">اختر من عناوينك المحفوظة:</p>
-                      <div className="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
-                        {savedAddresses.map((addr) => (
-                          <button
-                            key={addr.id}
-                            type="button"
-                            onClick={() => {
-                              set('savedAddressId', addr.id);
-                              set('originCity', addr.city);
-                              set('originAddress', '');
-                            }}
-                            className={cn(
-                              'text-start p-3 rounded-lg border-2 transition-all flex items-start gap-3',
-                              form.savedAddressId === addr.id
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary/40',
-                            )}
-                          >
-                            <MapPin className={cn(
-                              'h-4 w-4 mt-0.5 shrink-0',
-                              form.savedAddressId === addr.id ? 'text-primary' : 'text-muted-foreground',
-                            )} />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-sm font-medium">{addr.label}</span>
-                                {addr.isDefault && (
-                                  <Badge variant="secondary" className="text-[10px] h-4 px-1.5">افتراضي</Badge>
-                                )}
-                              </div>
-                              <p className="text-xs text-muted-foreground mt-0.5 truncate">{addr.address} — {addr.city}</p>
-                            </div>
-                            {form.savedAddressId === addr.id && (
-                              <Check className="h-4 w-4 text-primary shrink-0" strokeWidth={3} />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => { setShowManualAddress(true); set('savedAddressId', null); }}
-                        className="flex items-center gap-1.5 text-xs text-primary hover:underline"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        أدخل عنواناً مختلفاً
-                      </button>
-                    </div>
-                  )}
+            <div className="space-y-2">
+              <Label>تعليمات إضافية (اختياري)</Label>
+              <Input
+                value={form.specialInstructions}
+                onChange={(e) => set('specialInstructions', e.target.value)}
+                placeholder="مثال: يلزم الحضور الصباحي، التواصل قبل الزيارة"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-                  {/* Manual address input */}
-                  {(showManualAddress || !savedAddresses || savedAddresses.length === 0) && (
-                    <div className="space-y-3">
-                      {showManualAddress && (
-                        <button
-                          type="button"
-                          onClick={() => { setShowManualAddress(false); }}
-                          className="text-xs text-muted-foreground hover:text-foreground"
-                        >
-                          ← العودة للعناوين المحفوظة
-                        </button>
-                      )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <Label>المدينة</Label>
-                          <Select value={form.originCity} onValueChange={(v) => set('originCity', v)}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {activeCities.map((c) => (
-                                <SelectItem key={c.id} value={c.nameAr}>{c.nameAr}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>تفاصيل العنوان (اختياري)</Label>
-                          <Input
-                            value={form.originAddress}
-                            onChange={(e) => set('originAddress', e.target.value)}
-                            placeholder="مثال: حي الملقا، المستودع الرئيسي"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+      {/* Step 1: Location & date */}
+      {step === 1 && (
+        <Card>
+          <CardHeader><CardTitle>الموقع والموعد</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>المدينة</Label>
+              <Select value={form.city} onValueChange={(v) => set('city', v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CITY_OPTIONS.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* City only for REMOTE or AT_PROVIDER */}
-              {form.deliveryMode !== 'ON_SITE' && (
-                <div className="space-y-2">
-                  <Label>المدينة {form.deliveryMode === 'REMOTE' ? '(مدينة التعامل)' : '(مدينة مقر المزوّد)'}</Label>
-                  <Select value={form.originCity} onValueChange={(v) => set('originCity', v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {activeCities.map((c) => (
-                        <SelectItem key={c.id} value={c.nameAr}>{c.nameAr}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.deliveryMode === 'REMOTE' && (
-                    <p className="text-xs text-muted-foreground">
-                      💡 ستُقدَّم الخدمة عن بُعد — سيتواصل معك المزوّد بعد قبول العرض.
-                    </p>
-                  )}
-                </div>
-              )}
+            <div className="space-y-2">
+              <Label>تاريخ البدء المطلوب <span className="text-destructive">*</span></Label>
+              <Input
+                type="date"
+                min={new Date().toISOString().slice(0, 10)}
+                value={form.pickupDate}
+                onChange={(e) => set('pickupDate', e.target.value)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-              {/* Timing */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>تاريخ البدء المطلوب</Label>
-                  <Input
-                    type="date"
-                    min={new Date().toISOString().slice(0, 10)}
-                    value={form.pickupDate}
-                    onChange={(e) => set('pickupDate', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>نافذة التوقيت</Label>
-                  <Select value={form.pickupWindow} onValueChange={(v) => set('pickupWindow', v as PickupWindow)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MORNING">🌅 صباحاً (8:00 - 12:00)</SelectItem>
-                      <SelectItem value="EVENING">🌇 مساءً (12:00 - 18:00)</SelectItem>
-                      <SelectItem value="ALL_DAY">☀️ طوال اليوم (8:00 - 18:00)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                💡 مزود الخدمة سيؤكّد الوقت الدقيق داخل النافذة عند قبول العرض.
-              </p>
-            </Step>
-          )}
+      {/* Step 2: Review */}
+      {step === 2 && (
+        <Card>
+          <CardHeader><CardTitle>مراجعة الطلب</CardTitle></CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <Row label="نوع الخدمة" value={SERVICE_OPTIONS.find((o) => o.value === form.cargoType)?.label} />
+            <Row label="وصف الطلب" value={form.cargoDescription} />
+            {form.specialInstructions && <Row label="تعليمات" value={form.specialInstructions} />}
+            <hr />
+            <Row label="المدينة" value={form.city} />
+            <Row label="تاريخ البدء" value={form.pickupDate} />
+            <hr />
+            <Row label="طريقة الإرسال" value="نشر للجميع (OPEN)" />
+          </CardContent>
+        </Card>
+      )}
 
-          {step === 3 && (
-            <Step title="كيف تريد إرسال الطلب؟" description="انشره لكل مزودي الخدمة أو أرسله مباشرة لمزود محدد">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ChoiceCard
-                  selected={form.mode === 'OPEN'}
-                  onClick={() => { set('mode', 'OPEN'); set('targetCarrierId', null); }}
-                  icon={<Radio className="h-6 w-6" />}
-                  title="نشر للجميع"
-                  description="يظهر طلبك لكل مزودي الخدمة المؤهلين وتستقبل عروضاً متعددة للمقارنة."
-                  badge="موصى به"
-                />
-                <ChoiceCard
-                  selected={form.mode === 'DIRECT'}
-                  onClick={() => set('mode', 'DIRECT')}
-                  icon={<UserSearch className="h-6 w-6" />}
-                  title="إرسال مباشر"
-                  description="اختر مزوّداً معتمداً وأرسل له الطلب بشكل مباشر."
-                />
-              </div>
+      {/* Error display */}
+      {error && (
+        <div className="rounded-md bg-destructive/10 border border-destructive/30 p-4 text-sm text-destructive font-mono break-all">
+          {error}
+        </div>
+      )}
 
-              {form.mode === 'DIRECT' && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label>اختر مزوّداً معتمداً</Label>
-                    <span className="text-xs text-muted-foreground">
-                      {carriersLoading ? 'جارٍ التحميل...' : `${carriers.length} مزوّد متاح`}
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <Search className="absolute top-1/2 -translate-y-1/2 start-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="ابحث باسم الشركة أو المدينة..."
-                      value={carrierSearch}
-                      onChange={(e) => setCarrierSearch(e.target.value)}
-                      className="ps-9"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
-                    {carriersLoading && (
-                      <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">
-                        <Briefcase className="h-6 w-6 mx-auto mb-2 animate-pulse" />
-                        جارٍ تحميل المزوّدين...
-                      </div>
-                    )}
-                    {!carriersLoading && carriers.length === 0 && (
-                      <div className="col-span-2 text-center py-8 text-sm text-muted-foreground">
-                        لا يوجد مزوّدون مطابقون للبحث
-                      </div>
-                    )}
-                    {carriers.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => set('targetCarrierId', c.id)}
-                        className={cn(
-                          'text-start p-4 rounded-lg border-2 transition-all flex items-start gap-3',
-                          form.targetCarrierId === c.id
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-primary/40',
-                        )}
-                      >
-                        <Avatar className="h-10 w-10">
-                          <AvatarFallback>{c.nameAr.split(' ').slice(0, 2).map((w) => w[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold truncate">{c.nameAr}</div>
-                          {c.nameEn && <div className="text-xs text-muted-foreground truncate" dir="ltr">{c.nameEn}</div>}
-                          <div className="text-xs text-muted-foreground mt-1">{c.city}</div>
-                        </div>
-                        {form.targetCarrierId === c.id && (
-                          <Check className="h-5 w-5 text-primary shrink-0" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-
-                  {form.targetCarrierId && (
-                    <div className="rounded-lg border p-4 space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="text-sm font-medium">هل لديك سعر متفق مسبقاً مع هذا المزوّد؟</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">يتجاوز مرحلة التفاوض ويُسند الطلب مباشرة</div>
-                        </div>
-                        <div className="flex gap-2 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => { set('hasPreAgreedPrice', true); }}
-                            className={cn(
-                              'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
-                              form.hasPreAgreedPrice
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'border-border text-muted-foreground hover:bg-muted',
-                            )}
-                          >
-                            نعم
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { set('hasPreAgreedPrice', false); set('agreedPriceUpfront', null); }}
-                            className={cn(
-                              'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
-                              !form.hasPreAgreedPrice
-                                ? 'bg-primary text-primary-foreground border-primary'
-                                : 'border-border text-muted-foreground hover:bg-muted',
-                            )}
-                          >
-                            لا — تفاوض عادي
-                          </button>
-                        </div>
-                      </div>
-                      {form.hasPreAgreedPrice && (
-                        <div className="space-y-1.5">
-                          <Label htmlFor="agreed-price">السعر المتفق عليه (ريال)</Label>
-                          <Input
-                            id="agreed-price"
-                            type="number"
-                            dir="ltr"
-                            min={1}
-                            placeholder="0.00"
-                            className="text-end"
-                            value={form.agreedPriceUpfront ?? ''}
-                            onChange={(e) => set('agreedPriceUpfront', e.target.value ? Number(e.target.value) : null)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </Step>
-          )}
-
-          {step === 4 && (
-            <Step title="المتطلبات" description="حدّد نوع الخدمة المطلوبة والخصائص الإضافية">
-              <div className="space-y-2">
-                <Label>نوع الخدمة المطلوبة</Label>
-                <Select value={form.truckType} onValueChange={(v) => set('truckType', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {serviceTypesList.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  مزودو الخدمة سيقدّمون عروضهم بالأسعار التنافسية — لا حاجة لتحديد ميزانية مسبقة.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <ToggleCard
-                  icon={<ShieldCheck className="h-5 w-5" />}
-                  title="تأمين شامل"
-                  description="ضمان تنفيذ الخدمة وتعويض عند الإخلال"
-                  checked={form.requiresInsurance}
-                  onChange={(v) => set('requiresInsurance', v)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>تعليمات خاصة (اختياري)</Label>
-                <Textarea value={form.specialInstructions} onChange={(e) => set('specialInstructions', e.target.value)}
-                  placeholder="مثال: يلزم حضور مهندس موقع، الدخول من الباب الرئيسي فقط" />
-              </div>
-            </Step>
-          )}
-
-          {step === 5 && (
-            <Step title="مراجعة وإرسال" description="تأكد من المعلومات قبل النشر">
-              <Section title="الخدمة">
-                <Row label="نوع الخدمة" value={SERVICE_CATEGORIES.find((c) => c.value === form.cargoType)?.label} />
-                <Row label="وصف الطلب" value={form.cargoDescription} />
-              </Section>
-              <Separator />
-              <Section title="الموقع والموعد">
-                <Row label="طريقة التقديم" value={DELIVERY_MODE_OPTIONS.find((d) => d.value === form.deliveryMode)?.title} />
-                <Row label="الموقع" value={locationSummary} />
-                <Row label="تاريخ البدء" value={form.pickupDate || '—'} />
-              </Section>
-              <Separator />
-              <Section title="طريقة الإرسال">
-                <Row label="النوع" value={form.mode === 'OPEN' ? 'نشر للجميع' : 'إرسال مباشر'} />
-                {form.mode === 'DIRECT' && form.targetCarrierId && (
-                  <Row label="المزوّد" value={carriersRaw?.find((c) => c.id === form.targetCarrierId)?.nameAr ?? '—'} />
-                )}
-              </Section>
-              <Separator />
-              <Section title="المتطلبات">
-                <Row label="نوع الخدمة المطلوبة" value={serviceTypesList.find((t) => t.value === form.truckType)?.label} />
-                <Row label="تأمين" value={form.requiresInsurance ? 'نعم' : 'لا'} />
-                {form.specialInstructions && <Row label="تعليمات" value={form.specialInstructions} />}
-              </Section>
-            </Step>
-          )}
-        </CardContent>
-      </Card>
-
+      {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1}>
-          <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+        <Button
+          variant="outline"
+          disabled={step === 0}
+          onClick={() => { setError(null); setStep((s) => s - 1); }}
+        >
+          <ChevronRight className="h-4 w-4" />
           السابق
         </Button>
-        {step < STEPS.length ? (
-          <Button onClick={() => setStep((s) => s + 1)} disabled={!canNext}>
+
+        {step < STEPS.length - 1 ? (
+          <Button disabled={!canProceed} onClick={() => setStep((s) => s + 1)}>
             التالي
-            <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
         ) : (
-          <Button onClick={submit} disabled={!canNext || submitting}>
+          <Button disabled={submitting} onClick={submit}>
             <Send className="h-4 w-4" />
             {submitting ? 'جارٍ الإرسال...' : 'إرسال الطلب'}
           </Button>
         )}
       </div>
-      {submitError && (
-        <div className="mt-3 rounded-md bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive">
-          {submitError}
-        </div>
-      )}
-    </>
-  );
-}
-
-function Step({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-lg font-bold">{title}</h2>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
-      </div>
-      <div className="space-y-4">{children}</div>
-    </div>
-  );
-}
-
-function ChoiceCard({
-  icon, title, description, selected, badge, onClick,
-}: { icon: React.ReactNode; title: string; description: string; selected: boolean; badge?: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'text-start p-5 rounded-xl border-2 transition-all flex items-start gap-4',
-        selected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40',
-      )}
-    >
-      <div className={cn(
-        'shrink-0 h-12 w-12 rounded-xl grid place-items-center',
-        selected ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary',
-      )}>
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="font-semibold">{title}</h3>
-          {badge && <Badge variant="warning" className="text-[10px]">{badge}</Badge>}
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{description}</p>
-      </div>
-      <span className={cn(
-        'h-6 w-6 rounded-full border-2 grid place-items-center shrink-0',
-        selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card',
-      )}>
-        {selected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
-      </span>
-    </button>
-  );
-}
-
-function ToggleCard({
-  icon, title, description, checked, onChange,
-}: { icon: React.ReactNode; title: string; description: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={cn(
-        'text-start p-4 rounded-lg border-2 transition-all flex items-start gap-3',
-        checked ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40',
-      )}
-    >
-      <div className={cn(
-        'shrink-0 h-10 w-10 rounded-md grid place-items-center',
-        checked ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
-      )}>
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm">{title}</h4>
-        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-      </div>
-    </button>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">{title}</h3>
-      <dl className="space-y-2">{children}</dl>
     </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-1">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium text-end max-w-[60%]">{value ?? '—'}</dd>
+    <div className="flex justify-between gap-4">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-end">{value ?? '—'}</span>
     </div>
   );
 }
