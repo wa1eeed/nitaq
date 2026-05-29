@@ -1,150 +1,141 @@
 # Pending Work — حالة الربط الحالية (Nitaq Platform)
 
-> آخر تحديث: 2026-05-26 (بعد v0.9.17 — B2B UI Cleanup مُطبَّق)
+> آخر تحديث: 2026-05-29 (بعد v0.9.18 — Reviews, Finance API, Audit Logs, Password Reset)
 >
-> الهدف من هذا الملف: نقطة استئناف واضحة. يلخّص ما تبقّى من الربط/الإصلاحات قبل
-> أن نعتبر النظام جاهزاً لـ release v1.0.
+> الهدف من هذا الملف: نقطة استئناف واضحة. يلخّص ما تبقّى قبل أن نعتبر النظام
+> جاهزاً لـ release v1.0.
 
 ---
 
-## ✅ مربوط بالـ API (لا تبدأ من الصفر — لكن أعد الفتح إذا وجدت بق)
-
-> ⚠️ "مربوط" لا تعني "خالٍ من البق". هذه الأشياء استُدعي فيها endpoint حقيقي
-> مع toast/spinner/mutate. لكن قد تظهر مشاكل في:
-> - اختلاف أسماء حقول بين mock و API (مثل ما حصل مع Service و Payment)
-> - Rules-of-Hooks بعد إضافة SWR
-> - حالات حافة (empty/null/long lists) لم تُختَبر بعد
->
-> إذا اكتشفت أي خلل في الميزات أدناه، أعد فتحها فوراً — لا تتردّد.
+## ✅ مربوط بالـ API (مكتمل)
 
 ربط end-to-end لـ:
 - Auth (login/register/refresh/logout + admin login)
-- Auto Token Refresh ✅ v0.9.9 — client + provider يجدّدان الـ token على 401 قبل redirect
+- Auto Token Refresh — client + provider يجدّدان الـ token على 401
+- Forgot Password / Reset Password — OTP-based (v0.9.18)
 - Companies (GET/PUT، members CRUD، KYC submit + approve/reject)
-- Orders (CRUD كامل + lifecycle publish/cancel/confirm/deliver/complete + tracking)
-- Bids (POST/PUT/accept/reject + retry بعد REJECTED + proposedDeliveryDate)
-- Services (list + create + detail + photo upload بعد v0.9.3)
-- Employees (list + detail + invite بعد v0.9.3)
+- Orders (CRUD كامل + lifecycle كامل)
+- Bids (POST/PUT/accept/reject + negotiation)
+- Services (list + create + detail + photo upload)
+- Employees (list + detail + invite + assignment)
 - Payments (list + release + admin force-release)
 - Invoices (list + send)
 - Notifications (list + mark-read + mark-all-read)
-- Disputes (POST جديد للعميل/مقدّم الخدمة + admin update)
+- Disputes (POST جديد + admin update)
 - Support Tickets (POST/GET + admin update)
-- Admin dashboard/companies/orders/disputes/transactions/settings
-- Locale isolation (cookies منفصلة لكل بورتال)
-- Toast infrastructure (sonner + lib/notify.ts على كل بورتال)
-- normalizeOrder + normalizeBid + normalizeService + normalizePayment adapters
-- Provider opportunities filtering (يستثني المُسندة لنفس مقدّم الخدمة)
-- Provider order detail متطابق بصرياً مع العميل (RequestStatusCard inline timeline)
-- Dynamic Logo ✅ v0.9.9 — admin يحفظ في DB، client/provider يجلبان من `GET /settings/platform`
-- Direct Assignment بسعر ثابت ✅ v0.9.9 — `agreedPriceUpfront` يتجاوز التفاوض ويُسند مباشرة
-- Saved Addresses ✅ migration طُبّقت في v0.9.3 (20260521043732_add_saved_addresses_and_national_id)
-- قائمة مقدّمي الخدمات في New Order ✅ v0.9.10 — `GET /companies?type=PROVIDER&status=ACTIVE` بدل COMPANIES mock
-- Provider order controls ✅ v0.9.11 — أزرار ASSIGNED/CONFIRMED/IN_TRANSIT مع dialog صحيح لكل مرحلة
-- Employee Assignment ✅ v0.9.11 — `POST /orders/:id/assign-employee` + `GET /employees/available` + auto ON_ASSIGNMENT/AVAILABLE
+- Admin dashboard / companies / orders / disputes / transactions / settings
+- Reviews — POST/GET بعد COMPLETED (v0.9.18)
+- Finance pages (client + provider) — مربوطة بـ `GET /companies/:id/transactions` (v0.9.18)
+- Documents page (provider) — مربوطة بـ `GET/POST /companies/:id/kyc` (v0.9.18)
+- Audit Logs page (admin) — مربوطة بـ `GET /admin/audit-logs` (v0.9.18)
+- Saved Addresses — migration مُطبَّقة
+- ON_SITE address picker في new order wizard (v0.9.17+)
+- Provider order controls (ASSIGNED → CONFIRMED → IN_TRANSIT → DELIVERED)
+- Employee Assignment (`POST /orders/:id/assign-employee`)
+- Direct Assignment بسعر ثابت (`agreedPriceUpfront`)
+- Dynamic Logo (`GET /settings/platform`)
+- Admin reports — 6 analytics endpoints + PDF export (v0.9.14)
 
 ---
 
-## 🟡 ناقص أو يحتاج عمل
+## 🟡 يحتاج عمل (مرتّب بالأولوية)
 
-لا يوجد بنود مفتوحة بعد v0.9.9 — جميع الوظائف الجوهرية مربوطة.
+### 1. Provider Reports Page — ربط بـ Analytics API
+- **الصفحة:** `apps/web/provider/src/app/(app)/reports/page.tsx`
+- **الحالة:** رسوم بيانية static (mock)
+- **المطلوب:** `GET /companies/:id/analytics` أو إعادة استخدام analytics endpoints الموجودة في admin
+- **التعقيد:** منخفض — نفس نمط admin reports
 
----
+### 2. File Upload حقيقي للمستندات
+- **الحالة:** dialog رفع المستندات (provider) يقبل URL نصي فقط
+- **المطلوب:** رفع ملف حقيقي → `POST /uploads/presigned` → S3/R2 → حفظ URL
+- **ملاحظة:** `uploads module` موجود في الـ API لكن الـ UI لم يُوصَل به
+- **التعقيد:** متوسط
 
-## 🔴 صفحات بواجهة ثابتة (لا API — مؤجَّلة بقرار)
+### 3. Admin Company Detail — Company Wallet/Transactions
+- **الصفحة:** `apps/web/admin/src/app/(app)/companies/[id]/page.tsx`
+- **المطلوب:** عرض `walletBalance` + `GET /companies/:id/transactions` داخل تفاصيل الشركة
+- **التعقيد:** منخفض — endpoint موجود (v0.9.18)
 
-هذه الصفحات موجودة في الـ sidebar لكن تعرض بيانات static فقط:
-
-| الصفحة | البورتال | الحالة |
-|---|---|---|
-| `/reports` | admin | ✅ مربوط بـ 6 analytics endpoints (v0.9.14) — Bloomberg Terminal dark theme + PDF export |
-| `/legal` | admin | نصوص قانونية ثابتة — لا يحتاج API |
-| `/promotions` | admin | Static UI — ميزة مستقبلية |
-| `/audit` | admin | Stub — يحتاج `GET /admin/audit-logs` |
-| `/reports` | provider | Static charts — لا endpoint بعد |
-| `/finance` | provider | Static UI — يحتاج ربط Wallet API |
-| `/documents` | provider | Static UI — يحتاج ربط KYC/uploads |
-| `/tracking` | client | Static map — يحتاج GPS live feed |
-| `/finance` | client | Static charts — يحتاج ربط Wallet API |
-
----
-
-## 🔴 External Integrations (مؤجَّلة post-deploy عمداً)
-
-- **SMS Provider**: حالياً `SMS_PROVIDER=console` يطبع الـ OTP في terminal. لا تشغّل عليها الـ flows حتى نوصل provider حقيقي (Unifonic / Twilio).
-- **Email Provider**: Resend غير مفعّل. التذاكر/الفواتير/إعادة كلمة المرور لا ترسل أي إيميل.
-- **Payment Gateway**: `PAYMENT_PROVIDER=mock`. الـ escrow يعمل DB-only؛ لا يوجد تحويل بنكي حقيقي.
+### 4. Client Tracking Page — تحسين بعد إزالة الخريطة
+- **الصفحة:** `apps/web/client/src/app/(app)/tracking/page.tsx`
+- **الحالة:** الخريطة محذوفة، يعرض timeline + بيانات الطلب
+- **المطلوب:** ربط `GET /tracking/:orderId/events` للـ live events (إن توفّر websocket)
+- **التعقيد:** عالٍ — يتطلب WebSocket أو polling
 
 ---
 
-## 🟢 Stability constraints (لا تخالفها)
+## 🔴 مؤجَّل بقرار (ما بعد v1.0)
 
-- **PWA**: مُعطَّل. كل مرّة فُعِّل وقع المستخدمون في offline trap. مؤجَّل لما بعد v1.0 بـ Workbox/serwist.
-- **shared-utils CJS dist**: Node 25 لا يقدر يحمّل `.ts` من main. `package.json.main = dist/index.js`. بعد كل تعديل لـ shared-utils run `pnpm exec tsc` من داخل `packages/shared-utils`.
-- **date-fns @2.30.0**: v3+ ESM يكسر CJS bundling. لا ترفّع.
-- **Rules of Hooks**: كل الـ hooks قبل أي `if/return`. خاصةً مع SWR الذي يقفز بين undefined ↔ resolved.
-- **Per-portal cookies**: localhost cookies تتقاسم عبر الـ ports. كل مفتاح state-حسب-البورتال لازم suffix (`-admin/-client/-provider`).
-- **API adapters**: لا تشتغل مباشرة على `data` من SWR. مرّرها على `normalizeOrder/normalizeBid/normalizeService/normalizePayment` أولاً.
-
----
-
-## 🧪 Smoke test الحالي
-
-19 خطوة موثّقة في `GETTING_STARTED.md` — تغطّي:
-1. Client login → wizard → publish order
-2. Provider login → opportunities → submit bid مع proposedDeliveryDate
-3. Client: تفاصيل dialog → accept
-4. Provider: confirm pickup → confirm delivery
-5. Admin: status + escrow auto-refresh كل 15 ثانية
-6. Client: تأكيد الاستلام → escrow released
-7. Disputes / Support tickets / KYC / Payments release / Service add / Location update / Notifications
+| الوظيفة | السبب |
+|---|---|
+| **SMS Provider حقيقي** | حالياً `SMS_PROVIDER=console` — OTP يطبع في terminal. يحتاج Unifonic أو Twilio |
+| **Email Provider** | Resend غير مفعّل — لا إيميلات ترسل (تذاكر/فواتير/OTP) |
+| **Payment Gateway** | `PAYMENT_PROVIDER=mock` — escrow يعمل DB-only، لا تحويل بنكي حقيقي |
+| **WebSocket / Live Updates** | تحديثات الطلبات في الوقت الفعلي — يحتاج `@nestjs/websockets` |
+| **PWA** | مُعطَّل — كل مرّة وقع المستخدمون في offline trap |
+| **Admin Language/Timezone** | Settings UI موجود لكن يحتاج backend endpoint + i18n framework |
+| **Promotions** | Admin promotions page — static UI، ميزة مستقبلية |
+| **Test Suite** | لا unit/integration tests على الـ backend — كل modules بدون tests |
+| **CI/CD** | لا GitHub Actions pipeline بعد |
 
 ---
 
-## 📦 Backend modules state
+## 🟢 Stability Constraints (لا تخالفها)
+
+- **PWA:** مُعطَّل. لا تُفعِّله قبل Workbox/serwist.
+- **shared-utils CJS dist:** بعد كل تعديل لـ shared-utils → `pnpm exec tsc` من `packages/shared-utils`.
+- **date-fns @2.30.0:** لا ترفّع إلى v3+ (يكسر CJS bundling).
+- **Rules of Hooks:** جميع hooks قبل أي `if/return` — خاصةً مع SWR.
+- **Per-portal cookies:** لكل مفتاح state → suffix (`-admin/-client/-provider`).
+- **API adapters:** مرّر data عبر `normalizeOrder/normalizeBid/normalizeService/normalizePayment` قبل الاستخدام.
+- **Finance normalizer:** `type→kind`, `balance→balanceAfter`, `createdAt→at`, `companyId→walletId`.
+
+---
+
+## 📦 Backend Modules State
 
 | Module | Controller | Service | Tests | Notes |
 |---|---|---|---|---|
-| auth | ✅ | ✅ | ✗ | Admin login منفصل عند `/admin/auth/login` |
-| companies | ✅ | ✅ | ✗ | KYC + members CRUD |
-| orders | ✅ | ✅ | ✗ | List include `bids` selected fields (v0.9.0) + agreedPriceUpfront (v0.9.9) + assignDriver (v0.9.11) |
-| bids | ✅ | ✅ | ✗ | `proposedDeliveryDate` (v0.9.0) |
-| services | ✅ | ✅ | ✗ | ServiceType enum extended (v0.9.2) |
-| payments | ✅ | ✅ | ✗ | List includes `order.client/carrier.nameAr` (v0.9.1) |
+| auth | ✅ | ✅ | ✗ | forgot/reset password (v0.9.18) |
+| companies | ✅ | ✅ | ✗ | KYC + members + transactions (v0.9.18) |
+| orders | ✅ | ✅ | ✗ | lifecycle كامل + assignEmployee |
+| bids | ✅ | ✅ | ✗ | proposedDeliveryDate + negotiation |
+| reviews | ✅ | ✅ | ✗ | جديد v0.9.18 — POST/GET بعد COMPLETED |
+| services | ✅ | ✅ | ✗ | ServiceType enum B2B |
+| payments | ✅ | ✅ | ✗ | list + release + force-release |
 | invoices | ✅ | ✅ | ✗ | |
 | notifications | ✅ | ✅ | ✗ | |
 | tracking | ✅ | ✅ | ✗ | events lifecycle |
-| uploads | ✅ | ✅ | ✗ | presigned URLs (UI wiring pending) |
-| admin | ✅ | ✅ | ✗ | dashboard/companies/orders/disputes/settings + 6 analytics endpoints (v0.9.14) |
-| **disputes** | ✅ | ✅ | ✗ | جديد في v0.9.0 — POST/GET للأطراف |
-| **support** | ✅ | ✅ | ✗ | جديد في v0.9.0 — Tickets CRUD |
-| addresses | ✅ | ✅ | ✗ | migration مُطبَّقة (20260521043732 + 20260526000000) |
-| settings/catalogs | ✅ | — | ✗ | `GET /settings/catalogs` عام (بدون auth) |
-| settings/platform | ✅ | — | ✗ | `GET /settings/platform` عام — logo + name (v0.9.9) |
+| uploads | ✅ | ✅ | ✗ | presigned URLs — UI wiring partial |
+| admin | ✅ | ✅ | ✗ | audit-logs (v0.9.18) + 6 analytics endpoints |
+| disputes | ✅ | ✅ | ✗ | |
+| support | ✅ | ✅ | ✗ | |
+| addresses | ✅ | ✅ | ✗ | migrations مُطبَّقة |
+| settings | ✅ | — | ✗ | catalogs + platform logo/name |
+
+---
+
+## 🧪 Smoke Test (19 خطوة)
+
+موثَّقة في `GETTING_STARTED.md` — تغطّي:
+1. Client login → wizard → publish order (OPEN + DIRECT)
+2. Provider login → opportunities → submit bid
+3. Client: تفاصيل dialog → accept bid
+4. Provider: ASSIGNED → CONFIRMED → IN_TRANSIT → DELIVERED
+5. Client: تأكيد الاستلام → escrow released
+6. Client: تقييم المزوّد بعد COMPLETED ⭐ (v0.9.18)
+7. Admin: status + escrow auto-refresh + audit logs
+8. Disputes / Support tickets / KYC / Payments release / Services / Notifications
+9. Forgot password (جميع البورتالات) → OTP → new password (v0.9.18)
 
 ---
 
 ## 📝 ملاحظات للجلسة القادمة
 
 - ابدأ بقراءة هذا الملف + `CHANGELOG.md` (v0.9.x entries).
-- المستخدم يفضّل: tasks منظّمة، type-check بعد كل تعديل جوهري، toasts بدل alerts، mutate بعد كل mutation.
-- **v0.9.17 مُطبَّق**: الخريطة محذوفة من order detail + new order wizard، بيانات الدخول صحيحة (provider@nitaq.sa / Carrier@1234)، تبويب البراندات محذوف من admin settings.
-- بورتال Provider يعمل الآن على `apps/web/provider` (بعد إعادة التسمية من carrier).
-- نوع الخدمة الافتراضي في New Order: `CONSULTING` (بدلاً من `LARGE_FLATBED`). يمكن تغييره إن احتجت.
-- لا تكسر الـ stability constraints أعلاه.
+- المستخدم يفضّل: tasks منظّمة، type-check بعد كل تعديل، toasts بدل alerts، mutate بعد كل mutation.
+- **المهمة الأقرب لـ v1.0:** ربط SMS حقيقي (Unifonic) حتى تعمل forgot-password فعلياً.
+- **المهمة الثانية:** file upload حقيقي للمستندات.
+- نوع الخدمة الافتراضي في New Order: `CONSULTING`. يمكن تغييره.
 - في حال شك حول backend endpoint: `grep -E "@(Get|Post|Put|Delete|Patch)\(" apps/api/src/modules/*/`.
-
-### آخر ما أُنجز (v0.9.13 → v0.9.16 كامل):
-
-- **v0.9.13**: Premium UI/UX — framer-motion على client/provider portals
-- **v0.9.14**: Executive KPI Dashboard — 6 analytics endpoints في admin + Bloomberg Terminal + PDF export
-- **v0.9.15**: Landing page إعادة كتابة كاملة (animated hero, stats counters, testimonials slider)
-- **v0.9.16**: تحويل هوية المنصة من لوجستيات إلى خدمات — 10 مراحل كاملة:
-  - مراحل ١-٢: حذف driver app، تحديث التوثيق
-  - مرحلة ٣: 72 ملف ترجمة × 4 بورتالات × 2 لغات
-  - مرحلة ٤: shared-types + shared-utils (ServiceType، EmployeeStatus، normalizeService، serviceTypeLabels، workflow-engine PROVIDER actor)
-  - مراحل ٥-٨: carrier/admin/client/landing portals — provider terminology في الكود
-  - مرحلة ٩: API comments/error messages
-  - **مرحلة ١٠ ✅**: Prisma schema migration — `ALTER TYPE/TABLE RENAME` طُبّقت على `naqla_dev`، Prisma client أُعيد توليده، 15 ملف API مُحدَّثة، صفر أخطاء TypeScript
-
-### ✅ لا يوجد عمل معلّق — المشروع جاهز لـ v1.0 release

@@ -6,6 +6,37 @@
 
 ## [Unreleased] — قيد التطوير
 
+### ✅ v0.9.18 — Platform Completion: Reviews, Finance API, Audit Logs, Password Reset (2026-05-29)
+
+**سياق:** استكمال ربط الوظائف الجوهرية التي كانت تعمل بـ mock data فقط. الهدف: كل صفحة رئيسية تستهلك API حقيقي مع fallback تلقائي.
+
+**Backend — وحدات جديدة:**
+- `ReviewsModule` جديد: `POST /orders/:id/review` (تحقق من COMPLETED + منع الازدواجية)، `GET /orders/:id/reviews`، `GET /companies/:id/reviews` (مُقسَّم صفحات + متوسط التقييم)
+- `GET /admin/audit-logs` — قائمة مُقسَّمة مع فلاتر `action`, `userId`, `resourceType`
+- `GET /companies/:id/transactions` — كشف حساب الشركة مع `walletBalance`
+- `POST /auth/forgot-password` — يُرسل OTP عبر OtpService
+- `POST /auth/reset-password` — يتحقق من OTP، يُحدّث كلمة المرور، يُلغي جميع refresh tokens
+
+**Frontend — بورتال العميل:**
+- صفحة تفاصيل الطلب: بطاقة "قيّم المزوّد" (نجوم 1-5 + تعليق اختياري) تظهر بعد COMPLETED — تُرسل إلى `POST /orders/:id/review`
+- صفحة الشؤون المالية: ربط بـ `GET /companies/:id/transactions` مع normalizer (`type→kind`, `balance→balanceAfter`, `createdAt→at`)
+- صفحة تسجيل الدخول: إضافة رابط "نسيت كلمة المرور؟"
+- صفحة جديدة `/forgot-password`: خطوتان (رقم الجوال → OTP + كلمة مرور جديدة)
+
+**Frontend — بورتال المزوّد:**
+- صفحة تفاصيل الطلب: بطاقة تقييم العميل بعد COMPLETED (نفس منطق العميل)
+- صفحة الشؤون المالية: ربط بـ `GET /companies/:id/transactions` مع mock fallback
+- صفحة المستندات: إعادة كتابة كاملة — تجلب `GET /companies/:id/kyc`، dialog رفع مستند جديد (نوع + URL → `POST /companies/:id/kyc`)
+- تسجيل الدخول: رابط "نسيت كلمة المرور؟" + صفحة `/forgot-password`
+
+**Frontend — بورتال الإدارة:**
+- صفحة سجل التدقيق: ربط بـ `GET /admin/audit-logs` مع normalizer (`resourceType→category`, `user.role→actor`) + mock fallback
+- تسجيل الدخول: رابط "نسيت كلمة المرور؟" + صفحة `/forgot-password`
+
+**صفر أخطاء TypeScript** عبر جميع البورتالات الثلاثة بعد التعديلات.
+
+---
+
 ### ✅ v0.9.17 — B2B UI Cleanup: Service Catalog + Portal Redesign (2026-05-26)
 
 **سياق:** استكمال التحويل البصري الكامل من منصة لوجستيات إلى منصة خدمات B2B. جميع التغييرات UI/UX فقط — لا تعديل على business logic أو API.
