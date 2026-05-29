@@ -65,4 +65,18 @@ export class AuthController {
   verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.auth.verifyOtp(dto.phone, dto.code);
   }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60 * 60 * 1000 } })
+  @Post('forgot-password')
+  forgotPassword(@Body() dto: { phone: string }) {
+    return this.auth.forgotPassword(dto.phone);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60 * 60 * 1000 } })
+  @Post('reset-password')
+  resetPassword(@Body() dto: { phone: string; otp: string; newPassword: string }) {
+    return this.auth.resetPassword(dto.phone, dto.otp, dto.newPassword);
+  }
 }

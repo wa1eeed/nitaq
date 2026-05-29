@@ -101,6 +101,24 @@ export class CompaniesService {
     };
   }
 
+  async getTransactions(companyId: string, query: PaginationDto) {
+    const skip = ((query.page ?? 1) - 1) * (query.limit ?? 20);
+    const [data, total, company] = await this.prisma.$transaction([
+      this.prisma.transaction.findMany({
+        where: { companyId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: query.limit ?? 20,
+      }),
+      this.prisma.transaction.count({ where: { companyId } }),
+      this.prisma.company.findUnique({
+        where: { id: companyId },
+        select: { walletBalance: true },
+      }),
+    ]);
+    return { data, total, walletBalance: company?.walletBalance ?? 0, page: query.page ?? 1, limit: query.limit ?? 20 };
+  }
+
   private assertAccess(companyId: string, actor: { companyId: string | null; role: string }) {
     if (actor.role === 'SUPER_ADMIN' || actor.role === 'ADMIN') return;
     if (actor.companyId !== companyId) {

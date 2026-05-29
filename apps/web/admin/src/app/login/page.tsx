@@ -1,6 +1,7 @@
 'use client';
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { AlertCircle, Eye, EyeOff, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,7 +78,7 @@ export default function AdminLoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">كلمة المرور</Label>
-                  <a href="#" className="text-xs text-primary hover:underline">نسيت كلمة المرور؟</a>
+                  <Link href="/forgot-password" className="text-xs text-primary hover:underline">نسيت كلمة المرور؟</Link>
                 </div>
                 <div className="relative">
                   <Input

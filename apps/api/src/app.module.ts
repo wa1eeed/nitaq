@@ -28,6 +28,7 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     TrackingModule,
     UploadsModule,
     RealtimeModule,
+    ReviewsModule,
   ],
   controllers: [HealthController],
   providers: [

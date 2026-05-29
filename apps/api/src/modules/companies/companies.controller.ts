@@ -115,4 +115,13 @@ export class CompaniesController {
   ) {
     return this.team.remove(id, userId, actor, reqMeta(req));
   }
+
+  @Get(':id/transactions')
+  getTransactions(
+    @Param('id') id: string,
+    @Query() query: PaginationDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.companies.getTransactions(id, query);
+  }
 }

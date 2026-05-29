@@ -4,6 +4,7 @@ import {
   Building2, Cog, CreditCard, FileText, History, Key, Package, Search,
   Settings, Shield, ShieldCheck, User, Wallet,
 } from 'lucide-react';
+import useSWR from 'swr';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import {
   AUDIT_EVENTS, formatDateTime, formatRelative,
   type AuditCategory, type AuditActor,
 } from '@naqla/shared-utils';
+import { fetcher } from '@/lib/api';
 
 const CATEGORY_META: Record<AuditCategory, { label: string; icon: any; tone: string }> = {
   AUTH:     { label: 'حساب',      icon: Key,        tone: 'bg-muted text-muted-foreground' },
@@ -40,8 +42,27 @@ export default function AuditLogPage() {
   const [category, setCategory] = useState<string>('ALL');
   const [actor, setActor] = useState<string>('ALL');
 
+  const { data: apiData } = useSWR<{ data: any[] }>('/admin/audit-logs?limit=50', fetcher);
+
+  // Normalize API audit logs to the mock shape the UI renders
+  const ROLE_TO_ACTOR: Record<string, string> = {
+    ADMIN: 'ADMIN', SUPER_ADMIN: 'ADMIN', CLIENT_ADMIN: 'CLIENT',
+    PROVIDER_ADMIN: 'CARRIER', EMPLOYEE: 'CLIENT',
+  };
+  const apiEvents = (apiData?.data ?? []).map((e: any) => ({
+    id: e.id,
+    at: e.createdAt,
+    category: (e.resourceType as any) ?? 'AUTH',
+    action: e.action,
+    actor: (ROLE_TO_ACTOR[e.user?.role ?? ''] ?? 'SYSTEM') as any,
+    actorName: e.user?.email ?? e.user?.phone ?? 'النظام',
+    target: e.resourceId ?? undefined,
+    detail: e.ipAddress ? `IP: ${e.ipAddress}` : undefined,
+  }));
+  const events = apiEvents.length > 0 ? apiEvents : AUDIT_EVENTS;
+
   const filtered = useMemo(() => {
-    return AUDIT_EVENTS
+    return events
       .filter((e) => {
         if (category !== 'ALL' && e.category !== category) return false;
         if (actor !== 'ALL' && e.actor !== actor) return false;
@@ -52,7 +73,7 @@ export default function AuditLogPage() {
         return true;
       })
       .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
-  }, [q, category, actor]);
+  }, [q, category, actor, events]);
 
   return (
     <>
@@ -98,7 +119,9 @@ export default function AuditLogPage() {
               <div className="absolute start-[19px] top-2 bottom-2 w-px bg-border" aria-hidden />
               <ul className="space-y-3">
                 {filtered.map((e) => {
-                  const meta = CATEGORY_META[e.category];
+                  const cat = e.category as AuditCategory;
+                  const act = e.actor as AuditActor;
+                  const meta = CATEGORY_META[cat] ?? CATEGORY_META.AUTH;
                   const Icon = meta.icon;
                   return (
                     <li key={e.id} className="relative flex items-start gap-3">
@@ -116,9 +139,9 @@ export default function AuditLogPage() {
                             </div>
                             {e.detail && <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{e.detail}</p>}
                             <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                              <Badge variant={ACTOR_BADGE[e.actor]} className="h-5">
-                                {e.actor === 'SYSTEM' ? <Cog className="h-3 w-3 me-1" /> : <User className="h-3 w-3 me-1" />}
-                                {ACTOR_LABEL[e.actor]}
+                              <Badge variant={ACTOR_BADGE[act]} className="h-5">
+                                {act === 'SYSTEM' ? <Cog className="h-3 w-3 me-1" /> : <User className="h-3 w-3 me-1" />}
+                                {ACTOR_LABEL[act]}
                               </Badge>
                               <span>{e.actorName}</span>
                               <span>·</span>

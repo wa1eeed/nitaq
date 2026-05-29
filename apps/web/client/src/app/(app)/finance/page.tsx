@@ -1,8 +1,11 @@
 'use client';
 import { useState, useMemo } from 'react';
+import useSWR from 'swr';
 import {
   ArrowDownLeft, ArrowUpRight, Download, FileSpreadsheet, FileText, ShieldCheck, Wallet,
 } from 'lucide-react';
+import { fetcher } from '@/lib/api';
+import { useAuthStore } from '@/lib/auth-store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,9 +32,22 @@ const TX_LABEL: Record<TxKind, string> = {
 const TX_IN: TxKind[] = ['CREDIT', 'ESCROW_RELEASE', 'REFUND'];
 
 export default function ClientFinancePage() {
-  const wallet = walletForCompany(CURRENT_CLIENT_ID);
-  const txs = transactionsForCompany(CURRENT_CLIENT_ID);
-  const invoices = invoicesForClient(CURRENT_CLIENT_ID);
+  const companyId = useAuthStore((s) => s.user?.companyId) ?? CURRENT_CLIENT_ID;
+  const { data: txData } = useSWR<{ data: any[]; walletBalance?: number }>(`/companies/${companyId}/transactions?limit=100`, fetcher);
+  const wallet = walletForCompany(companyId);
+  const invoices = invoicesForClient(companyId);
+  const apiTxs: WalletTransaction[] = (txData?.data ?? []).map((t: any) => ({
+    id: t.id,
+    walletId: t.companyId ?? '',
+    at: t.createdAt,
+    kind: (t.type as TxKind) ?? ('DEBIT' as TxKind),
+    description: t.description ?? '',
+    amount: t.amount,
+    balanceAfter: t.balance ?? 0,
+    note: t.reference ?? undefined,
+  }));
+  const txs = apiTxs.length > 0 ? apiTxs : transactionsForCompany(companyId);
+  const effectiveBalance = txData?.walletBalance ?? wallet?.balance ?? 0;
 
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -57,7 +73,7 @@ export default function ClientFinancePage() {
   const handlePDF = () => exportPDF({
     filename: `statement-${Date.now()}.pdf`,
     header: { brand: 'Nitaq', subtitle: 'Client Statement', reportTitle: 'Statement of Account' },
-    footer: { closingBalance: wallet?.balance ?? 0, totalCredit, totalDebit },
+    footer: { closingBalance: effectiveBalance, totalCredit, totalDebit },
     columns: exportColumns as any,
     rows: filteredTxs,
   });
@@ -87,7 +103,7 @@ export default function ClientFinancePage() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-muted-foreground">الرصيد المتاح</p>
                 <p className="text-4xl font-bold tracking-tight mt-1 num">
-                  {(wallet?.balance ?? 0).toLocaleString('en-US')}
+                  {effectiveBalance.toLocaleString('en-US')}
                   <span className="text-xl text-muted-foreground ms-2">ر.س.</span>
                 </p>
                 {(wallet?.escrowHeld ?? 0) > 0 && (
@@ -169,7 +185,7 @@ export default function ClientFinancePage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                 <StatMini icon={ArrowDownLeft} label="إجمالي الإيداعات" value={totalCredit} tone="success" />
                 <StatMini icon={ArrowUpRight}   label="إجمالي الخصومات" value={totalDebit}  tone="danger" />
-                <StatMini icon={Wallet}         label="الرصيد الحالي"   value={wallet?.balance ?? 0} tone="default" />
+                <StatMini icon={Wallet}         label="الرصيد الحالي"   value={effectiveBalance} tone="default" />
               </div>
 
               <Table>

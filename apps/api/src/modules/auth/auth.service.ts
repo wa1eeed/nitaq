@@ -259,6 +259,38 @@ export class AuthService {
     return { verified: true };
   }
 
+  // ─── Password reset flow ─────────────────────────────────────────
+
+  async forgotPassword(phone: string) {
+    const normalized = normalizeSaudiPhone(phone);
+    const user = await this.prisma.user.findUnique({ where: { phone: normalized } });
+    if (!user) return { message: 'If this phone is registered, an OTP has been sent' };
+    await this.otp.send(normalized);
+    return { message: 'OTP sent' };
+  }
+
+  async resetPassword(phone: string, otp: string, newPassword: string) {
+    const normalized = normalizeSaudiPhone(phone);
+    const ok = await this.otp.verify(normalized, otp);
+    if (!ok) {
+      throw new BadRequestException({
+        code: 'INVALID_OTP',
+        message: 'رمز التحقق غير صحيح أو منتهي الصلاحية',
+      });
+    }
+    const hash = await bcrypt.hash(newPassword, Number(process.env.BCRYPT_ROUNDS ?? 12));
+    const user = await this.prisma.user.update({
+      where: { phone: normalized },
+      data: { passwordHash: hash },
+    });
+    // Revoke all existing refresh tokens
+    await this.prisma.refreshToken.updateMany({
+      where: { userId: user.id },
+      data: { isRevoked: true },
+    });
+    return { message: 'Password reset successfully' };
+  }
+
   // ─── Token issuance ─────────────────────────────────────────────
 
   private async issueTokens(

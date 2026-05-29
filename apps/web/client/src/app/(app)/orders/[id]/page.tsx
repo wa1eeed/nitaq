@@ -71,6 +71,10 @@ export default function ClientOrderDetail() {
     fetcher,
   );
   const order = (normalizeOrder(orderData) ?? ORDERS.find((o) => o.id === params.id)) as Order | undefined;
+  const { data: reviewsData, mutate: refetchReviews } = useSWR<{ reviews?: Array<{ reviewerId: string; rating: number }> }>(
+    params?.id ? `/orders/${params.id}/reviews` : null,
+    fetcher,
+  );
 
   // ─── Hooks — MUST be declared unconditionally, BEFORE any early return ────
   // Otherwise React throws "Rendered more hooks than during the previous
@@ -86,6 +90,11 @@ export default function ClientOrderDetail() {
   const [confirmDeliveryOpen, setConfirmDeliveryOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [cancelReasonText, setCancelReasonText] = useState('');
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   // Prefer bids from the API response (live data — backend `findById()` includes
   // them via Prisma relation). Falls back to mock `bidsForOrder()` only when
@@ -352,6 +361,103 @@ export default function ClientOrderDetail() {
               </CardContent>
             </Card>
           )}
+
+          {/* ─── Rate the Provider card — shown after order is COMPLETED ─── */}
+          {order.status === 'COMPLETED' && order.carrierId && (() => {
+            const myCompanyId = order.clientId;
+            const alreadyReviewed = (reviewsData?.reviews ?? []).some(
+              (r: { reviewerId: string; rating: number }) => r.reviewerId === myCompanyId || reviewSubmitted
+            );
+
+            if (alreadyReviewed) {
+              return (
+                <Card className="border-success/30 bg-success/[0.03]">
+                  <CardContent className="py-10 text-center">
+                    <div className="text-3xl mb-2">⭐</div>
+                    <h3 className="font-semibold text-success">شكراً على تقييمك</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">ساهم تقييمك في تحسين جودة الخدمة على المنصة</p>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-warning fill-warning" />
+                    قيّم المزوّد
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">تقييمك يساعد الشركات الأخرى في اتخاذ قرارات أفضل</p>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  {/* Star picker */}
+                  <div className="flex items-center gap-1.5 justify-center">
+                    {[1,2,3,4,5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onMouseEnter={() => setReviewHover(star)}
+                        onMouseLeave={() => setReviewHover(0)}
+                        onClick={() => setReviewRating(star)}
+                        className="p-1 rounded-md hover:bg-warning/10 transition-colors"
+                      >
+                        <Star
+                          className={`h-8 w-8 transition-colors ${
+                            star <= (reviewHover || reviewRating)
+                              ? 'text-warning fill-warning'
+                              : 'text-muted-foreground'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  {reviewRating > 0 && (
+                    <p className="text-center text-sm font-medium text-muted-foreground">
+                      {['', 'سيئ', 'مقبول', 'جيد', 'جيد جداً', 'ممتاز'][reviewRating]}
+                    </p>
+                  )}
+
+                  {/* Comment */}
+                  <div className="space-y-2">
+                    <Label>تعليق (اختياري)</Label>
+                    <textarea
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      rows={3}
+                      className="w-full p-3 rounded-md border bg-background text-sm"
+                      placeholder="شاركنا رأيك في الخدمة المقدّمة..."
+                    />
+                  </div>
+
+                  <Button
+                    className="w-full"
+                    disabled={reviewRating === 0 || reviewSubmitting}
+                    onClick={async () => {
+                      if (!reviewRating || !order) return;
+                      setReviewSubmitting(true);
+                      try {
+                        await api.post(`/orders/${order.id}/review`, {
+                          rating: reviewRating,
+                          comment: reviewComment || undefined,
+                        });
+                        setReviewSubmitted(true);
+                        notify.success('تم إرسال التقييم', 'شكراً على مشاركتك');
+                        await refetchReviews();
+                      } catch (err) {
+                        notify.error(err, 'فشل إرسال التقييم');
+                      } finally {
+                        setReviewSubmitting(false);
+                      }
+                    }}
+                  >
+                    <Star className="h-4 w-4" />
+                    {reviewSubmitting ? 'جارٍ الإرسال...' : 'إرسال التقييم'}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
 
         <div className="space-y-6">

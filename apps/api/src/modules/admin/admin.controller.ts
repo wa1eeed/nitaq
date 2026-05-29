@@ -136,4 +136,16 @@ export class AdminController {
   ) {
     return this.admin.manualWalletTransaction(companyId, dto);
   }
+
+  @Get('audit-logs')
+  @Roles('ADMIN', 'SUPER_ADMIN')
+  @UseGuards(RolesGuard)
+  auditLogs(
+    @Query() query: PaginationDto,
+    @Query('action') action?: string,
+    @Query('userId') userId?: string,
+    @Query('resourceType') resourceType?: string,
+  ) {
+    return this.admin.listAuditLogs(query, { action, userId, resourceType });
+  }
 }

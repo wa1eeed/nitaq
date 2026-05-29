@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowRight, Building2, Calendar, CheckCircle2, Mail, MapPin, Navigation, Package,
-  Phone, Shield, ShieldCheck, Truck, Users, X,
+  Phone, Shield, ShieldCheck, Star, Truck, Users, X,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { playSoundIfEnabled } from '@/lib/sound';
 import useSWR from 'swr';
 import { api, fetcher } from '@/lib/api';
+import { useAuthStore } from '@/lib/auth-store';
 import { notify } from '@/lib/notify';
 import { PageHeader } from '@/components/page-header';
 import { StatusBadge } from '@/components/status-badge';
@@ -65,6 +66,25 @@ export default function CarrierOrderDetail() {
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [assignDriverOpen, setAssignDriverOpen] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+
+  // ─── Review state ──────────────────────────────────────────────────────
+  const companyId = useAuthStore((s) => s.user?.companyId);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewTags, setReviewTags] = useState<string[]>([]);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  const REVIEW_CHIPS = ['تعاون جيد', 'التزام بالمواعيد'];
+
+  type ApiReview = { id: string; raterId: string; raterCompanyId?: string; rating: number; comment?: string };
+  const { data: reviewData, mutate: refetchReview } = useSWR<ApiReview[]>(
+    order?.status === 'COMPLETED' ? `/orders/${order.id}/reviews` : null,
+    fetcher,
+  );
+  const alreadyReviewed = Array.isArray(reviewData) && reviewData.some(
+    (r) => r.raterCompanyId === companyId || (companyId && r.raterId === companyId),
+  );
 
   type AvailableDriver = {
     id: string; rating: number; totalTrips: number;
@@ -223,6 +243,106 @@ export default function CarrierOrderDetail() {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {order.status === 'COMPLETED' && (
+            alreadyReviewed ? (
+              <Card className="border-success/30 bg-success/5">
+                <CardContent className="pt-6 flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+                  <p className="font-semibold text-success">شكراً على تقييمك ⭐</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-warning" />
+                    قيّم العميل
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Star rating */}
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setReviewRating(s)}
+                        onMouseEnter={() => setReviewHover(s)}
+                        onMouseLeave={() => setReviewHover(0)}
+                        className="p-0.5 transition-transform hover:scale-110"
+                      >
+                        <Star
+                          className={`h-7 w-7 transition-colors ${
+                            s <= (reviewHover || reviewRating)
+                              ? 'fill-warning text-warning'
+                              : 'text-muted-foreground'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    {reviewRating > 0 && (
+                      <span className="ms-2 text-sm text-muted-foreground">
+                        {reviewRating === 1 ? 'سيء' : reviewRating === 2 ? 'مقبول' : reviewRating === 3 ? 'جيد' : reviewRating === 4 ? 'جيد جداً' : 'ممتاز'}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    {REVIEW_CHIPS.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        onClick={() => setReviewTags((prev) =>
+                          prev.includes(chip) ? prev.filter((t) => t !== chip) : [...prev, chip]
+                        )}
+                        className={`px-3 py-1 rounded-full border text-sm transition-colors ${
+                          reviewTags.includes(chip)
+                            ? 'border-primary bg-primary/10 text-primary font-medium'
+                            : 'border-border text-muted-foreground hover:border-primary/50'
+                        }`}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Comment */}
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="أضف تعليقاً (اختياري)…"
+                    rows={3}
+                    className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+
+                  <Button
+                    disabled={reviewRating === 0 || reviewSubmitting}
+                    onClick={async () => {
+                      if (!order || reviewRating === 0) return;
+                      setReviewSubmitting(true);
+                      try {
+                        await api.post(`/orders/${order.id}/review`, {
+                          rating: reviewRating,
+                          comment: [reviewComment, ...reviewTags].filter(Boolean).join(' · ') || undefined,
+                        });
+                        notify.success('تم إرسال تقييمك', 'شكراً على ملاحظاتك');
+                        await refetchReview();
+                      } catch (err: unknown) {
+                        notify.error(err, 'فشل إرسال التقييم');
+                      } finally {
+                        setReviewSubmitting(false);
+                      }
+                    }}
+                  >
+                    <Star className="h-4 w-4" />
+                    {reviewSubmitting ? 'جارٍ الإرسال…' : 'إرسال التقييم'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )
           )}
 
           {order.agreedPrice && ['CONFIRMED', 'IN_TRANSIT', 'DELIVERED'].includes(order.status) && (

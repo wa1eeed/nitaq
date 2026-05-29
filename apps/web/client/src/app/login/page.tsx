@@ -139,7 +139,7 @@ export default function ClientLoginPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">كلمة المرور</Label>
-                    <a href="#" className="text-xs text-primary hover:underline">نسيت كلمة المرور؟</a>
+                    <Link href="/forgot-password" className="text-xs text-primary hover:underline">نسيت كلمة المرور؟</Link>
                   </div>
                   <div className="relative">
                     <Input

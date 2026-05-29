@@ -592,4 +592,23 @@ export class AdminService {
       generatedAt: new Date().toISOString(),
     };
   }
+
+  async listAuditLogs(query: PaginationDto, filters: { action?: string; userId?: string; resourceType?: string }) {
+    const skip = ((query.page ?? 1) - 1) * (query.limit ?? 20);
+    const where: any = {};
+    if (filters.action) where.action = filters.action;
+    if (filters.userId) where.userId = filters.userId;
+    if (filters.resourceType) where.resourceType = filters.resourceType;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.auditLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: query.limit ?? 20,
+        include: { user: { select: { id: true, phone: true, email: true, role: true } } },
+      }),
+      this.prisma.auditLog.count({ where }),
+    ]);
+    return { data, total, page: query.page ?? 1, limit: query.limit ?? 20 };
+  }
 }
