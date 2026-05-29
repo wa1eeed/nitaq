@@ -44,7 +44,7 @@ export default function CarrierOpportunityDetail() {
   // Real-API source of truth, with mock fallback (see api.ts interceptor).
   // normalizeOrder aliases Prisma fields (weight, requiredTruckType) to the
   // mock shape (weightKg, truckType) the UI accesses directly.
-  const { data: orderData, mutate: refetchOrder } = useSWR<typeof ORDERS[number]>(
+  const { data: orderData, isLoading, mutate: refetchOrder } = useSWR<typeof ORDERS[number]>(
     params?.id ? `/orders/${params.id}` : null,
     fetcher,
   );
@@ -91,6 +91,17 @@ export default function CarrierOpportunityDetail() {
 
   // If order is already in active execution phase, redirect to orders page
   const activeStatuses = ['ASSIGNED', 'CONFIRMED', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED'];
+
+  if (isLoading && !order) {
+    return (
+      <Card>
+        <CardContent className="py-16 text-center">
+          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">جارٍ التحميل...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!order) {
     return (
