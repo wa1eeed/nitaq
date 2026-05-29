@@ -40,7 +40,22 @@
 
 ## 🟡 يحتاج عمل (مرتّب بالأولوية)
 
-### 1. Provider Reports Page — ربط بـ Analytics API
+### 1. Review System — إكمال وإصلاح
+
+**المشاكل الموجودة:**
+- بورتال العميل: `myCompanyId = order.clientId` بدل JWT الحقيقي — فحص "هل قيّمت مسبقاً؟" قد يخطئ
+- لا توجد صفحة لعرض التقييمات المستلمة (بروفايل المزوّد، صفحة الشركة)
+- Admin لا يرى التقييمات في أي مكان
+- متوسط التقييم محسوب في الـ API لكن غير معروض في الواجهة
+
+**المطلوب:**
+- إصلاح `myCompanyId` في client order detail لاستخدام `useAuthStore` بدل `order.clientId`
+- إضافة قسم "التقييمات" في صفحة تفاصيل الشركة (admin)
+- عرض متوسط التقييم في بطاقة المزوّد (بورتال العميل عند اختيار العرض)
+
+---
+
+### 2. Provider Reports Page — ربط بـ Analytics API
 - **الصفحة:** `apps/web/provider/src/app/(app)/reports/page.tsx`
 - **الحالة:** رسوم بيانية static (mock)
 - **المطلوب:** `GET /companies/:id/analytics` أو إعادة استخدام analytics endpoints الموجودة في admin
