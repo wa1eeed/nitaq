@@ -6,6 +6,20 @@
 
 ## [Unreleased] — قيد التطوير
 
+### ✅ v0.9.19 — Bug Fix: Opportunity Detail Loading Flash (2026-05-29)
+
+**المشكلة:** صفحة تفاصيل الفرصة (`/opportunities/[id]`) كانت تعرض "الفرصة غير موجودة" لثوانٍ عند فتحها، ثم تختفي وتظهر النموذج.
+
+**السبب:** SWR في أول render يُعيد `data = undefined` و`isLoading = true` — فكان `if (!order)` يُقيَّم بـ `true` ويعرض رسالة الخطأ قبل وصول الـ response.
+
+**الإصلاح:** تمييز حالتين منفصلتين:
+- `isLoading && !order` ← تحميل مؤقت → spinner
+- `!isLoading && !order` ← غير موجود فعلاً → رسالة الخطأ
+
+**الملف:** `apps/web/provider/src/app/(app)/opportunities/[id]/page.tsx`
+
+---
+
 ### ✅ v0.9.18 — Platform Completion: Reviews, Finance API, Audit Logs, Password Reset (2026-05-29)
 
 **سياق:** استكمال ربط الوظائف الجوهرية التي كانت تعمل بـ mock data فقط. الهدف: كل صفحة رئيسية تستهلك API حقيقي مع fallback تلقائي.

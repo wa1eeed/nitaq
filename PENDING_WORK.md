@@ -1,6 +1,6 @@
 # Pending Work — حالة الربط الحالية (Nitaq Platform)
 
-> آخر تحديث: 2026-05-29 (بعد v0.9.18 — Reviews, Finance API, Audit Logs, Password Reset)
+> آخر تحديث: 2026-05-29 (بعد v0.9.19 — Bug Fix: Opportunity Detail Loading Flash)
 >
 > الهدف من هذا الملف: نقطة استئناف واضحة. يلخّص ما تبقّى قبل أن نعتبر النظام
 > جاهزاً لـ release v1.0.
