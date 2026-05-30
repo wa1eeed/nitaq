@@ -40,7 +40,29 @@
 
 ## 🟡 يحتاج عمل (مرتّب بالأولوية)
 
-### 1. Review System — إكمال وإصلاح
+### 1. 🔥 شات الطلب + رفع الملفات عبر Cloudflare R2
+
+**المطلوب من المستخدم أولاً:**
+- إنشاء R2 Bucket باسم `nitaq-files` على dash.cloudflare.com
+- إنشاء R2 API Token (Object Read & Write)
+- تزويد هذه القيم: `Account ID`, `Access Key ID`, `Secret Access Key`, `Bucket Name`
+
+**خطوات التنفيذ (جلسة واحدة بعد توفر الـ credentials):**
+1. تهيئة `@aws-sdk/client-s3` في الـ backend للتكلم مع R2
+2. Prisma migration — إضافة `OrderMessage` و `OrderFile` models
+3. Backend API: `GET/POST /orders/:id/messages` + `POST /uploads/presigned`
+4. UI في صفحة الطلب (client + provider): شات + رفع ملفات
+5. ربط نظام الإشعارات الموجود لإشعار الطرف الآخر عند رسالة جديدة
+
+**القرارات المعمارية المتفق عليها:**
+- التخزين: Cloudflare R2 (S3-compatible, zero egress fees)
+- الرسائل: REST + Polling كل 10 ثوانٍ (بدون WebSocket الآن)
+- الإشعارات: نظام Notifications الموجود يُطلَق عند كل رسالة جديدة
+- الملفات لا تمرّ بالـ VPS — المتصفح يرفع مباشرة لـ R2 عبر presigned URL
+
+---
+
+### 2. Review System — إكمال وإصلاح
 
 **المشاكل الموجودة:**
 - بورتال العميل: `myCompanyId = order.clientId` بدل JWT الحقيقي — فحص "هل قيّمت مسبقاً؟" قد يخطئ
